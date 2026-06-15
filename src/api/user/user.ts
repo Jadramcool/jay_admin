@@ -1,15 +1,15 @@
-import request from "@/utils/http/axios";
+import request from '@/utils/http/axios'
 
 enum API {
-  login = "/auth/login",
-  register = "/auth/register",
-  refresh = "/auth/refresh",
-  logout = "/auth/logout",
-  userInfo = "/auth/user/info",
-  menu = "/auth/user/menu",
-  updateUser = "/auth/user/update",
-  checkPassword = "/auth/user/checkPassword",
-  updatePassword = "/auth/user/updatePassword",
+  login = '/auth/login',
+  register = '/auth/register',
+  refresh = '/auth/refresh',
+  logout = '/auth/logout',
+  userInfo = '/auth/user/info',
+  menu = '/auth/user/menu',
+  updateUser = '/auth/user/update',
+  checkPassword = '/auth/user/checkPassword',
+  updatePassword = '/auth/user/updatePassword',
 }
 
 export const UserApi = {
@@ -17,7 +17,7 @@ export const UserApi = {
     request.post<Api.LoginResult>({ url: API.login, data }),
 
   register: (data: Api.RegisterParams) =>
-    request.post<{ userId: number; username: string }>({
+    request.post<{ userId: number, username: string }>({
       url: API.register,
       data,
     }),
@@ -39,7 +39,6 @@ export const UserApi = {
   checkPassword: (password: string) =>
     request.post({ url: API.checkPassword, data: { password } }),
 
-  updatePassword: (data: { oldPassword: string; newPassword: string }) =>
+  updatePassword: (data: { oldPassword: string, newPassword: string }) =>
     request.post({ url: API.updatePassword, data }),
-};
-
+}

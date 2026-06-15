@@ -1,9 +1,197 @@
+<script setup lang="ts">
+import type { DropdownOption } from 'naive-ui'
+import type { DropdownMixedOption } from 'naive-ui/es/dropdown/src/interface'
+import type { RouteLocationNormalized } from 'vue-router'
+import { computed, nextTick, ref } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
+import { useRouter } from 'vue-router'
+import { useTabStore } from '@/store/modules'
+
+const tabStore = useTabStore()
+const router = useRouter()
+
+// Context-menu state — x/y position and target tab
+const showDropdown = ref(false)
+const dropdownX = ref(0)
+const dropdownY = ref(0)
+const contextTab = ref<RouteLocationNormalized | null>(null)
+
+// Scroll container for wheel-based horizontal scrolling
+const tabsRef = ref<HTMLElement | null>(null)
+
+// Props passed down to the internal TransitionGroup rendered by VueDraggable
+const transitionGroupData = computed(() => ({
+  name: 'tab-move',
+  tag: 'div',
+  class: 'tab-list',
+}))
+
+// ─── Tab click ─────────────────────────────────────────────
+function handleTabClick(tab: RouteLocationNormalized) {
+  if (tab.path !== router.currentRoute.value.path) {
+    router.push(tab.path)
+  }
+}
+
+// ─── Overflow menu ─────────────────────────────────────────
+const overflowOptions = computed<DropdownMixedOption[]>(() =>
+  tabStore.tabs.map(tab => ({
+    label: tab.meta?.title || '未命名',
+    key: tab.path,
+  })),
+)
+
+function handleOverflowSelect(key: string) {
+  if (key !== router.currentRoute.value.path) {
+    router.push(key)
+  }
+}
+
+// ─── Context menu — built dynamically based on tab state ───
+function isActiveTab(tab: RouteLocationNormalized): boolean {
+  return tab.path === tabStore.activeTab
+}
+
+const dropdownOptions = computed<DropdownOption[]>(() => {
+  const currentTab = contextTab.value
+  if (!currentTab)
+    return []
+  const isActive = isActiveTab(currentTab)
+  const options: DropdownOption[] = [{ label: '刷新', key: 'refresh' }]
+  if (tabStore.tabs.length > 1) {
+    options.push({ type: 'divider' as const, key: 'd1' })
+    // "关闭当前" 仅对激活 tab 显示，非激活 tab 点击后会自动切换过去
+    if (isActive) {
+      options.push({ label: '关闭当前', key: 'closeCurrent' })
+    }
+    options.push(
+      { label: '关闭其他', key: 'closeOthers' },
+      { label: '关闭左侧', key: 'closeLeft' },
+      { label: '关闭右侧', key: 'closeRight' },
+    )
+    options.push({ type: 'divider' as const, key: 'd2' })
+    options.push({ label: '关闭所有', key: 'closeAll' })
+  }
+  return options
+})
+
+// ─── Tab operations ────────────────────────────────────────
+// Called from n-tabs @close and the X button click.
+// After removing a tab, navigates to the last remaining tab if the active one was closed.
+function handleClose(name: string) {
+  tabStore.closeTab(name)
+  const currentPath = router.currentRoute.value.path
+  if (!tabStore.tabs.some(t => t.path === currentPath)) {
+    const target = tabStore.tabs[tabStore.tabs.length - 1]
+    if (target)
+      router.push(target.path)
+  }
+}
+
+function handleContextMenu(e: MouseEvent, tab: RouteLocationNormalized) {
+  // Reset then reposition — ensures correct menu placement on successive right-clicks
+  showDropdown.value = false
+  dropdownX.value = e.clientX
+  dropdownY.value = e.clientY
+  contextTab.value = tab
+  nextTick(() => {
+    showDropdown.value = true
+  })
+}
+
+function handleDropdownSelect(key: string) {
+  showDropdown.value = false
+  const currentTab = contextTab.value
+  if (!currentTab)
+    return
+
+  switch (key) {
+    case 'refresh':
+      refreshTab(currentTab)
+      break
+    case 'closeCurrent':
+      closeTabInternal(currentTab)
+      break
+    case 'closeOthers':
+      closeOthersInternal(currentTab)
+      break
+    case 'closeLeft':
+      closeLeftInternal(currentTab)
+      break
+    case 'closeRight':
+      closeRightInternal(currentTab)
+      break
+    case 'closeAll':
+      closeAllInternal()
+      break
+  }
+}
+
+// 通过 /redirect 路由重新进入目标页面，触发组件重建实现刷新
+function refreshTab(tab: RouteLocationNormalized) {
+  const currentRoute = router.currentRoute.value
+  if (currentRoute.path === tab.path) {
+    const { query, hash } = currentRoute
+    router.replace({ path: `/redirect${tab.path}`, query, hash })
+  }
+}
+
+function closeTabInternal(tab: RouteLocationNormalized) {
+  const closedPath = tab.path
+  tabStore.closeTab(closedPath)
+  const currentPath = router.currentRoute.value.path
+  if (closedPath === currentPath) {
+    const target = tabStore.tabs[tabStore.tabs.length - 1]
+    if (target)
+      router.push(target.path)
+  }
+}
+
+function closeOthersInternal(tab: RouteLocationNormalized) {
+  tabStore.closeOtherTabs(tab.path)
+  if (router.currentRoute.value.path !== tab.path) {
+    router.push(tab.path)
+  }
+}
+
+function closeLeftInternal(tab: RouteLocationNormalized) {
+  tabStore.closeLeftTabs(tab.path)
+  if (router.currentRoute.value.path !== tab.path) {
+    router.push(tab.path)
+  }
+}
+
+function closeRightInternal(tab: RouteLocationNormalized) {
+  tabStore.closeRightTabs(tab.path)
+  if (router.currentRoute.value.path !== tab.path) {
+    router.push(tab.path)
+  }
+}
+
+function closeAllInternal() {
+  tabStore.closeAllTabs()
+  router.push('/home')
+}
+
+// ─── Scroll: 鼠标滚轮横移 tabs ────────────────────────────
+function handleWheel(e: WheelEvent) {
+  const el = tabsRef.value
+  if (!el)
+    return
+  el.scrollBy({
+    left: e.deltaY > 0 ? 60 : -60,
+    behavior: 'smooth',
+  })
+}
+</script>
+
 <template>
   <div class="tab-bar-wrapper">
     <div
       ref="tabsRef"
       class="tabs-scroll-container"
-      @wheel.prevent="handleWheel">
+      @wheel.prevent="handleWheel"
+    >
       <!--
         VueDraggable with tag="transition-group": avoids extra DOM layer that would
         break SortableJS handle selector. component-data passes TransitionGroup props.
@@ -19,13 +207,15 @@
         :component-data="transitionGroupData"
         :scroll="true"
         :scroll-sensitivity="50"
-        :scroll-speed="10">
+        :scroll-speed="10"
+      >
         <div
           v-for="(tab, index) in tabStore.tabs"
           :key="tab.path"
           class="tab-item"
           :class="{ 'is-active': tabStore.activeTab === tab.path }"
-          @click="handleTabClick(tab)">
+          @click="handleTabClick(tab)"
+        >
           <!-- Active indicator bar -->
           <span class="tab-active-bar" />
 
@@ -38,18 +228,21 @@
             class="tab-separator"
             :class="{
               'is-hidden':
-                tabStore.activeTab === tab.path ||
-                tabStore.activeTab === tabStore.tabs[index - 1]?.path,
-            }" />
+                tabStore.activeTab === tab.path
+                || tabStore.activeTab === tabStore.tabs[index - 1]?.path,
+            }"
+          />
 
           <div
             class="tab-label"
-            @contextmenu.prevent="handleContextMenu($event, tab)">
+            @contextmenu.prevent="handleContextMenu($event, tab)"
+          >
             <JIcon
               v-if="tab.meta?.icon"
               :icon="tab.meta.icon as string"
               :size="14"
-              class="tab-icon" />
+              class="tab-icon"
+            />
             <span class="tab-title">{{ tab.meta?.title || "未命名" }}</span>
             <!--
               @mousedown.stop prevents drag handle activation when clicking close,
@@ -59,11 +252,13 @@
               v-if="tabStore.tabs.length > 1"
               class="tab-close"
               @mousedown.stop
-              @click.stop="handleClose(tab.path)">
+              @click.stop="handleClose(tab.path)"
+            >
               <svg viewBox="0 0 12 12" width="12" height="12">
                 <path
                   fill="currentColor"
-                  d="M2.22 2.22a.75.75 0 0 1 1.06 0L6 4.94l2.72-2.72a.75.75 0 1 1 1.06 1.06L7.06 6l2.72 2.72a.75.75 0 1 1-1.06 1.06L6 7.06l-2.72 2.72a.75.75 0 0 1-1.06-1.06L4.94 6 2.22 3.28a.75.75 0 0 1 0-1.06z" />
+                  d="M2.22 2.22a.75.75 0 0 1 1.06 0L6 4.94l2.72-2.72a.75.75 0 1 1 1.06 1.06L7.06 6l2.72 2.72a.75.75 0 1 1-1.06 1.06L6 7.06l-2.72 2.72a.75.75 0 0 1-1.06-1.06L4.94 6 2.22 3.28a.75.75 0 0 1 0-1.06z"
+                />
               </svg>
             </span>
           </div>
@@ -76,13 +271,15 @@
       <n-dropdown
         trigger="click"
         :options="overflowOptions"
-        @select="handleOverflowSelect">
+        @select="handleOverflowSelect"
+      >
         <n-button text size="tiny" class="overflow-btn">
           <template #icon>
             <n-icon size="16">
               <svg viewBox="0 0 16 16" fill="currentColor">
                 <path
-                  d="M4 6a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM4 9a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0z" />
+                  d="M4 6a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM4 9a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0zm3 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0z"
+                />
               </svg>
             </n-icon>
           </template>
@@ -97,191 +294,10 @@
       :y="dropdownY"
       :options="dropdownOptions"
       @clickoutside="showDropdown = false"
-      @select="handleDropdownSelect" />
+      @select="handleDropdownSelect"
+    />
   </div>
 </template>
-
-<script setup lang="ts">
-import { useTabStore } from "@/store/modules";
-import { useRouter } from "vue-router";
-import { computed, ref, nextTick } from "vue";
-import { VueDraggable } from "vue-draggable-plus";
-import type { RouteLocationNormalized } from "vue-router";
-import type { DropdownOption } from "naive-ui";
-import { DropdownMixedOption } from "naive-ui/es/dropdown/src/interface";
-
-const tabStore = useTabStore();
-const router = useRouter();
-
-// Context-menu state — x/y position and target tab
-const showDropdown = ref(false);
-const dropdownX = ref(0);
-const dropdownY = ref(0);
-const contextTab = ref<RouteLocationNormalized | null>(null);
-
-// Scroll container for wheel-based horizontal scrolling
-const tabsRef = ref<HTMLElement | null>(null);
-
-// Props passed down to the internal TransitionGroup rendered by VueDraggable
-const transitionGroupData = computed(() => ({
-  name: "tab-move",
-  tag: "div",
-  class: "tab-list",
-}));
-
-// ─── Tab click ─────────────────────────────────────────────
-function handleTabClick(tab: RouteLocationNormalized) {
-  if (tab.path !== router.currentRoute.value.path) {
-    router.push(tab.path);
-  }
-}
-
-// ─── Overflow menu ─────────────────────────────────────────
-const overflowOptions = computed<DropdownMixedOption[]>(() =>
-  tabStore.tabs.map((tab) => ({
-    label: tab.meta?.title || "未命名",
-    key: tab.path,
-  })),
-);
-
-function handleOverflowSelect(key: string) {
-  if (key !== router.currentRoute.value.path) {
-    router.push(key);
-  }
-}
-
-// ─── Context menu — built dynamically based on tab state ───
-function isActiveTab(tab: RouteLocationNormalized): boolean {
-  return tab.path === tabStore.activeTab;
-}
-
-const dropdownOptions = computed<DropdownOption[]>(() => {
-  const currentTab = contextTab.value;
-  if (!currentTab) return [];
-  const isActive = isActiveTab(currentTab);
-  const options: DropdownOption[] = [{ label: "刷新", key: "refresh" }];
-  if (tabStore.tabs.length > 1) {
-    options.push({ type: "divider" as const, key: "d1" });
-    // "关闭当前" 仅对激活 tab 显示，非激活 tab 点击后会自动切换过去
-    if (isActive) {
-      options.push({ label: "关闭当前", key: "closeCurrent" });
-    }
-    options.push(
-      { label: "关闭其他", key: "closeOthers" },
-      { label: "关闭左侧", key: "closeLeft" },
-      { label: "关闭右侧", key: "closeRight" },
-    );
-    options.push({ type: "divider" as const, key: "d2" });
-    options.push({ label: "关闭所有", key: "closeAll" });
-  }
-  return options;
-});
-
-// ─── Tab operations ────────────────────────────────────────
-// Called from n-tabs @close and the X button click.
-// After removing a tab, navigates to the last remaining tab if the active one was closed.
-function handleClose(name: string) {
-  tabStore.closeTab(name);
-  const currentPath = router.currentRoute.value.path;
-  if (!tabStore.tabs.some((t) => t.path === currentPath)) {
-    const target = tabStore.tabs[tabStore.tabs.length - 1];
-    if (target) router.push(target.path);
-  }
-}
-
-function handleContextMenu(e: MouseEvent, tab: RouteLocationNormalized) {
-  // Reset then reposition — ensures correct menu placement on successive right-clicks
-  showDropdown.value = false;
-  dropdownX.value = e.clientX;
-  dropdownY.value = e.clientY;
-  contextTab.value = tab;
-  nextTick(() => {
-    showDropdown.value = true;
-  });
-}
-
-function handleDropdownSelect(key: string) {
-  showDropdown.value = false;
-  const currentTab = contextTab.value;
-  if (!currentTab) return;
-
-  switch (key) {
-    case "refresh":
-      refreshTab(currentTab);
-      break;
-    case "closeCurrent":
-      closeTabInternal(currentTab);
-      break;
-    case "closeOthers":
-      closeOthersInternal(currentTab);
-      break;
-    case "closeLeft":
-      closeLeftInternal(currentTab);
-      break;
-    case "closeRight":
-      closeRightInternal(currentTab);
-      break;
-    case "closeAll":
-      closeAllInternal();
-      break;
-  }
-}
-
-// 通过 /redirect 路由重新进入目标页面，触发组件重建实现刷新
-function refreshTab(tab: RouteLocationNormalized) {
-  const currentRoute = router.currentRoute.value;
-  if (currentRoute.path === tab.path) {
-    const { query, hash } = currentRoute;
-    router.replace({ path: "/redirect" + tab.path, query, hash });
-  }
-}
-
-function closeTabInternal(tab: RouteLocationNormalized) {
-  const closedPath = tab.path;
-  tabStore.closeTab(closedPath);
-  const currentPath = router.currentRoute.value.path;
-  if (closedPath === currentPath) {
-    const target = tabStore.tabs[tabStore.tabs.length - 1];
-    if (target) router.push(target.path);
-  }
-}
-
-function closeOthersInternal(tab: RouteLocationNormalized) {
-  tabStore.closeOtherTabs(tab.path);
-  if (router.currentRoute.value.path !== tab.path) {
-    router.push(tab.path);
-  }
-}
-
-function closeLeftInternal(tab: RouteLocationNormalized) {
-  tabStore.closeLeftTabs(tab.path);
-  if (router.currentRoute.value.path !== tab.path) {
-    router.push(tab.path);
-  }
-}
-
-function closeRightInternal(tab: RouteLocationNormalized) {
-  tabStore.closeRightTabs(tab.path);
-  if (router.currentRoute.value.path !== tab.path) {
-    router.push(tab.path);
-  }
-}
-
-function closeAllInternal() {
-  tabStore.closeAllTabs();
-  router.push("/home");
-}
-
-// ─── Scroll: 鼠标滚轮横移 tabs ────────────────────────────
-function handleWheel(e: WheelEvent) {
-  const el = tabsRef.value;
-  if (!el) return;
-  el.scrollBy({
-    left: e.deltaY > 0 ? 60 : -60,
-    behavior: "smooth",
-  });
-}
-</script>
 
 <style scoped>
 /* ================================================================
@@ -551,4 +567,3 @@ function handleWheel(e: WheelEvent) {
   transform: scale(0.95);
 }
 </style>
-

@@ -1,5 +1,5 @@
-import { defineConfig, presetUno, presetAttributify } from 'unocss';
-import presetRemToPx from '@unocss/preset-rem-to-px';
+import presetRemToPx from '@unocss/preset-rem-to-px'
+import { defineConfig, presetAttributify, presetUno } from 'unocss'
 
 export default defineConfig({
   presets: [presetUno(), presetAttributify(), presetRemToPx()],
@@ -9,4 +9,4 @@ export default defineConfig({
     'flex-col-center': 'flex flex-col items-center justify-center',
     'flex-between': 'flex items-center justify-between',
   },
-});
+})

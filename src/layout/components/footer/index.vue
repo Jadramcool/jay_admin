@@ -1,3 +1,7 @@
+<script setup lang="ts">
+const year = new Date().getFullYear()
+</script>
+
 <template>
   <div class="layout-footer">
     <span class="footer-text">JDM Admin &copy; {{ year }}</span>
@@ -5,10 +9,6 @@
     <span class="footer-text">Powered by Vue 3 + Naive UI</span>
   </div>
 </template>
-
-<script setup lang="ts">
-const year = new Date().getFullYear();
-</script>
 
 <style scoped>
 .layout-footer {
@@ -25,4 +25,3 @@ const year = new Date().getFullYear();
   opacity: 0.3;
 }
 </style>
-

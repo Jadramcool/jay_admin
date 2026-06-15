@@ -1,3 +1,83 @@
+<script setup lang="ts">
+import type { FormInst } from 'naive-ui'
+import { Icon } from '@iconify/vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { UserApi } from '@/api/user'
+import { useAuthStore } from '@/store/modules'
+
+const emit = defineEmits(['success', 'switchToRegister'])
+
+const authStore = useAuthStore()
+const formRef = ref<FormInst | null>(null)
+const loading = ref(false)
+const rememberMe = ref(false)
+
+const formData = reactive({
+  username: '',
+  password: '',
+})
+
+const rules = {
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 4, message: '密码长度不能小于4位', trigger: 'blur' },
+  ],
+}
+
+const iconColor = computed(() => 'rgba(255,255,255,0.5)')
+const checkboxColor = computed(() => 'rgba(255,255,255,0.7)')
+
+onMounted(() => {
+  const saved = localStorage.getItem('REMEMBER_LOGIN')
+  if (saved) {
+    try {
+      const data = JSON.parse(saved)
+      formData.username = data.username || ''
+      formData.password = data.password || ''
+      rememberMe.value = true
+    }
+    catch {
+      /* ignore */
+    }
+  }
+})
+
+async function handleLogin() {
+  try {
+    await formRef.value?.validate()
+  }
+  catch {
+    return
+  }
+
+  loading.value = true
+  try {
+    const result = await UserApi.login({
+      username: formData.username,
+      password: formData.password,
+    })
+
+    authStore.setToken(result)
+
+    if (rememberMe.value) {
+      localStorage.setItem('REMEMBER_LOGIN', JSON.stringify(formData))
+    }
+    else {
+      localStorage.removeItem('REMEMBER_LOGIN')
+    }
+
+    emit('success')
+  }
+  catch {
+    // 错误已由全局 errorHandler 统一弹 toast
+  }
+  finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <n-form
     ref="formRef"
@@ -6,17 +86,19 @@
     label-placement="top"
     :show-label="false"
     class="glass-form"
-    size="large">
+    size="large"
+  >
     <n-form-item path="username">
       <n-input
         v-model:value="formData.username"
         placeholder="用户名"
         :maxlength="20"
         class="glass-input"
-        :input-props="{ autocomplete: 'username' }">
+        :input-props="{ autocomplete: 'username' }"
+      >
         <template #prefix>
           <n-icon size="18" :color="iconColor">
-            <icon icon="icon-park-outline:user" />
+            <Icon icon="icon-park-outline:user" />
           </n-icon>
         </template>
       </n-input>
@@ -29,10 +111,11 @@
         placeholder="密码"
         show-password-on="click"
         class="glass-input"
-        :input-props="{ autocomplete: 'current-password' }">
+        :input-props="{ autocomplete: 'current-password' }"
+      >
         <template #prefix>
           <n-icon size="18" :color="iconColor">
-            <icon icon="icon-park-outline:lock" />
+            <Icon icon="icon-park-outline:lock" />
           </n-icon>
         </template>
       </n-input>
@@ -42,7 +125,8 @@
       <n-checkbox
         v-model:checked="rememberMe"
         class="glass-checkbox"
-        :style="{ '--checkbox-color': checkboxColor }">
+        :style="{ '--checkbox-color': checkboxColor }"
+      >
         记住密码
       </n-checkbox>
     </div>
@@ -52,93 +136,17 @@
       block
       :loading="loading"
       class="glass-btn"
-      @click="handleLogin">
+      @click="handleLogin"
+    >
       {{ loading ? "登录中..." : "登 录" }}
     </n-button>
 
     <div class="form-footer">
       <span class="footer-text">还没有账号？</span>
-      <span class="footer-link" @click="emit('switchToRegister')"
-        >立即注册</span
-      >
+      <span class="footer-link" @click="emit('switchToRegister')">立即注册</span>
     </div>
   </n-form>
 </template>
-
-<script setup lang="ts">
-import { ref, reactive, onMounted, computed } from "vue";
-import { UserApi } from "@/api/user";
-import { useAuthStore } from "@/store/modules";
-import { Icon } from "@iconify/vue";
-import type { FormInst } from "naive-ui";
-
-const emit = defineEmits(["success", "switchToRegister"]);
-
-const authStore = useAuthStore();
-const formRef = ref<FormInst | null>(null);
-const loading = ref(false);
-const rememberMe = ref(false);
-
-const formData = reactive({
-  username: "",
-  password: "",
-});
-
-const rules = {
-  username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
-  password: [
-    { required: true, message: "请输入密码", trigger: "blur" },
-    { min: 4, message: "密码长度不能小于4位", trigger: "blur" },
-  ],
-};
-
-const iconColor = computed(() => "rgba(255,255,255,0.5)");
-const checkboxColor = computed(() => "rgba(255,255,255,0.7)");
-
-onMounted(() => {
-  const saved = localStorage.getItem("REMEMBER_LOGIN");
-  if (saved) {
-    try {
-      const data = JSON.parse(saved);
-      formData.username = data.username || "";
-      formData.password = data.password || "";
-      rememberMe.value = true;
-    } catch {
-      /* ignore */
-    }
-  }
-});
-
-async function handleLogin() {
-  try {
-    await formRef.value?.validate();
-  } catch {
-    return;
-  }
-
-  loading.value = true;
-  try {
-    const result = await UserApi.login({
-      username: formData.username,
-      password: formData.password,
-    });
-
-    authStore.setToken(result);
-
-    if (rememberMe.value) {
-      localStorage.setItem("REMEMBER_LOGIN", JSON.stringify(formData));
-    } else {
-      localStorage.removeItem("REMEMBER_LOGIN");
-    }
-
-    emit("success");
-  } catch {
-    // 错误已由全局 errorHandler 统一弹 toast
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
 
 <style scoped>
 .glass-form {
@@ -234,4 +242,3 @@ async function handleLogin() {
   text-decoration: underline;
 }
 </style>
-

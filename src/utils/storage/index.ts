@@ -1,36 +1,37 @@
 class CustomStorage {
-  private prefix: string;
+  private prefix: string
 
-  constructor(prefix = "") {
-    this.prefix = prefix;
+  constructor(prefix = '') {
+    this.prefix = prefix
   }
 
   private getKey(key: string): string {
-    return this.prefix ? `${this.prefix}_${key}` : key;
+    return this.prefix ? `${this.prefix}_${key}` : key
   }
 
   get(key: string): any {
-    const raw = localStorage.getItem(this.getKey(key));
-    if (raw === null || raw === undefined) return null;
+    const raw = localStorage.getItem(this.getKey(key))
+    if (raw === null || raw === undefined)
+      return null
     try {
-      return JSON.parse(raw);
-    } catch {
-      return raw;
+      return JSON.parse(raw)
+    }
+    catch {
+      return raw
     }
   }
 
   set(key: string, value: any): void {
-    localStorage.setItem(this.getKey(key), JSON.stringify(value));
+    localStorage.setItem(this.getKey(key), JSON.stringify(value))
   }
 
   remove(key: string): void {
-    localStorage.removeItem(this.getKey(key));
+    localStorage.removeItem(this.getKey(key))
   }
 
   clear(): void {
-    localStorage.clear();
+    localStorage.clear()
   }
 }
 
-export default new CustomStorage();
-
+export default new CustomStorage()

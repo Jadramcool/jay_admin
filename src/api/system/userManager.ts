@@ -1,4 +1,4 @@
-import request from '@/utils/http/axios';
+import request from '@/utils/http/axios'
 
 enum API {
   list = '/system/user/list',
@@ -30,4 +30,4 @@ export const UserManagerApi = {
   assignRoles: (id: number, roleIds: number[]) => request.post({ url: `${API.roles}/${id}`, data: { roleIds } }),
 
   resetPassword: (id: number, newPassword: string) => request.post({ url: `${API.resetPassword}/${id}`, data: { newPassword } }),
-};
+}

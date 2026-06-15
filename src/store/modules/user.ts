@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
 
 interface UserState {
-  userInfo: Api.UserInfo | null;
+  userInfo: Api.UserInfo | null
 }
 
 export const useUserStore = defineStore('user', {
@@ -10,10 +10,10 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     setUser(user: Api.UserInfo) {
-      this.userInfo = user;
+      this.userInfo = user
     },
     resetUser() {
-      this.$reset();
+      this.$reset()
     },
   },
-});
+})

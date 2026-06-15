@@ -1,2 +1,2 @@
-export type { FormSchema, FormActionType } from './form';
-export type { ComponentType } from './components';
+export type { ComponentType } from './components'
+export type { FormActionType, FormSchema } from './form'

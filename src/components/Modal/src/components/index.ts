@@ -1,1 +1,1 @@
-export { default as BasicModalFooter } from './BasicModalFooter.vue';
+export { default as BasicModalFooter } from './BasicModalFooter.vue'

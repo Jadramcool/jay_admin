@@ -1,18 +1,97 @@
+<script setup lang="ts">
+import { Icon } from '@iconify/vue'
+import { ref } from 'vue'
+import { RoleApi, UserManagerApi } from '@/api/system'
+import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+
+const emit = defineEmits<{
+  success: []
+  register: [instance: any, uuid: number]
+}>()
+
+const userId = ref<number>(0)
+const checkedRoleIds = ref<number[]>([])
+const roles = ref<any[]>([])
+
+const [registerModal, { closeModal }] = useModalInner(async (data: any) => {
+  if (data?.record) {
+    userId.value = data.record.id
+    checkedRoleIds.value = data.record.roles?.map((r: any) => r.id) || []
+  }
+  const res = await RoleApi.all()
+  roles.value = res || []
+})
+
+function toggleRole(id: number) {
+  const idx = checkedRoleIds.value.indexOf(id)
+  if (idx > -1) {
+    checkedRoleIds.value.splice(idx, 1)
+  }
+  else if (checkedRoleIds.value.length < 5) {
+    checkedRoleIds.value.push(id)
+  }
+}
+
+function getIconClass(code: string) {
+  const map: Record<string, string> = {
+    ADMIN: 'icon-admin',
+    EDITOR: 'icon-editor',
+    VIEWER: 'icon-viewer',
+    OPERATOR: 'icon-operator',
+    FINANCE: 'icon-finance',
+    DEVELOPER: 'icon-dev',
+    TESTER: 'icon-tester',
+    PROJECT_MGR: 'icon-pm',
+    DEPT_MGR: 'icon-dept',
+    AUDITOR: 'icon-auditor',
+  }
+  return map[code] || 'icon-default'
+}
+
+async function handleOk() {
+  const selectedNames = checkedRoleIds.value
+    .map(id => roles.value.find((r: any) => r.id === id)?.name)
+    .filter(Boolean)
+    .join('、')
+  const content
+    = checkedRoleIds.value.length === 0
+      ? '确定要取消该用户的所有角色吗？'
+      : `确定要为该用户分配以下角色？\n${selectedNames}`
+
+  window.$dialog?.warning({
+    title: '确认分配',
+    content,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      await UserManagerApi.assignRoles(userId.value, checkedRoleIds.value)
+      window.$message?.success?.('分配角色成功')
+      closeModal()
+      emit('success')
+    },
+  })
+}
+</script>
+
 <template>
   <BasicModal
     title="分配角色"
+    draggable
     @register="registerModal"
     @ok="handleOk"
-    draggable>
+  >
     <template v-if="roles.length > 0">
       <div class="mb-3 flex items-center justify-between">
-        <p class="text-sm text-gray-500">点击选择角色，最多选 5 个</p>
+        <p class="text-sm text-gray-500">
+          点击选择角色，最多选 5 个
+        </p>
         <n-button
           v-if="checkedRoleIds.length > 0"
           text
           size="small"
           type="warning"
-          @click="checkedRoleIds = []">
+          @click="checkedRoleIds = []"
+        >
           取消全部
         </n-button>
       </div>
@@ -25,19 +104,25 @@
               disabled:
                 !checkedRoleIds.includes(role.id) && checkedRoleIds.length >= 5,
             }"
-            @click="toggleRole(role.id)">
+            @click="toggleRole(role.id)"
+          >
             <div class="role-card-left">
               <div class="role-icon" :class="getIconClass(role.code)">
                 {{ role.name.charAt(0) }}
               </div>
               <div>
-                <div class="role-name">{{ role.name }}</div>
-                <div class="role-code">{{ role.code }}</div>
+                <div class="role-name">
+                  {{ role.name }}
+                </div>
+                <div class="role-code">
+                  {{ role.code }}
+                </div>
               </div>
             </div>
             <div
               class="role-check"
-              :class="{ visible: checkedRoleIds.includes(role.id) }">
+              :class="{ visible: checkedRoleIds.includes(role.id) }"
+            >
               <Icon icon="mdi:check-circle" width="18" color="#18a058" />
             </div>
           </div>
@@ -50,80 +135,6 @@
     <n-empty v-else description="暂无可用角色" />
   </BasicModal>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-import { Icon } from "@iconify/vue";
-import { RoleApi, UserManagerApi } from "@/api/system";
-import { useModalInner } from "@/components/Modal/src/hooks/useModal";
-
-const emit = defineEmits<{
-  success: [];
-  register: [instance: any, uuid: number];
-}>();
-
-const userId = ref<number>(0);
-const checkedRoleIds = ref<number[]>([]);
-const roles = ref<any[]>([]);
-
-const [registerModal, { closeModal }] = useModalInner(async (data: any) => {
-  if (data?.record) {
-    userId.value = data.record.id;
-    checkedRoleIds.value = data.record.roles?.map((r: any) => r.id) || [];
-  }
-  const res = await RoleApi.all();
-  roles.value = res || [];
-});
-
-function toggleRole(id: number) {
-  const idx = checkedRoleIds.value.indexOf(id);
-  if (idx > -1) {
-    checkedRoleIds.value.splice(idx, 1);
-  } else if (checkedRoleIds.value.length < 5) {
-    checkedRoleIds.value.push(id);
-  }
-}
-
-function getIconClass(code: string) {
-  const map: Record<string, string> = {
-    ADMIN: "icon-admin",
-    EDITOR: "icon-editor",
-    VIEWER: "icon-viewer",
-    OPERATOR: "icon-operator",
-    FINANCE: "icon-finance",
-    DEVELOPER: "icon-dev",
-    TESTER: "icon-tester",
-    PROJECT_MGR: "icon-pm",
-    DEPT_MGR: "icon-dept",
-    AUDITOR: "icon-auditor",
-  };
-  return map[code] || "icon-default";
-}
-
-async function handleOk() {
-  const selectedNames = checkedRoleIds.value
-    .map((id) => roles.value.find((r: any) => r.id === id)?.name)
-    .filter(Boolean)
-    .join("、");
-  const content =
-    checkedRoleIds.value.length === 0
-      ? "确定要取消该用户的所有角色吗？"
-      : `确定要为该用户分配以下角色？\n${selectedNames}`;
-
-  window.$dialog?.warning({
-    title: "确认分配",
-    content,
-    positiveText: "确定",
-    negativeText: "取消",
-    onPositiveClick: async () => {
-      await UserManagerApi.assignRoles(userId.value, checkedRoleIds.value);
-      window.$message?.success?.("分配角色成功");
-      closeModal();
-      emit("success");
-    },
-  });
-}
-</script>
 
 <style scoped>
 .role-card {
@@ -229,4 +240,3 @@ async function handleOk() {
   opacity: 1;
 }
 </style>
-

@@ -1,13 +1,13 @@
-import request from "@/utils/http/axios";
+import request from '@/utils/http/axios'
 
 enum API {
-  list = "/system/menu/list",
-  tree = "/system/menu/tree",
-  create = "/system/menu/create",
-  update = "/system/menu/update",
-  delete = "/system/menu/delete",
-  batchDelete = "/system/menu/batchDelete",
-  onlineMenus = "/system/menu/onlineMenus",
+  list = '/system/menu/list',
+  tree = '/system/menu/tree',
+  create = '/system/menu/create',
+  update = '/system/menu/update',
+  delete = '/system/menu/delete',
+  batchDelete = '/system/menu/batchDelete',
+  onlineMenus = '/system/menu/onlineMenus',
 }
 
 export const MenuApi = {
@@ -28,5 +28,4 @@ export const MenuApi = {
     request.delete({ url: API.batchDelete, data: { ids } }),
 
   onlineMenus: () => request.get<System.Menu[]>({ url: API.onlineMenus }),
-};
-
+}

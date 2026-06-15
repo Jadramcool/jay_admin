@@ -1,3 +1,68 @@
+<script setup lang="ts">
+import type { FormInst } from 'naive-ui'
+import { Icon } from '@iconify/vue'
+import { computed, reactive, ref } from 'vue'
+import { UserApi } from '@/api/user'
+
+const emit = defineEmits(['success', 'switchToLogin'])
+
+const formRef = ref<FormInst | null>(null)
+const loading = ref(false)
+
+const formData = reactive({
+  username: '',
+  password: '',
+  confirmPassword: '',
+})
+
+const rules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 4, max: 20, message: '用户名长度为4-20位', trigger: 'blur' },
+    { pattern: /^\w+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 8, max: 32, message: '密码长度为8-32位', trigger: 'blur' },
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => value === formData.password,
+      message: '两次输入的密码不一致',
+      trigger: 'blur',
+    },
+  ],
+}
+
+const iconColor = computed(() => 'rgba(255,255,255,0.5)')
+
+async function handleRegister() {
+  try {
+    await formRef.value?.validate()
+  }
+  catch {
+    return
+  }
+
+  loading.value = true
+  try {
+    await UserApi.register({
+      username: formData.username,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    })
+    emit('success')
+  }
+  catch {
+    // 错误已由全局 errorHandler 统一弹 toast
+  }
+  finally {
+    loading.value = false
+  }
+}
+</script>
+
 <template>
   <n-form
     ref="formRef"
@@ -17,7 +82,7 @@
       >
         <template #prefix>
           <n-icon size="18" :color="iconColor">
-            <icon icon="icon-park-outline:user" />
+            <Icon icon="icon-park-outline:user" />
           </n-icon>
         </template>
       </n-input>
@@ -33,7 +98,7 @@
       >
         <template #prefix>
           <n-icon size="18" :color="iconColor">
-            <icon icon="icon-park-outline:lock" />
+            <Icon icon="icon-park-outline:lock" />
           </n-icon>
         </template>
       </n-input>
@@ -49,7 +114,7 @@
       >
         <template #prefix>
           <n-icon size="18" :color="iconColor">
-            <icon icon="icon-park-outline:lock" />
+            <Icon icon="icon-park-outline:lock" />
           </n-icon>
         </template>
       </n-input>
@@ -71,68 +136,6 @@
     </div>
   </n-form>
 </template>
-
-<script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
-import { UserApi } from '@/api/user';
-import { Icon } from '@iconify/vue';
-import type { FormInst } from 'naive-ui';
-
-const emit = defineEmits(['success', 'switchToLogin']);
-
-const formRef = ref<FormInst | null>(null);
-const loading = ref(false);
-
-const formData = reactive({
-  username: '',
-  password: '',
-  confirmPassword: '',
-});
-
-const rules = {
-  username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 4, max: 20, message: '用户名长度为4-20位', trigger: 'blur' },
-    { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含字母、数字和下划线', trigger: 'blur' },
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 32, message: '密码长度为8-32位', trigger: 'blur' },
-  ],
-  confirmPassword: [
-    { required: true, message: '请确认密码', trigger: 'blur' },
-    {
-      validator: (_rule: any, value: string) => value === formData.password,
-      message: '两次输入的密码不一致',
-      trigger: 'blur',
-    },
-  ],
-};
-
-const iconColor = computed(() => 'rgba(255,255,255,0.5)');
-
-async function handleRegister() {
-  try {
-    await formRef.value?.validate();
-  } catch {
-    return;
-  }
-
-  loading.value = true;
-  try {
-    await UserApi.register({
-      username: formData.username,
-      password: formData.password,
-      confirmPassword: formData.confirmPassword,
-    });
-    emit('success');
-  } catch {
-    // 错误已由全局 errorHandler 统一弹 toast
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
 
 <style scoped>
 .glass-form {

@@ -1,6 +1,6 @@
-export const defaultLayout = 'normal';
+export const defaultLayout = 'normal'
 
-export const fontOptions: Record<string, { name: string; value: string; description: string }> = {
+export const fontOptions: Record<string, { name: string, value: string, description: string }> = {
   'smiley-sans': {
     name: '得意黑',
     value: 'Smiley Sans',
@@ -11,20 +11,20 @@ export const fontOptions: Record<string, { name: string; value: string; descript
     value: 'HarmonySans',
     description: '鸿蒙字体 - 优雅舒适',
   },
-  LXGWWenKai: {
+  'LXGWWenKai': {
     name: '霞鹜文楷',
     value: 'LXGWWenKai',
     description: '霞鹜文楷 - 优雅舒适',
   },
-  system: {
+  'system': {
     name: 'System',
     value:
       '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     description: '系统默认字体',
   },
-};
+}
 
-export const defaultFont = 'smiley-sans';
+export const defaultFont = 'smiley-sans'
 
 export const naiveThemeOverrides = {
   common: {
@@ -50,16 +50,16 @@ export const naiveThemeOverrides = {
     errorColorPressed: '#ab1f3f',
     errorColorSuppl: '#de576d',
   },
-};
+}
 
 export const lightThemeOverrides = {
   common: {
     tabSelectedBg: '#f0f0f4',
   },
-};
+}
 
 export const darkThemeOverrides = {
   common: {
     tabSelectedBg: '#1A171C',
   },
-};
+}

@@ -1,7 +1,6 @@
-export { BasicForm, FormQuery, FormEdit, useForm } from "./Form";
-export { BasicTable } from "./Table";
-export { BasicModal, useModal, useModalInner } from "./Modal";
-export { BasicDrawer, useDrawer, useDrawerInner } from "./Drawer";
-export { Description } from "./Description";
-export { JIcon } from "./common";
-
+export { JIcon } from './common'
+export { Description } from './Description'
+export { BasicDrawer, useDrawer, useDrawerInner } from './Drawer'
+export { BasicForm, FormEdit, FormQuery, useForm } from './Form'
+export { BasicModal, useModal, useModalInner } from './Modal'
+export { BasicTable } from './Table'

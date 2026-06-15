@@ -1,9 +1,9 @@
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils';
-import dayjs from 'dayjs';
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui';
-import { computed } from 'vue';
+import dayjs from 'dayjs'
+import { NButton, NPopconfirm, NSpace } from 'naive-ui'
+import { computed } from 'vue'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
 
-export const useRoleSchema = (methods: any = {}) => {
+export function useRoleSchema(methods: any = {}) {
   const schema = computed(() => ({
     properties: [
       {
@@ -75,15 +75,15 @@ export const useRoleSchema = (methods: any = {}) => {
       },
     ],
     setting: { table: { resizable: true } },
-  }));
+  }))
 
-  const tableFields = ['code', 'name', 'description', 'createdTime', 'operate'];
-  const formFields = ['code', 'name'];
-  const editFormFields = ['code', 'name', 'description'];
+  const tableFields = ['code', 'name', 'description', 'createdTime', 'operate']
+  const formFields = ['code', 'name']
+  const editFormFields = ['code', 'name', 'description']
 
-  const columns = computed(() => columnsUtil(schema.value, tableFields));
-  const formSchemas = computed(() => formSchemaUtil(schema.value, formFields));
-  const editFormSchemas = computed(() => editFormSchemaUtil(schema.value, editFormFields));
+  const columns = computed(() => columnsUtil(schema.value, tableFields))
+  const formSchemas = computed(() => formSchemaUtil(schema.value, formFields))
+  const editFormSchemas = computed(() => editFormSchemaUtil(schema.value, editFormFields))
 
-  return { columns, formSchemas, editFormSchemas };
-};
+  return { columns, formSchemas, editFormSchemas }
+}

@@ -1,3 +1,275 @@
+<script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import LoginForm from './components/LoginForm.vue'
+import RegisterForm from './components/RegisterForm.vue'
+
+const isFlipped = ref(false)
+const router = useRouter()
+const route = useRoute()
+
+// === Canvas particle system ===
+const canvasRef = ref<HTMLCanvasElement | null>(null)
+const pageRef = ref<HTMLDivElement | null>(null)
+
+const COLORS = [
+  '#18a058',
+  '#2080f0',
+  '#f0a020',
+  '#d03050',
+  '#22c55e',
+  '#6366f1',
+]
+
+interface Particle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  size: number
+  color: string
+  alpha: number
+}
+
+interface Meteor {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  length: number
+  alpha: number
+  color: string
+}
+
+let particles: Particle[] = []
+const meteors: Meteor[] = []
+let animationId = 0
+const mouse = { x: -1000, y: -1000, radius: 180 }
+let meteorSpawnTimer = 0
+
+let cleanupCanvas: (() => void) | null = null
+let cleanupParallax: (() => void) | null = null
+
+function initCanvas(canvas: HTMLCanvasElement) {
+  const ctxOrNull = canvas.getContext('2d')
+  if (!ctxOrNull)
+    return
+  const ctx: CanvasRenderingContext2D = ctxOrNull
+
+  const resize = () => {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+  }
+  window.addEventListener('resize', resize)
+  resize()
+
+  particles = []
+  const density
+    = Math.min(window.innerWidth, window.innerHeight) < 768 ? 8000 : 5000
+  const count = Math.min(
+    Math.floor((canvas.width * canvas.height) / density),
+    200,
+  )
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      size: Math.random() * 2.5 + 1,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      alpha: Math.random() * 0.5 + 0.3,
+    })
+  }
+
+  const onMove = (e: MouseEvent) => {
+    mouse.x = e.clientX
+    mouse.y = e.clientY
+  }
+  const onLeave = () => {
+    mouse.x = -1000
+    mouse.y = -1000
+  }
+  window.addEventListener('mousemove', onMove)
+  window.addEventListener('mouseleave', onLeave)
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    meteorSpawnTimer++
+    if (meteorSpawnTimer > 120 + Math.random() * 180) {
+      meteorSpawnTimer = 0
+      const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3
+      const speed = 4 + Math.random() * 3
+      meteors.push({
+        x: Math.random() * canvas.width * 1.2 - canvas.width * 0.1,
+        y: -20,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        length: 60 + Math.random() * 80,
+        alpha: 0.6 + Math.random() * 0.4,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      })
+    }
+
+    for (let m = meteors.length - 1; m >= 0; m--) {
+      const met = meteors[m]
+      met.x += met.vx
+      met.y += met.vy
+      met.alpha -= 0.003
+
+      const grad = ctx.createLinearGradient(
+        met.x,
+        met.y,
+        met.x - met.vx * met.length,
+        met.y - met.vy * met.length,
+      )
+      grad.addColorStop(0, `rgba(255, 255, 255, ${met.alpha})`)
+      grad.addColorStop(0.3, met.color)
+      grad.addColorStop(1, 'transparent')
+      ctx.beginPath()
+      ctx.moveTo(met.x, met.y)
+      ctx.lineTo(met.x - met.vx * met.length, met.y - met.vy * met.length)
+      ctx.strokeStyle = grad
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      ctx.beginPath()
+      ctx.arc(met.x, met.y, 2.5, 0, Math.PI * 2)
+      ctx.fillStyle = '#fff'
+      ctx.globalAlpha = met.alpha * 0.9
+      ctx.fill()
+      ctx.globalAlpha = 1
+
+      if (
+        met.alpha <= 0
+        || met.x > canvas.width + 50
+        || met.y > canvas.height + 50
+      ) {
+        meteors.splice(m, 1)
+      }
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i]
+
+      const dx = mouse.x - p.x
+      const dy = mouse.y - p.y
+      const dist = Math.sqrt(dx * dx + dy * dy)
+      if (dist < mouse.radius) {
+        const force = (mouse.radius - dist) / mouse.radius
+        const angle = Math.atan2(dy, dx)
+        p.vx -= Math.cos(angle) * force * 0.4
+        p.vy -= Math.sin(angle) * force * 0.4
+      }
+
+      p.x += p.vx
+      p.y += p.vy
+
+      p.vx *= 0.98
+      p.vy *= 0.98
+
+      if (p.x < -10)
+        p.x = canvas.width + 10
+      if (p.x > canvas.width + 10)
+        p.x = -10
+      if (p.y < -10)
+        p.y = canvas.height + 10
+      if (p.y > canvas.height + 10)
+        p.y = -10
+
+      ctx.beginPath()
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+      ctx.fillStyle = p.color
+      ctx.globalAlpha = p.alpha
+      ctx.fill()
+
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j]
+        const dx2 = p.x - p2.x
+        const dy2 = p.y - p2.y
+        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2)
+        if (dist2 < 150) {
+          ctx.beginPath()
+          ctx.moveTo(p.x, p.y)
+          ctx.lineTo(p2.x, p2.y)
+          ctx.strokeStyle = p.color
+          ctx.globalAlpha = (1 - dist2 / 150) * 0.2
+          ctx.lineWidth = 0.8
+          ctx.stroke()
+        }
+      }
+    }
+
+    ctx.globalAlpha = 1
+    animationId = requestAnimationFrame(animate)
+  }
+
+  animate()
+
+  cleanupCanvas = () => {
+    cancelAnimationFrame(animationId)
+    window.removeEventListener('resize', resize)
+    window.removeEventListener('mousemove', onMove)
+    window.removeEventListener('mouseleave', onLeave)
+  }
+}
+
+const mouseX = ref(-200)
+const mouseY = ref(-200)
+const cardTilt = ref({ x: 0, y: 0 })
+const cardTiltStyle = computed(() => ({
+  transform: `rotateX(${cardTilt.value.x}deg) rotateY(${cardTilt.value.y}deg)`,
+}))
+const cardRef = ref<HTMLDivElement | null>(null)
+
+function setupParallax(page: HTMLDivElement) {
+  const onMove = (e: MouseEvent) => {
+    mouseX.value = e.clientX
+    mouseY.value = e.clientY
+
+    const rect = page.getBoundingClientRect()
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    const tiltX = ((e.clientY - centerY) / centerY) * 3
+    const tiltY = ((e.clientX - centerX) / centerX) * 3
+    cardTilt.value = { x: -tiltX, y: tiltY }
+  }
+
+  window.addEventListener('mousemove', onMove, { passive: true })
+  cleanupParallax = () => window.removeEventListener('mousemove', onMove)
+}
+
+onBeforeUnmount(() => {
+  cleanupCanvas?.()
+  cleanupParallax?.()
+})
+
+onMounted(() => {
+  if (canvasRef.value)
+    initCanvas(canvasRef.value)
+  if (pageRef.value)
+    setupParallax(pageRef.value)
+})
+
+function flipToRegister() {
+  isFlipped.value = true
+}
+function flipToLogin() {
+  isFlipped.value = false
+}
+function handleLoginSuccess() {
+  const redirect
+    = (route.query?.redirect as string)
+      || import.meta.env.VITE_HOME_PATH
+      || '/home'
+  router.push(redirect.startsWith('/') ? redirect : `/${redirect}`)
+}
+function handleRegisterSuccess() {
+  flipToLogin()
+  window.$message?.success?.('注册成功，请登录')
+}
+</script>
+
 <template>
   <div ref="pageRef" class="login-page wh-full flex-center">
     <!-- Canvas particle system -->
@@ -9,14 +281,16 @@
       :style="{
         left: `${mouseX}px`,
         top: `${mouseY}px`,
-      }" />
+      }"
+    />
 
     <!-- Glass card container with parallax tilt -->
     <div
+      ref="cardRef"
       class="glass-wrapper"
       :class="{ flipped: isFlipped }"
-      ref="cardRef"
-      :style="cardTiltStyle">
+      :style="cardTiltStyle"
+    >
       <div class="glass-inner">
         <!-- Front: Login -->
         <div class="glass-face front">
@@ -27,24 +301,31 @@
                   width="32"
                   height="32"
                   rx="8"
-                  fill="rgba(24,160,88,0.9)" />
+                  fill="rgba(24,160,88,0.9)"
+                />
                 <text
                   x="16"
                   y="22"
                   font-size="18"
                   font-weight="bold"
                   fill="white"
-                  text-anchor="middle">
+                  text-anchor="middle"
+                >
                   J
                 </text>
               </svg>
             </div>
-            <h2 class="title">欢迎回来</h2>
-            <p class="subtitle">登录您的账号以继续</p>
+            <h2 class="title">
+              欢迎回来
+            </h2>
+            <p class="subtitle">
+              登录您的账号以继续
+            </p>
           </div>
           <LoginForm
             @success="handleLoginSuccess"
-            @switch-to-register="flipToRegister" />
+            @switch-to-register="flipToRegister"
+          />
         </div>
 
         <!-- Back: Register -->
@@ -56,294 +337,36 @@
                   width="32"
                   height="32"
                   rx="8"
-                  fill="rgba(24,160,88,0.9)" />
+                  fill="rgba(24,160,88,0.9)"
+                />
                 <text
                   x="16"
                   y="22"
                   font-size="18"
                   font-weight="bold"
                   fill="white"
-                  text-anchor="middle">
+                  text-anchor="middle"
+                >
                   J
                 </text>
               </svg>
             </div>
-            <h2 class="title">创建账号</h2>
-            <p class="subtitle">注册一个新账号开始使用</p>
+            <h2 class="title">
+              创建账号
+            </h2>
+            <p class="subtitle">
+              注册一个新账号开始使用
+            </p>
           </div>
           <RegisterForm
             @success="handleRegisterSuccess"
-            @switch-to-login="flipToLogin" />
+            @switch-to-login="flipToLogin"
+          />
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
-import LoginForm from "./components/LoginForm.vue";
-import RegisterForm from "./components/RegisterForm.vue";
-
-const isFlipped = ref(false);
-const router = useRouter();
-const route = useRoute();
-
-// === Canvas particle system ===
-const canvasRef = ref<HTMLCanvasElement | null>(null);
-const pageRef = ref<HTMLDivElement | null>(null);
-
-const COLORS = [
-  "#18a058",
-  "#2080f0",
-  "#f0a020",
-  "#d03050",
-  "#22c55e",
-  "#6366f1",
-];
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  alpha: number;
-}
-
-interface Meteor {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  length: number;
-  alpha: number;
-  color: string;
-}
-
-let particles: Particle[] = [];
-let meteors: Meteor[] = [];
-let animationId = 0;
-let mouse = { x: -1000, y: -1000, radius: 180 };
-let meteorSpawnTimer = 0;
-
-let cleanupCanvas: (() => void) | null = null;
-let cleanupParallax: (() => void) | null = null;
-
-function initCanvas(canvas: HTMLCanvasElement) {
-  const ctxOrNull = canvas.getContext("2d");
-  if (!ctxOrNull) return;
-  const ctx: CanvasRenderingContext2D = ctxOrNull;
-
-  const resize = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
-  window.addEventListener("resize", resize);
-  resize();
-
-  particles = [];
-  const density =
-    Math.min(window.innerWidth, window.innerHeight) < 768 ? 8000 : 5000;
-  const count = Math.min(
-    Math.floor((canvas.width * canvas.height) / density),
-    200,
-  );
-  for (let i = 0; i < count; i++) {
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
-      size: Math.random() * 2.5 + 1,
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      alpha: Math.random() * 0.5 + 0.3,
-    });
-  }
-
-  const onMove = (e: MouseEvent) => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-  };
-  const onLeave = () => {
-    mouse.x = -1000;
-    mouse.y = -1000;
-  };
-  window.addEventListener("mousemove", onMove);
-  window.addEventListener("mouseleave", onLeave);
-
-  function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    meteorSpawnTimer++;
-    if (meteorSpawnTimer > 120 + Math.random() * 180) {
-      meteorSpawnTimer = 0;
-      const angle = Math.PI / 4 + (Math.random() - 0.5) * 0.3;
-      const speed = 4 + Math.random() * 3;
-      meteors.push({
-        x: Math.random() * canvas.width * 1.2 - canvas.width * 0.1,
-        y: -20,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        length: 60 + Math.random() * 80,
-        alpha: 0.6 + Math.random() * 0.4,
-        color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      });
-    }
-
-    for (let m = meteors.length - 1; m >= 0; m--) {
-      const met = meteors[m];
-      met.x += met.vx;
-      met.y += met.vy;
-      met.alpha -= 0.003;
-
-      const grad = ctx.createLinearGradient(
-        met.x,
-        met.y,
-        met.x - met.vx * met.length,
-        met.y - met.vy * met.length,
-      );
-      grad.addColorStop(0, `rgba(255, 255, 255, ${met.alpha})`);
-      grad.addColorStop(0.3, met.color);
-      grad.addColorStop(1, "transparent");
-      ctx.beginPath();
-      ctx.moveTo(met.x, met.y);
-      ctx.lineTo(met.x - met.vx * met.length, met.y - met.vy * met.length);
-      ctx.strokeStyle = grad;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(met.x, met.y, 2.5, 0, Math.PI * 2);
-      ctx.fillStyle = "#fff";
-      ctx.globalAlpha = met.alpha * 0.9;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-
-      if (
-        met.alpha <= 0 ||
-        met.x > canvas.width + 50 ||
-        met.y > canvas.height + 50
-      ) {
-        meteors.splice(m, 1);
-      }
-    }
-
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-
-      const dx = mouse.x - p.x;
-      const dy = mouse.y - p.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < mouse.radius) {
-        const force = (mouse.radius - dist) / mouse.radius;
-        const angle = Math.atan2(dy, dx);
-        p.vx -= Math.cos(angle) * force * 0.4;
-        p.vy -= Math.sin(angle) * force * 0.4;
-      }
-
-      p.x += p.vx;
-      p.y += p.vy;
-
-      p.vx *= 0.98;
-      p.vy *= 0.98;
-
-      if (p.x < -10) p.x = canvas.width + 10;
-      if (p.x > canvas.width + 10) p.x = -10;
-      if (p.y < -10) p.y = canvas.height + 10;
-      if (p.y > canvas.height + 10) p.y = -10;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.globalAlpha = p.alpha;
-      ctx.fill();
-
-      for (let j = i + 1; j < particles.length; j++) {
-        const p2 = particles[j];
-        const dx2 = p.x - p2.x;
-        const dy2 = p.y - p2.y;
-        const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
-        if (dist2 < 150) {
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = p.color;
-          ctx.globalAlpha = (1 - dist2 / 150) * 0.2;
-          ctx.lineWidth = 0.8;
-          ctx.stroke();
-        }
-      }
-    }
-
-    ctx.globalAlpha = 1;
-    animationId = requestAnimationFrame(animate);
-  }
-
-  animate();
-
-  cleanupCanvas = () => {
-    cancelAnimationFrame(animationId);
-    window.removeEventListener("resize", resize);
-    window.removeEventListener("mousemove", onMove);
-    window.removeEventListener("mouseleave", onLeave);
-  };
-}
-
-const mouseX = ref(-200);
-const mouseY = ref(-200);
-const cardTilt = ref({ x: 0, y: 0 });
-const cardTiltStyle = computed(() => ({
-  transform: `rotateX(${cardTilt.value.x}deg) rotateY(${cardTilt.value.y}deg)`,
-}));
-const cardRef = ref<HTMLDivElement | null>(null);
-
-function setupParallax(page: HTMLDivElement) {
-  const onMove = (e: MouseEvent) => {
-    mouseX.value = e.clientX;
-    mouseY.value = e.clientY;
-
-    const rect = page.getBoundingClientRect();
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const tiltX = ((e.clientY - centerY) / centerY) * 3;
-    const tiltY = ((e.clientX - centerX) / centerX) * 3;
-    cardTilt.value = { x: -tiltX, y: tiltY };
-  };
-
-  window.addEventListener("mousemove", onMove, { passive: true });
-  cleanupParallax = () => window.removeEventListener("mousemove", onMove);
-}
-
-onBeforeUnmount(() => {
-  cleanupCanvas?.();
-  cleanupParallax?.();
-});
-
-onMounted(() => {
-  if (canvasRef.value) initCanvas(canvasRef.value);
-  if (pageRef.value) setupParallax(pageRef.value);
-});
-
-function flipToRegister() {
-  isFlipped.value = true;
-}
-function flipToLogin() {
-  isFlipped.value = false;
-}
-function handleLoginSuccess() {
-  const redirect =
-    (route.query?.redirect as string) ||
-    import.meta.env.VITE_HOME_PATH ||
-    "/home";
-  router.push(redirect.startsWith("/") ? redirect : "/" + redirect);
-}
-function handleRegisterSuccess() {
-  flipToLogin();
-  window.$message?.success?.("注册成功，请登录");
-}
-</script>
 
 <style scoped>
 .login-page {
@@ -412,7 +435,7 @@ function handleRegisterSuccess() {
 }
 
 .glass-face::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   border-radius: 24px;
@@ -427,7 +450,7 @@ function handleRegisterSuccess() {
 }
 
 .glass-face::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: -1px;
   border-radius: 24px;
@@ -499,4 +522,3 @@ function handleRegisterSuccess() {
   margin: 0;
 }
 </style>
-

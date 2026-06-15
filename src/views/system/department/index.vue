@@ -1,3 +1,246 @@
+<script setup lang="ts">
+import type { DataTableColumn } from 'naive-ui'
+import { Icon } from '@iconify/vue'
+import { h, nextTick, ref } from 'vue'
+import { DepartmentApi } from '@/api/system'
+import DepartmentModal from './components/DepartmentModal.vue'
+import { useDepartmentSchema } from './schema'
+
+useDepartmentSchema()
+
+// ---------- state ----------
+const treeData = ref<any[]>([])
+const treeLoading = ref(false)
+const selectedKeys = ref<number[]>([])
+const selectedDept = ref<System.Department | null>(null)
+const searchKeyword = ref('')
+
+const includeChildren = ref(false)
+
+const tableRef = ref<any>(null)
+const [registerModal, { openModal }] = useModal()
+
+// ---------- member columns ----------
+const memberColumns: DataTableColumn[] = [
+  {
+    title: '姓名',
+    key: 'name',
+    width: 120,
+    render: (row: any) => row.name || row.username || '-',
+  },
+  { title: '账号', key: 'username', width: 130 },
+  {
+    title: '手机号',
+    key: 'phone',
+    width: 130,
+    render: (row: any) => row.phone || '-',
+  },
+  {
+    title: '职位',
+    key: 'position',
+    width: 120,
+    render: (row: any) => row.position || '-',
+  },
+  {
+    title: '角色',
+    key: 'roles',
+    render: (row: any) => {
+      const roles = row.roles || []
+      if (!roles.length)
+        return '-'
+      return h(
+        'span',
+        {},
+        roles.map((r: any) => h('span', { class: 'role-tag' }, r.name)),
+      )
+    },
+  },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    render: (row: any) => {
+      const color = row.status === 1 ? 'success' : 'warning'
+      return h(
+        'n-tag',
+        { bordered: false, type: color, size: 'small' },
+        { default: () => (row.status === 1 ? '启用' : '禁用') },
+      )
+    },
+  },
+]
+
+// ---------- tree ----------
+const expandedKeys = ref<number[]>([])
+
+const selectedDeptId = ref<number | null>(null)
+
+async function loadTree() {
+  treeLoading.value = true
+  try {
+    const res = await DepartmentApi.tree()
+    const nodes = (res || []).map(formatTreeNode)
+    treeData.value = nodes
+    expandedKeys.value = nodes.map((n: any) => n.key)
+    // 默认选中第一个根节点（总公司）
+    if (nodes.length > 0) {
+      selectedKeys.value = [nodes[0].key]
+      selectedDeptId.value = nodes[0].key
+      await loadDeptDetail(nodes[0].key)
+      nextTick(() => tableRef.value?.reload())
+    }
+  }
+  finally {
+    treeLoading.value = false
+  }
+}
+
+function formatTreeNode(item: any): any {
+  return {
+    label: item.name,
+    code: item.code,
+    key: item.id,
+    isLeaf: !item.children || item.children.length === 0,
+    children: item.children ? item.children.map(formatTreeNode) : undefined,
+  }
+}
+
+function renderLabel(info: {
+  option: any
+  selected: boolean
+  checked: boolean
+}) {
+  return h('div', { style: 'line-height:1.4;' }, [
+    h(
+      'div',
+      { style: 'font-size:13px;font-weight:500;color:#1f2937;' },
+      info.option.label,
+    ),
+    h(
+      'span',
+      {
+        style:
+          'font-size:10px;color:#9ca3af;background:#f3f4f6;padding:0 5px;border-radius:3px;display:inline-block;margin-top:1px;',
+      },
+      info.option.code,
+    ),
+  ])
+}
+
+function nodeProps(_option: { option: any }) {
+  return {
+    style: {
+      cursor: 'pointer',
+      padding: '2px 0',
+    },
+  }
+}
+
+async function onTreeSelect(keys: number[]) {
+  if (!keys.length)
+    return
+  selectedKeys.value = keys
+  selectedDeptId.value = keys[0]
+  await loadDeptDetail(keys[0])
+  nextTick(() => tableRef.value?.reload())
+}
+
+async function loadDeptDetail(id: number) {
+  try {
+    selectedDept.value = await DepartmentApi.detail(id)
+  }
+  catch {
+    selectedDept.value = null
+  }
+}
+
+async function loadMembers(params: any) {
+  const id = selectedDeptId.value
+  if (!id)
+    return { list: [], pagination: { page: 1, pageSize: 10, total: 0 } }
+  return DepartmentApi.members(id, {
+    ...params,
+    includeChildren: includeChildren.value,
+  })
+}
+
+function onIncludeChildrenChange() {
+  if (selectedDeptId.value)
+    nextTick(() => tableRef.value?.reload())
+}
+
+// ---------- search ----------
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+function handleSearch() {
+  if (searchTimer)
+    clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    // tree uses :pattern prop for filtering, no extra logic needed
+  }, 300)
+}
+
+// ---------- actions ----------
+function handleAdd() {
+  openModal({ isUpdate: false })
+}
+
+function handleAddChild(dept: System.Department) {
+  openModal({ record: { pid: dept.id }, isUpdate: false })
+}
+
+function handleEdit(dept: System.Department) {
+  openModal({ record: dept, isUpdate: true })
+}
+
+async function handleDelete(dept: System.Department) {
+  try {
+    await DepartmentApi.delete(dept.id)
+    window.$message?.success?.('删除成功')
+    selectedDept.value = null
+    selectedKeys.value = []
+    loadTree()
+  }
+  catch {
+    /* handled by interceptor */
+  }
+}
+
+async function handleToggleStatus(dept: System.Department) {
+  try {
+    if (dept.status === 1) {
+      await DepartmentApi.disable(dept.id)
+    }
+    else {
+      await DepartmentApi.enable(dept.id)
+    }
+    window.$message?.success?.(dept.status === 1 ? '已禁用' : '已启用')
+    loadDeptDetail(dept.id)
+    loadTree()
+  }
+  catch {
+    /* handled by interceptor */
+  }
+}
+
+function getDeptIcon(code: string) {
+  const map: Record<string, string> = {
+    HQ: 'mdi:domain',
+    IT: 'mdi:laptop',
+    MARKETING: 'mdi:bullhorn',
+    FINANCE: 'mdi:currency-usd',
+    HR: 'mdi:account-group',
+    OPERATIONS: 'mdi:cog',
+    R_D: 'mdi:flask',
+  }
+  return map[code] || 'mdi:folder-outline'
+}
+
+// ---------- init ----------
+onMounted(() => {
+  loadTree()
+})
+</script>
+
 <template>
   <div class="dept-page">
     <!-- 左侧部门树 -->
@@ -5,7 +248,9 @@
       <div class="dept-tree-header">
         <span class="dept-tree-title">部门结构</span>
         <n-button size="small" circle type="primary" @click="handleAdd">
-          <template #icon><Icon icon="mdi:plus" width="16" /></template>
+          <template #icon>
+            <Icon icon="mdi:plus" width="16" />
+          </template>
         </n-button>
       </div>
       <n-input
@@ -14,7 +259,8 @@
         clearable
         size="small"
         class="dept-search"
-        @input="handleSearch" />
+        @input="handleSearch"
+      />
       <n-spin :show="treeLoading" class="dept-tree-spin">
         <n-tree
           :data="treeData"
@@ -26,7 +272,8 @@
           block-node
           :node-props="nodeProps"
           @update:selected-keys="onTreeSelect"
-          @update:expanded-keys="expandedKeys = $event" />
+          @update:expanded-keys="expandedKeys = $event"
+        />
       </n-spin>
     </div>
 
@@ -40,23 +287,38 @@
             <n-tag size="small" :bordered="false" type="info">
               {{ selectedDept.code }}
             </n-tag>
-            <n-tag size="small" :bordered="false" :type="selectedDept.status === 1 ? 'success' : 'warning'">
-              {{ selectedDept.status === 1 ? '启用' : '禁用' }}
+            <n-tag
+              size="small"
+              :bordered="false"
+              :type="selectedDept.status === 1 ? 'success' : 'warning'"
+            >
+              {{ selectedDept.status === 1 ? "启用" : "禁用" }}
             </n-tag>
           </div>
           <div class="dept-content-actions">
-            <n-button size="small" quaternary @click="handleEdit(selectedDept)">编辑部门</n-button>
-            <n-button size="small" quaternary @click="handleAddChild(selectedDept)">添加子部门</n-button>
+            <n-button size="small" quaternary @click="handleEdit(selectedDept)">
+              编辑部门
+            </n-button>
+            <n-button
+              size="small"
+              quaternary
+              @click="handleAddChild(selectedDept)"
+            >
+              添加子部门
+            </n-button>
             <n-button
               size="small"
               quaternary
               :type="selectedDept.status === 1 ? 'warning' : 'success'"
-              @click="handleToggleStatus(selectedDept)">
-              {{ selectedDept.status === 1 ? '禁用' : '启用' }}
+              @click="handleToggleStatus(selectedDept)"
+            >
+              {{ selectedDept.status === 1 ? "禁用" : "启用" }}
             </n-button>
             <n-popconfirm @positive-click="handleDelete(selectedDept)">
               <template #trigger>
-                <n-button size="small" quaternary type="error">删除</n-button>
+                <n-button size="small" quaternary type="error">
+                  删除
+                </n-button>
               </template>
               确定要删除部门「{{ selectedDept.name }}」吗？
             </n-popconfirm>
@@ -66,7 +328,11 @@
         <div class="dept-stats">
           <span v-if="selectedDept">共 {{ selectedDept.children?.length || 0 }} 个子部门</span>
           <label class="include-children-toggle">
-            <n-switch v-model:value="includeChildren" size="small" @update:value="onIncludeChildrenChange" />
+            <n-switch
+              v-model:value="includeChildren"
+              size="small"
+              @update:value="onIncludeChildrenChange"
+            />
             <span class="toggle-label">包含子部门</span>
           </label>
         </div>
@@ -79,7 +345,8 @@
           :show-toolbar="false"
           :bordered="false"
           :single-line="false"
-          size="small" />
+          size="small"
+        />
       </template>
 
       <div v-else class="dept-empty">
@@ -91,198 +358,6 @@
     <DepartmentModal @register="registerModal" @success="loadTree" />
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed, h, nextTick } from 'vue';
-import { Icon } from '@iconify/vue';
-import { DepartmentApi } from '@/api/system';
-import { useDepartmentSchema } from './schema';
-import DepartmentModal from './components/DepartmentModal.vue';
-import type { DataTableColumn } from 'naive-ui';
-
-const { editFormSchemas } = useDepartmentSchema();
-
-// ---------- state ----------
-const treeData = ref<any[]>([]);
-const treeLoading = ref(false);
-const selectedKeys = ref<number[]>([]);
-const selectedDept = ref<System.Department | null>(null);
-const searchKeyword = ref('');
-
-const includeChildren = ref(false);
-
-const tableRef = ref<any>(null);
-const [registerModal, { openModal }] = useModal();
-
-// ---------- member columns ----------
-const memberColumns: DataTableColumn[] = [
-  { title: '姓名', key: 'name', width: 120, render: (row: any) => row.name || row.username || '-' },
-  { title: '账号', key: 'username', width: 130 },
-  { title: '手机号', key: 'phone', width: 130, render: (row: any) => row.phone || '-' },
-  { title: '职位', key: 'position', width: 120, render: (row: any) => row.position || '-' },
-  {
-    title: '角色',
-    key: 'roles',
-    render: (row: any) => {
-      const roles = row.roles || [];
-      if (!roles.length) return '-';
-      return h('span', {}, roles.map((r: any) =>
-        h('span', { class: 'role-tag' }, r.name),
-      ));
-    },
-  },
-  {
-    title: '状态',
-    key: 'status',
-    width: 80,
-    render: (row: any) => {
-      const color = row.status === 1 ? 'success' : 'warning';
-      return h('n-tag', { bordered: false, type: color, size: 'small' }, { default: () => row.status === 1 ? '启用' : '禁用' });
-    },
-  },
-];
-
-// ---------- tree ----------
-const expandedKeys = ref<number[]>([]);
-
-async function loadTree() {
-  treeLoading.value = true;
-  try {
-    const res = await DepartmentApi.tree();
-    const nodes = (res || []).map(formatTreeNode);
-    treeData.value = nodes;
-    expandedKeys.value = nodes.map((n: any) => n.key);
-    // 默认选中第一个根节点（总公司）
-    if (nodes.length > 0) {
-      selectedKeys.value = [nodes[0].key];
-      selectedDeptId.value = nodes[0].key;
-      await loadDeptDetail(nodes[0].key);
-      nextTick(() => tableRef.value?.reload());
-    }
-  } finally {
-    treeLoading.value = false;
-  }
-}
-
-function formatTreeNode(item: any): any {
-  return {
-    label: item.name,
-    code: item.code,
-    key: item.id,
-    isLeaf: !item.children || item.children.length === 0,
-    children: item.children ? item.children.map(formatTreeNode) : undefined,
-  };
-}
-
-const renderLabel = (info: { option: any; selected: boolean; checked: boolean }) => {
-  return h(
-    'div',
-    { style: 'line-height:1.4;' },
-    [
-      h('div', { style: 'font-size:13px;font-weight:500;color:#1f2937;' }, info.option.label),
-      h('span', { style: 'font-size:10px;color:#9ca3af;background:#f3f4f6;padding:0 5px;border-radius:3px;display:inline-block;margin-top:1px;' }, info.option.code),
-    ],
-  );
-};
-
-const nodeProps = ({ option }: { option: any }) => ({
-  style: {
-    cursor: 'pointer',
-    padding: '2px 0',
-  },
-});
-
-async function onTreeSelect(keys: number[]) {
-  if (!keys.length) return;
-  selectedKeys.value = keys;
-  selectedDeptId.value = keys[0];
-  await loadDeptDetail(keys[0]);
-  nextTick(() => tableRef.value?.reload());
-}
-
-async function loadDeptDetail(id: number) {
-  try {
-    selectedDept.value = await DepartmentApi.detail(id);
-  } catch {
-    selectedDept.value = null;
-  }
-}
-
-const selectedDeptId = ref<number | null>(null);
-
-async function loadMembers(params: any) {
-  const id = selectedDeptId.value;
-  if (!id) return { list: [], pagination: { page: 1, pageSize: 10, total: 0 } };
-  return DepartmentApi.members(id, { ...params, includeChildren: includeChildren.value });
-}
-
-function onIncludeChildrenChange() {
-  if (selectedDeptId.value) nextTick(() => tableRef.value?.reload());
-}
-
-// ---------- search ----------
-let searchTimer: ReturnType<typeof setTimeout> | null = null;
-function handleSearch() {
-  if (searchTimer) clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => {
-    // tree uses :pattern prop for filtering, no extra logic needed
-  }, 300);
-}
-
-// ---------- actions ----------
-function handleAdd() {
-  openModal({ isUpdate: false });
-}
-
-function handleAddChild(dept: System.Department) {
-  openModal({ record: { pid: dept.id }, isUpdate: false });
-}
-
-function handleEdit(dept: System.Department) {
-  openModal({ record: dept, isUpdate: true });
-}
-
-async function handleDelete(dept: System.Department) {
-  try {
-    await DepartmentApi.delete(dept.id);
-    window.$message?.success?.('删除成功');
-    selectedDept.value = null;
-    selectedKeys.value = [];
-    loadTree();
-  } catch { /* handled by interceptor */ }
-}
-
-async function handleToggleStatus(dept: System.Department) {
-  try {
-    if (dept.status === 1) {
-      await DepartmentApi.disable(dept.id);
-    } else {
-      await DepartmentApi.enable(dept.id);
-    }
-    window.$message?.success?.(dept.status === 1 ? '已禁用' : '已启用');
-    loadDeptDetail(dept.id);
-    loadTree();
-  } catch { /* handled by interceptor */ }
-}
-
-function getDeptIcon(code: string) {
-  const map: Record<string, string> = {
-    HQ: 'mdi:domain',
-    IT: 'mdi:laptop',
-    MARKETING: 'mdi:bullhorn',
-    FINANCE: 'mdi:currency-usd',
-    HR: 'mdi:account-group',
-    OPERATIONS: 'mdi:cog',
-    R_D: 'mdi:flask',
-  };
-  return map[code] || 'mdi:folder-outline';
-}
-
-// ---------- init ----------
-onMounted(() => {
-  loadTree();
-});
-</script>
 
 <style scoped>
 .dept-page {

@@ -1,21 +1,21 @@
-import { shallowRef, readonly } from 'vue';
+import { readonly, shallowRef } from 'vue'
 
-export const useLoading = (props: any) => {
-  const loadingRef = shallowRef(unref(props).loading);
+export function useLoading(props: any) {
+  const loadingRef = shallowRef(unref(props).loading)
 
   watch(
     () => unref(props).loading,
     (loading) => {
-      loadingRef.value = loading;
+      loadingRef.value = loading
     },
-  );
+  )
 
   const setLoading = (value: boolean) => {
-    loadingRef.value = value;
-  };
+    loadingRef.value = value
+  }
 
   return {
     getLoading: readonly(loadingRef),
     setLoading,
-  };
-};
+  }
+}

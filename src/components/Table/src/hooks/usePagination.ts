@@ -1,24 +1,24 @@
-import { isBoolean } from "@/utils/common";
-import { APISETTING, DEFAULTPAGESIZE, PAGESIZES } from "../const";
+import { isBoolean } from '@/utils/common'
+import { APISETTING, DEFAULTPAGESIZE, PAGESIZES } from '../const'
 
-export const usePagination = (refProps: any) => {
-  const configRef = ref<any>({});
-  const show = shallowRef(true);
+export function usePagination(refProps: any) {
+  const configRef = ref<any>({})
+  const show = shallowRef(true)
 
   const getPaginationInfo = computed(() => {
-    const { pagination } = unref(refProps);
+    const { pagination } = unref(refProps)
     if (!unref(show) || (isBoolean(pagination) && !pagination)) {
-      return false;
+      return false
     }
 
-    const { totalField, itemCountField } = APISETTING;
-    const config = unref(configRef);
-    const pageSizes = config.pageSizes || PAGESIZES;
+    const { totalField, itemCountField } = APISETTING
+    const config = unref(configRef)
+    const pageSizes = config.pageSizes || PAGESIZES
     if (config?.pageSize && !pageSizes.includes(config.pageSize)) {
       const index = pageSizes.findIndex(
         (item: number) => item > config.pageSize,
-      );
-      pageSizes.splice(index, 0, config.pageSize);
+      )
+      pageSizes.splice(index, 0, config.pageSize)
     }
     return {
       pageSize: DEFAULTPAGESIZE,
@@ -32,28 +32,28 @@ export const usePagination = (refProps: any) => {
       prefix: (info: any) => `共${info.itemCount}条数据，共${info.pageCount}页`,
       onUpdatePage: () => {},
       onUpdatePageSize: () => {},
-    };
-  });
+    }
+  })
 
   const setPagination = (info: any) => {
-    const paginationInfo = unref(getPaginationInfo);
+    const paginationInfo = unref(getPaginationInfo)
     configRef.value = {
       ...(!isBoolean(paginationInfo) ? paginationInfo : {}),
       ...info,
-    };
-  };
+    }
+  }
 
   const getPagination = (): any => {
-    return unref(getPaginationInfo);
-  };
+    return unref(getPaginationInfo)
+  }
 
   const getShowPagination = (): boolean => {
-    return unref(show);
-  };
+    return unref(show)
+  }
 
   const setShowPagination = async (flag: boolean): Promise<void> => {
-    show.value = flag;
-  };
+    show.value = flag
+  }
 
   return {
     getPaginationInfo,
@@ -61,6 +61,5 @@ export const usePagination = (refProps: any) => {
     setPagination,
     getShowPagination,
     setShowPagination,
-  };
-};
-
+  }
+}

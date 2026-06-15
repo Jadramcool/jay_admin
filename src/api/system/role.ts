@@ -1,4 +1,4 @@
-import request from '@/utils/http/axios';
+import request from '@/utils/http/axios'
 
 enum API {
   list = '/system/role/list',
@@ -24,4 +24,4 @@ export const RoleApi = {
   delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
 
   assignMenu: (roleId: number, menuIds: number[]) => request.post({ url: API.roleMenu, data: { roleId, menuIds } }),
-};
+}

@@ -1,12 +1,12 @@
-import vue from '@vitejs/plugin-vue';
-import vueJsx from '@vitejs/plugin-vue-jsx';
-import AutoImport from 'unplugin-auto-import/vite';
-import Components from 'unplugin-vue-components/vite';
-import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
-import UnoCSS from 'unocss/vite';
-import { defineConfig, type ConfigEnv, type PluginOption } from 'vite';
+import type { ConfigEnv, PluginOption } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
+import UnoCSS from 'unocss/vite'
+import AutoImport from 'unplugin-auto-import/vite'
+import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
+import Components from 'unplugin-vue-components/vite'
 
-export default (env: ConfigEnv, viteEnv: Record<string, string>): PluginOption[] => {
+export default (_env: ConfigEnv, _viteEnv: Record<string, string>): PluginOption[] => {
   const plugins: PluginOption[] = [
     vue(),
     vueJsx(),
@@ -35,7 +35,7 @@ export default (env: ConfigEnv, viteEnv: Record<string, string>): PluginOption[]
       dts: 'typings/components.d.ts',
     }),
     UnoCSS(),
-  ];
+  ]
 
-  return plugins;
-};
+  return plugins
+}

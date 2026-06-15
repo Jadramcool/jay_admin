@@ -1,11 +1,10 @@
-import { isArray, isFunction, isString } from '@/utils';
-import { nextTick } from 'vue';
-import type { FormSchema } from '../types/form';
+import type { FormSchema } from '../types/form'
+import { isArray, isFunction, isString } from '@/utils'
 
 interface UseFormValuesContext {
-  defaultFormModel: Ref<any>;
-  getSchema: ComputedRef<FormSchema[]>;
-  formModel: Recordable;
+  defaultFormModel: Ref<any>
+  getSchema: ComputedRef<FormSchema[]>
+  formModel: Recordable
 }
 
 /**
@@ -16,30 +15,32 @@ interface UseFormValuesContext {
  *   2. handleFormValues：过滤空值、trim 字符串
  *   3. handleFormatFormValues：为 field 附加 __in / __not_in 查询后缀，转换日期格式
  */
-export const useFormValues = ({ defaultFormModel, getSchema, formModel }: UseFormValuesContext) => {
+export function useFormValues({ defaultFormModel, getSchema, formModel }: UseFormValuesContext) {
   /**
    * 过滤空值：移除 null / undefined / 空数组，并对字符串做 trim。
    * 这是 getFieldsValue 的第一步处理。
    */
   const handleFormValues = (values: Recordable) => {
-    if (typeof values !== 'object') return {};
+    if (typeof values !== 'object')
+      return {}
 
-    const res: Recordable = {};
+    const res: Recordable = {}
     for (const [key, originalValue] of Object.entries(values)) {
       if (
-        key &&
-        !(isArray(originalValue) && originalValue.length === 0) &&
-        !isFunction(originalValue) &&
-        originalValue !== null &&
-        originalValue !== undefined
+        key
+        && !(isArray(originalValue) && originalValue.length === 0)
+        && !isFunction(originalValue)
+        && originalValue !== null
+        && originalValue !== undefined
       ) {
-        let value = originalValue;
-        if (isString(value)) value = value.trim();
-        res[key] = value;
+        let value = originalValue
+        if (isString(value))
+          value = value.trim()
+        res[key] = value
       }
     }
-    return res;
-  };
+    return res
+  }
 
   /**
    * 格式化最终提交的值：
@@ -48,26 +49,27 @@ export const useFormValues = ({ defaultFormModel, getSchema, formModel }: UseFor
    *   - NDatePicker 的值转为 Date 对象
    */
   const handleFormatFormValues = (values: Recordable, schemas: FormSchema[]) => {
-    const formatValues = handleFormValues(values);
-    const newValues: Recordable = {};
+    const formatValues = handleFormValues(values)
+    const newValues: Recordable = {}
     Object.entries(formatValues).forEach(([key, value]: any) => {
-      const schema = schemas.find((s) => s.field === key);
+      const schema = schemas.find(s => s.field === key)
       if (schema) {
-        const newKey = schema.query ? `${schema.field}__${schema.query}` : schema.field;
-        newValues[newKey] = value;
-        formModel[key] = value;
+        const newKey = schema.query ? `${schema.field}__${schema.query}` : schema.field
+        newValues[newKey] = value
+        formModel[key] = value
 
         if (schema.component === 'NDatePicker') {
           if (Array.isArray(value)) {
-            newValues[key] = value.map((v: any) => new Date(v));
-          } else {
-            newValues[key] = new Date(value);
+            newValues[key] = value.map((v: any) => new Date(v))
+          }
+          else {
+            newValues[key] = new Date(value)
           }
         }
       }
-    });
-    return newValues;
-  };
+    })
+    return newValues
+  }
 
   /**
    * 初始化默认值：遍历 schema，将所有 defaultValue 同步到：
@@ -76,17 +78,17 @@ export const useFormValues = ({ defaultFormModel, getSchema, formModel }: UseFor
    * 只在 schema 首次加载时执行一次（由 BasicForm 的 watch 控制）。
    */
   const initDefaultFormModel = () => {
-    const schemas = unref(getSchema);
-    const defaultForm: Recordable = {};
+    const schemas = unref(getSchema)
+    const defaultForm: Recordable = {}
     schemas.forEach((schema) => {
-      const { defaultValue } = schema;
+      const { defaultValue } = schema
       if (defaultValue !== null && defaultValue !== undefined) {
-        defaultForm[schema.field] = defaultValue;
-        formModel[schema.field] = defaultValue;
+        defaultForm[schema.field] = defaultValue
+        formModel[schema.field] = defaultValue
       }
-    });
-    defaultFormModel.value = defaultForm;
-  };
+    })
+    defaultFormModel.value = defaultForm
+  }
 
-  return { handleFormValues, handleFormatFormValues, initDefaultFormModel };
-};
+  return { handleFormValues, handleFormatFormValues, initDefaultFormModel }
+}

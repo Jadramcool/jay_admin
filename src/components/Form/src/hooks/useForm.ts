@@ -1,6 +1,6 @@
-import { isProdMode } from "@/utils/common/is";
-import { nextTick, onUnmounted, shallowRef, unref, watch } from "vue";
-import type { FormActionType } from "../types";
+import type { FormActionType } from '../types'
+import { nextTick, onUnmounted, shallowRef, unref, watch } from 'vue'
+import { isProdMode } from '@/utils/common/is'
 
 /**
  * useForm — 父组件侧的 composable
@@ -15,9 +15,9 @@ import type { FormActionType } from "../types";
  *   const [register, { setFieldsValue, validate }] = useForm({ schemas, ... });
  *   <BasicForm @register="register" />
  */
-export const useForm = (props?: any) => {
-  const formRef = shallowRef<Nullable<FormActionType>>(null);
-  const loadedRef = shallowRef<Nullable<boolean>>(false);
+export function useForm(props?: any) {
+  const formRef = shallowRef<Nullable<FormActionType>>(null)
+  const loadedRef = shallowRef<Nullable<boolean>>(false)
 
   /**
    * register — 由 <BasicForm @register="register"> 在 onMounted 时触发。
@@ -27,28 +27,30 @@ export const useForm = (props?: any) => {
     // 生产环境下，组件卸载时清理引用
     if (isProdMode()) {
       onUnmounted(() => {
-        formRef.value = null;
-        loadedRef.value = null;
-      });
+        formRef.value = null
+        loadedRef.value = null
+      })
     }
     // 防止重复注册（HMR 开发模式下可能触发多次）
-    if (unref(loadedRef) && isProdMode() && instance === unref(formRef)) return;
+    if (unref(loadedRef) && isProdMode() && instance === unref(formRef))
+      return
 
-    formRef.value = instance;
-    loadedRef.value = true;
+    formRef.value = instance
+    loadedRef.value = true
 
     /**
      * resolveProps：props 中的值可能是 Ref / ComputedRef / 普通值，
      * 统一通过 unref 取出真实值后再传给 BasicForm。
      */
     const resolveProps = (p: any) => {
-      if (!p || typeof p !== "object") return p;
-      const resolved: any = {};
+      if (!p || typeof p !== 'object')
+        return p
+      const resolved: any = {}
       for (const key of Object.keys(p)) {
-        resolved[key] = unref(p[key]);
+        resolved[key] = unref(p[key])
       }
-      return resolved;
-    };
+      return resolved
+    }
 
     /**
      * 深度监听外部 props 变化，自动同步到 BasicForm 内部。
@@ -59,24 +61,24 @@ export const useForm = (props?: any) => {
       () => props,
       () => {
         if (props) {
-          instance.setProps(resolveProps(props));
+          instance.setProps(resolveProps(props))
         }
       },
       { immediate: true, deep: true },
-    );
-  };
+    )
+  }
 
   /**
    * getForm — 获取 formAction 实例。
    * 由于父组件可能在 onMounted 前调用 methods，先 await nextTick 确保注册已发生。
    */
   async function getForm(): Promise<FormActionType> {
-    const form = unref(formRef);
+    const form = unref(formRef)
     if (!form) {
-      console.error("Form instance not found");
+      console.error('Form instance not found')
     }
-    await nextTick();
-    return form as FormActionType;
+    await nextTick()
+    return form as FormActionType
   }
 
   /**
@@ -85,42 +87,41 @@ export const useForm = (props?: any) => {
    */
   const methods = {
     setProps: async (formProps: any) => {
-      const form = await getForm();
-      form.setProps(formProps);
+      const form = await getForm()
+      form.setProps(formProps)
     },
     getFieldsValue: <T = Recordable>() => {
-      return unref(formRef)?.getFieldsValue() as T;
+      return unref(formRef)?.getFieldsValue() as T
     },
     resetFields: async () => {
-      const form = await getForm();
-      form.resetFields();
+      const form = await getForm()
+      form.resetFields()
     },
     clearValidate: async (name?: string | string[]) => {
-      const form = await getForm();
-      form.clearValidate(name);
+      const form = await getForm()
+      form.clearValidate(name)
     },
     setFieldsValue: async (values: Recordable) => {
-      const form = await getForm();
-      form.setFieldsValue(values);
+      const form = await getForm()
+      form.setFieldsValue(values)
     },
     validate: async () => {
-      const form = await getForm();
-      return form.validate();
+      const form = await getForm()
+      return form.validate()
     },
     validateFields: async (name: string | string[]) => {
-      const form = await getForm();
-      return form.validateFields(name);
+      const form = await getForm()
+      return form.validateFields(name)
     },
     updateSchema: async (data: any) => {
-      const form = await getForm();
-      form.updateSchema(data);
+      const form = await getForm()
+      form.updateSchema(data)
     },
     submit: async () => {
-      const form = await getForm();
-      return form.submit();
+      const form = await getForm()
+      return form.submit()
     },
-  };
+  }
 
-  return [register, methods] as const;
-};
-
+  return [register, methods] as const
+}

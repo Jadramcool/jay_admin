@@ -1,4 +1,4 @@
-import request from '@/utils/http/axios';
+import request from '@/utils/http/axios'
 
 enum API {
   list = '/system/department/list',
@@ -33,4 +33,4 @@ export const DepartmentApi = {
 
   members: (id: number, params?: Api.PageParams & { includeChildren?: boolean }) =>
     request.get<Api.PaginatedList<System.User>>({ url: `${API.members}/${id}`, params }),
-};
+}

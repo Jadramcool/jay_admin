@@ -1,6 +1,6 @@
-import { NDataTable } from "naive-ui";
-import type { PropType } from "vue";
-import { TABLELAYOUT } from "./const";
+import type { PropType } from 'vue'
+import { NDataTable } from 'naive-ui'
+import { TABLELAYOUT } from './const'
 
 export const basicProps = {
   ...NDataTable.props,
@@ -58,12 +58,11 @@ export const basicProps = {
     default: true,
   },
   size: {
-    type: String as PropType<"small" | "medium" | "large">,
+    type: String as PropType<'small' | 'medium' | 'large'>,
     default: TABLELAYOUT.size,
   },
   data: {
     type: Array as PropType<any[]>,
     default: () => [],
   },
-};
-
+}
