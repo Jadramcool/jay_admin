@@ -18,7 +18,7 @@ const year = new Date().getFullYear()
   height: 36px;
   gap: 8px;
   font-size: 12px;
-  color: rgba(153, 153, 153, 0.8);
+  color: var(--layout-text-secondary);
 }
 
 .footer-divider {

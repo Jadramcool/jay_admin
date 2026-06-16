@@ -57,9 +57,3 @@ export const lightThemeOverrides = {
     tabSelectedBg: '#f0f0f4',
   },
 }
-
-export const darkThemeOverrides = {
-  common: {
-    tabSelectedBg: '#1A171C',
-  },
-}

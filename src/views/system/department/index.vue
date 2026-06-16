@@ -113,15 +113,12 @@ function renderLabel(info: {
   return h('div', { style: 'line-height:1.4;' }, [
     h(
       'div',
-      { style: 'font-size:13px;font-weight:500;color:#1f2937;' },
+      { class: 'tree-node-name' },
       info.option.label,
     ),
     h(
       'span',
-      {
-        style:
-          'font-size:10px;color:#9ca3af;background:#f3f4f6;padding:0 5px;border-radius:3px;display:inline-block;margin-top:1px;',
-      },
+      { class: 'tree-node-code' },
       info.option.code,
     ),
   ])
@@ -350,7 +347,7 @@ onMounted(() => {
       </template>
 
       <div v-else class="dept-empty">
-        <Icon icon="mdi:folder-open-outline" width="64" color="#c0c4cc" />
+        <Icon icon="mdi:folder-open-outline" width="64" color="var(--card-empty-text)" />
         <p>请从左侧选择一个部门</p>
       </div>
     </div>
@@ -369,9 +366,9 @@ onMounted(() => {
 .dept-tree-panel {
   width: 280px;
   min-width: 280px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -387,7 +384,7 @@ onMounted(() => {
 .dept-tree-title {
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--card-header-text);
 }
 
 .dept-search {
@@ -404,9 +401,9 @@ onMounted(() => {
 /* ---------- right panel ---------- */
 .dept-content-panel {
   flex: 1;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--card-border);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -428,7 +425,7 @@ onMounted(() => {
   gap: 8px;
   font-size: 18px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--card-header-text);
 }
 
 .dept-content-actions {
@@ -439,10 +436,10 @@ onMounted(() => {
 
 .dept-stats {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--card-sub-text);
   margin-bottom: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--card-divider);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -456,7 +453,7 @@ onMounted(() => {
 }
 .toggle-label {
   font-size: 12px;
-  color: #6b7280;
+  color: var(--card-toggle-text);
 }
 
 .dept-empty {
@@ -466,37 +463,17 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  color: #c0c4cc;
+  color: var(--card-empty-text);
   font-size: 14px;
 }
 
 :deep(.role-tag) {
   display: inline-block;
-  background: #f0f9ff;
-  color: #0284c7;
+  background: var(--role-tag-bg);
+  color: var(--role-tag-text);
   padding: 1px 8px;
   border-radius: 4px;
   font-size: 12px;
   margin: 1px 3px 1px 0;
-}
-
-.tree-node-label {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-  line-height: 1.6;
-}
-.tree-node-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1f2937;
-}
-.tree-node-code {
-  font-size: 10px;
-  color: #9ca3af;
-  background: #f3f4f6;
-  padding: 0 5px;
-  border-radius: 3px;
-  line-height: 1.5;
 }
 </style>

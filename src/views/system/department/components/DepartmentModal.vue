@@ -12,36 +12,44 @@ const emit = defineEmits<{
 const isUpdate = ref(false)
 const { editFormSchemas } = useDepartmentSchema()
 
-const [registerForm, { setFieldsValue, resetFields, validate, setProps: setFormProps }] = useForm({
+const [registerForm, { setFieldsValue, resetFields, validate, getFieldsValue }] = useForm({
   schemas: editFormSchemas,
   showActionButtonGroup: false,
 })
 
-const [registerModal, { closeModal }] = useModalInner(async (data: any) => {
+const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data: any) => {
   resetFields()
   isUpdate.value = !!data?.isUpdate
   if (isUpdate.value)
     setFieldsValue(data.record)
 })
 
-onMounted(() => {
-  setFormProps({
-    submitFunc: async () => {
-      const values = await validate()
-      if (isUpdate.value) {
-        await DepartmentApi.update(values)
-      }
-      else {
-        await DepartmentApi.create(values)
-      }
-      closeModal()
-      emit('success')
-    },
-  })
-})
-
-function handleOk() {
-  validate().then(() => {})
+async function handleOk() {
+  try {
+    await validate()
+  }
+  catch {
+    return
+  }
+  setModalProps({ loading: true })
+  try {
+    const values = { ...getFieldsValue() }
+    if (isUpdate.value) {
+      await DepartmentApi.update(values)
+    }
+    else {
+      await DepartmentApi.create(values)
+    }
+    window.$message?.success?.(isUpdate.value ? '更新成功' : '创建成功')
+    closeModal()
+    emit('success')
+  }
+  catch {
+    /* handled by interceptor */
+  }
+  finally {
+    setModalProps({ loading: false })
+  }
 }
 </script>
 

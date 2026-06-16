@@ -39,6 +39,7 @@ declare namespace System {
     id: number
     code: string
     name: string
+    permission?: string
     type: 'DIRECTORY' | 'MENU' | 'BUTTON'
     pid?: number
     path?: string
@@ -51,8 +52,16 @@ declare namespace System {
     enable?: boolean
     order?: number
     needLogin?: boolean
+    isFrame?: boolean
+    frameSrc?: string
+    target?: string
+    affix?: boolean
+    alwaysShow?: boolean
+    badge?: string
+    badgeType?: string
+    withContentCard?: boolean
     description?: string
-    extraData?: string
+    extraData?: Record<string, any>
     children?: Menu[]
     createdTime?: string
     updatedTime?: string

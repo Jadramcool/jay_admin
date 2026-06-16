@@ -7,7 +7,7 @@ const router = useRouter()
     <h1 class="text-6xl font-bold" style="color: var(--primary-color)">
       404
     </h1>
-    <p class="text-18px text-#666 mt-16px">
+    <p class="text-18px mt-16px" style="color: var(--layout-text-hover)">
       抱歉，您访问的页面不存在
     </p>
     <n-button type="primary" class="mt-24px" @click="router.push('/')">

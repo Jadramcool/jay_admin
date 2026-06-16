@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { darkTheme, dateZhCN, zhCN } from 'naive-ui'
-import { computed, onMounted } from 'vue'
+import { dateZhCN, zhCN } from 'naive-ui'
+import { onMounted } from 'vue'
 import Application from '@/components/application/Application.vue'
 import { useAppStore } from '@/store/modules'
 
 const appStore = useAppStore()
-
-const isDark = computed(() => appStore.colorMode === 'dark')
 
 onMounted(() => {
   appStore.setPrimaryColor()
@@ -17,7 +15,7 @@ onMounted(() => {
 <template>
   <n-config-provider
     class="wh-full"
-    :theme="isDark ? darkTheme : null"
+    :theme="null"
     :theme-overrides="appStore.theme"
     :locale="zhCN"
     :date-locale="dateZhCN"

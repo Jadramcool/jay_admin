@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAppStore } from '@/store/modules'
 import Breadcrumb from './Breadcrumb.vue'
 import DarkModeSwitch from './components/DarkModeSwitch.vue'
 import FontSelector from './components/FontSelector.vue'
@@ -6,13 +7,15 @@ import FullScreen from './components/FullScreen.vue'
 import Setting from './components/Setting.vue'
 import UserControl from './components/UserControl.vue'
 import MenuCollapse from './MenuCollapse.vue'
+
+const appStore = useAppStore()
 </script>
 
 <template>
   <div class="h-48px flex-between px-16px">
     <div class="flex items-center gap-12px">
       <MenuCollapse />
-      <Breadcrumb />
+      <Breadcrumb v-if="appStore.showBreadcrumb" />
     </div>
     <div class="flex items-center gap-8px">
       <DarkModeSwitch />

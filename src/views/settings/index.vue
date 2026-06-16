@@ -1,33 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useDrawer } from '@/components/Drawer/src/hooks/useDrawer'
 import { fontOptions } from '@/settings'
 import { useAppStore } from '@/store/modules'
 
 const appStore = useAppStore()
 const [register, { openDrawer }] = useDrawer()
-
-const modes = [
-  { label: '浅色', value: 'light' as const },
-  { label: '深色', value: 'dark' as const },
-  { label: '自动', value: 'auto' as const },
-]
-
-function getStoredMode() {
-  try {
-    const v = localStorage.getItem('vueuse-color-scheme')
-    if (v === 'dark' || v === 'light' || v === 'auto')
-      return v
-  }
-  catch {}
-  return 'auto'
-}
-
-const currentMode = ref(getStoredMode())
-
-function handleModeChange(mode: 'light' | 'dark' | 'auto') {
-  appStore.setColorMode(mode)
-  currentMode.value = getStoredMode()
-}
 
 const fontOptionsList = computed(() =>
   Object.entries(fontOptions).map(([key, val]) => ({
@@ -36,31 +14,22 @@ const fontOptionsList = computed(() =>
   })),
 )
 
+const transitionOptions: { label: string, value: App.TransitionAnimation }[] = [
+  { label: '渐变滑动', value: 'fade-slide' },
+  { label: '渐变', value: 'fade' },
+  { label: '底部渐变', value: 'fade-bottom' },
+  { label: '缩放渐变', value: 'fade-scale' },
+  { label: '缩放', value: 'zoom-fade' },
+  { label: '缩小', value: 'zoom-out' },
+  { label: '无动画', value: 'none' },
+]
+
 defineExpose({ openDrawer })
 </script>
 
 <template>
   <BasicDrawer title="系统设置" width="380" @register="register">
     <div class="settings-content">
-      <!-- 主题模式 -->
-      <div class="setting-section">
-        <h3 class="section-title">
-          主题模式
-        </h3>
-        <div class="mode-btns">
-          <n-button
-            v-for="mode in modes"
-            :key="mode.value"
-            :type="currentMode === mode.value ? 'primary' : 'default'"
-            size="small"
-            class="mode-btn"
-            @click="handleModeChange(mode.value)"
-          >
-            {{ mode.label }}
-          </n-button>
-        </div>
-      </div>
-
       <!-- 系统字体 -->
       <div class="setting-section">
         <h3 class="section-title">
@@ -111,6 +80,19 @@ defineExpose({ openDrawer })
           </div>
         </div>
       </div>
+
+      <!-- 页面动画 -->
+      <div class="setting-section">
+        <h3 class="section-title">
+          页面动画
+        </h3>
+        <n-select
+          :value="appStore.transitionAnimation"
+          :options="transitionOptions"
+          size="small"
+          @update:value="appStore.transitionAnimation = $event"
+        />
+      </div>
     </div>
   </BasicDrawer>
 </template>
@@ -133,15 +115,6 @@ defineExpose({ openDrawer })
   font-weight: 600;
   margin: 0 0 12px;
   opacity: 0.65;
-}
-
-.mode-btns {
-  display: flex;
-  gap: 8px;
-}
-
-.mode-btn {
-  flex: 1;
 }
 
 .toggle-list {

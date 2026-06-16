@@ -6,7 +6,9 @@ import SideLogo from '@/layout/components/sider/SideLogo.vue'
 import SideMenu from '@/layout/components/sider/SideMenu.vue'
 import TabBar from '@/layout/components/tab/TabBar.vue'
 import { useAppStore, usePermissionStore } from '@/store/modules'
+import SettingsDrawer from '@/views/settings/index.vue'
 
+const route = useRoute()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
 
@@ -64,19 +66,28 @@ const keepAliveRoutes = computed(() => {
         embedded
         content-style="padding: 14px"
       >
-        <n-card
-          v-if="appStore.loadFlag"
-          content-style="overflow: auto; height: 100%;"
-          class="content-card"
-        >
-          <router-view v-slot="{ Component: Comp, route: r }">
+        <template v-if="appStore.loadFlag">
+          <n-card
+            v-if="route.meta?.withContentCard !== false"
+            content-style="overflow: auto; height: 100%;"
+            class="content-card"
+          >
+            <router-view v-slot="{ Component: Comp, route: r }">
+              <transition :name="appStore.transitionAnimation" mode="out-in">
+                <keep-alive :include="keepAliveRoutes">
+                  <component :is="Comp" :key="r.fullPath" />
+                </keep-alive>
+              </transition>
+            </router-view>
+          </n-card>
+          <router-view v-else v-slot="{ Component: Comp, route: r }">
             <transition :name="appStore.transitionAnimation" mode="out-in">
               <keep-alive :include="keepAliveRoutes">
                 <component :is="Comp" :key="r.fullPath" />
               </keep-alive>
             </transition>
           </router-view>
-        </n-card>
+        </template>
       </n-layout-content>
 
       <n-layout-footer
@@ -99,6 +110,6 @@ const keepAliveRoutes = computed(() => {
 
 .layout-footer {
   flex-shrink: 0;
-  background: #fff;
+  background: var(--layout-bg);
 }
 </style>

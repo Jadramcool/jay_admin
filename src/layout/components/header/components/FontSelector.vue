@@ -23,7 +23,7 @@ function handleSelect(key: string) {
     <n-button quaternary size="small">
       <template #icon>
         <n-icon size="18">
-          <Icon icon="icon-park-outline:font" />
+          <Icon icon="icon-park-outline:font-size-two" />
         </n-icon>
       </template>
     </n-button>

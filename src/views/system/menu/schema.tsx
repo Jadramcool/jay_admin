@@ -60,16 +60,29 @@ export function useMenuSchema(methods: any = {}) {
         },
       },
       {
+        key: 'permission',
+        label: '权限标识',
+        defaultValue: undefined,
+        ifShow: ({ values }: any) => values.type === 'MENU' || values.type === 'BUTTON',
+        editForm: {
+          component: 'NInput',
+          componentProps: { placeholder: '例如: system:user:list' },
+        },
+        table: {
+          render: (row: any) => row.permission || '-',
+        },
+      },
+      {
         key: 'code',
-        label: '编码',
+        label: '路由标识',
         defaultValue: undefined,
         form: {
           component: 'NInput',
-          componentProps: { placeholder: '编码' },
+          componentProps: { placeholder: '路由标识' },
         },
         editForm: {
-          rules: [{ required: true, message: '请输入编码', trigger: 'blur' }],
-          componentProps: { placeholder: '例如: system:user:list' },
+          rules: [{ required: true, message: '请输入路由标识', trigger: 'blur' }],
+          componentProps: { placeholder: '例如: UserList' },
         },
       },
       {
@@ -119,6 +132,21 @@ export function useMenuSchema(methods: any = {}) {
         },
       },
       {
+        key: 'target',
+        label: '打开方式',
+        defaultValue: '_self',
+        ifShow: ({ values }: any) => values.type !== 'BUTTON',
+        editForm: {
+          component: 'NSelect',
+          componentProps: {
+            options: [
+              { label: '当前窗口', value: '_self' },
+              { label: '新窗口', value: '_blank' },
+            ],
+          },
+        },
+      },
+      {
         key: 'layout',
         label: '布局',
         ifShow: ({ values }: any) => values.type !== 'BUTTON',
@@ -132,6 +160,36 @@ export function useMenuSchema(methods: any = {}) {
             ],
           },
         },
+      },
+      {
+        key: 'isFrame',
+        label: '外部链接',
+        defaultValue: false,
+        ifShow: ({ values }: any) => values.type !== 'BUTTON',
+        editForm: { component: 'NSwitch' },
+      },
+      {
+        key: 'frameSrc',
+        label: '外部链接地址',
+        ifShow: ({ values }: any) => values.isFrame && values.type !== 'BUTTON',
+        editForm: {
+          component: 'NInput',
+          componentProps: { placeholder: 'https://example.com' },
+        },
+      },
+      {
+        key: 'affix',
+        label: '固定标签页',
+        defaultValue: false,
+        ifShow: ({ values }: any) => values.type === 'MENU',
+        editForm: { component: 'NSwitch' },
+      },
+      {
+        key: 'alwaysShow',
+        label: '始终显示目录',
+        defaultValue: false,
+        ifShow: ({ values }: any) => values.type === 'DIRECTORY',
+        editForm: { component: 'NSwitch' },
       },
       {
         key: 'order',
@@ -167,6 +225,13 @@ export function useMenuSchema(methods: any = {}) {
         editForm: { component: 'NSwitch' },
       },
       {
+        key: 'withContentCard',
+        label: '内容卡片',
+        defaultValue: true,
+        ifShow: ({ values }: any) => values.type !== 'BUTTON',
+        editForm: { component: 'NSwitch' },
+      },
+      {
         key: 'redirect',
         label: '重定向',
         ifShow: ({ values }: any) =>
@@ -184,6 +249,34 @@ export function useMenuSchema(methods: any = {}) {
           component: 'NInput',
           giProps: { span: 2 },
           componentProps: { type: 'textarea' },
+        },
+      },
+      {
+        key: 'badge',
+        label: '徽标',
+        defaultValue: undefined,
+        editForm: {
+          component: 'NInput',
+          componentProps: {
+            placeholder: '暂未支持',
+            disabled: true,
+          },
+        },
+      },
+      {
+        key: 'badgeType',
+        label: '徽标类型',
+        defaultValue: undefined,
+        editForm: {
+          component: 'NSelect',
+          componentProps: {
+            options: [
+              { label: '小圆点', value: 'dot' },
+              { label: '数字', value: 'number' },
+              { label: '文本', value: 'text' },
+            ],
+            disabled: true,
+          },
         },
       },
       {
@@ -240,6 +333,7 @@ export function useMenuSchema(methods: any = {}) {
   const tableFields = [
     'name',
     'type',
+    'permission',
     'code',
     'path',
     'icon',
@@ -254,16 +348,25 @@ export function useMenuSchema(methods: any = {}) {
     'type',
     'pid',
     'name',
+    'permission',
     'code',
     'icon',
     'path',
     'component',
+    'target',
     'layout',
+    'isFrame',
+    'frameSrc',
+    'affix',
+    'alwaysShow',
     'redirect',
     'order',
     'show',
     'keepAlive',
+    'withContentCard',
     'description',
+    'badge',
+    'badgeType',
   ]
 
   const columns = computed(() => columnsUtil(schema.value, tableFields))

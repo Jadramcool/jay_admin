@@ -12,6 +12,32 @@ body,
   overflow: hidden;
 }
 
+/* Light-mode layout surface colors (default) */
+:root {
+  --layout-bg: #fff;
+  --layout-bg-secondary: rgb(248, 248, 250);
+  --layout-bg-hover: rgb(244, 244, 247);
+  --layout-border: rgb(217, 217, 224);
+  --layout-border-light: rgb(235, 235, 240);
+  --layout-text-secondary: #999;
+  --layout-text-hover: #666;
+  --layout-separator: rgb(225, 225, 232);
+
+  --card-bg: #fff;
+  --card-border: #e5e7eb;
+  --card-header-text: #1f2937;
+  --card-sub-text: #9ca3af;
+  --card-tag-bg: #f3f4f6;
+  --card-tag-text: #9ca3af;
+  --card-divider: #f0f0f0;
+  --card-toggle-text: #6b7280;
+  --card-empty-text: #c0c4cc;
+  --role-tag-bg: #f0f9ff;
+  --role-tag-text: #0284c7;
+  --card-hover-bg: #f8fbff;
+  --card-selected-bg: #f6fffa;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -32,4 +58,21 @@ body,
   flex-direction: column;
   gap: 12px;
   height: 100%;
+}
+
+/* Department tree node (rendered via h() — needs global styles) */
+.tree-node-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--card-header-text);
+}
+.tree-node-code {
+  font-size: 10px;
+  color: var(--card-tag-text);
+  background: var(--card-tag-bg);
+  padding: 0 5px;
+  border-radius: 3px;
+  line-height: 1.5;
+  display: inline-block;
+  margin-top: 1px;
 }

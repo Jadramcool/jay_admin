@@ -311,8 +311,8 @@ function handleWheel(e: WheelEvent) {
   align-items: center;
   overflow: hidden;
   position: relative;
-  background: #fff;
-  border-bottom: 1px solid rgb(217, 217, 224);
+  background: var(--layout-bg);
+  border-bottom: 1px solid var(--layout-border);
 }
 
 /* ─── Scroll container ───────────────────────────────── */
@@ -347,11 +347,11 @@ function handleWheel(e: WheelEvent) {
   font-size: 12px;
   line-height: 32px;
   border-radius: 6px 6px 0 0;
-  color: #999;
+  color: var(--layout-text-secondary);
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
-  background: rgb(248, 248, 250);
+  background: var(--layout-bg-secondary);
 
   /* ── 边框：每个 tab 有完整边框 ── */
   border: 1px solid transparent;
@@ -366,9 +366,9 @@ function handleWheel(e: WheelEvent) {
 
 /* ── 悬浮效果 ── */
 .tab-item:not(.is-active):hover {
-  color: #666;
-  background: rgb(244, 244, 247);
-  border-color: rgb(235, 235, 240);
+  color: var(--layout-text-hover);
+  background: var(--layout-bg-hover);
+  border-color: var(--layout-border-light);
   box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04);
 }
 
@@ -376,9 +376,9 @@ function handleWheel(e: WheelEvent) {
 .tab-item.is-active {
   color: var(--primary-color, #18a058);
   font-weight: 500;
-  background: #fff;
-  border-color: rgb(217, 217, 224);
-  border-bottom-color: #fff;
+  background: var(--layout-bg);
+  border-color: var(--layout-border);
+  border-bottom-color: var(--layout-bg);
   margin-bottom: -1px;
   box-shadow:
     0 -1px 4px rgba(0, 0, 0, 0.06),
@@ -422,7 +422,7 @@ function handleWheel(e: WheelEvent) {
   top: 8px;
   bottom: 8px;
   width: 1px;
-  background: rgb(225, 225, 232);
+  background: var(--layout-separator);
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
@@ -517,7 +517,7 @@ function handleWheel(e: WheelEvent) {
     background 0.2s,
     transform 0.2s;
   flex-shrink: 0;
-  color: #999;
+  color: var(--layout-text-secondary);
   pointer-events: auto;
   transform: scale(0.85);
 }
@@ -531,8 +531,8 @@ function handleWheel(e: WheelEvent) {
 }
 .tab-close:hover {
   opacity: 1 !important;
-  background: rgba(0, 0, 0, 0.08);
-  color: #555;
+  background: rgba(128, 128, 128, 0.12);
+  color: var(--layout-text-hover);
   transform: scale(1.1) !important;
 }
 
@@ -543,8 +543,8 @@ function handleWheel(e: WheelEvent) {
   align-items: center;
   height: 100%;
   padding: 0 6px;
-  border-left: 1px solid rgb(217, 217, 224);
-  background: #fff;
+  border-left: 1px solid var(--layout-border);
+  background: var(--layout-bg);
   position: relative;
   z-index: 2;
 }
@@ -560,7 +560,7 @@ function handleWheel(e: WheelEvent) {
     transform 0.2s ease;
 }
 .overflow-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(128, 128, 128, 0.08);
   transform: scale(1.05);
 }
 .overflow-btn:active {

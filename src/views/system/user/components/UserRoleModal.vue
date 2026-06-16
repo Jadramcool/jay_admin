@@ -82,7 +82,7 @@ async function handleOk() {
   >
     <template v-if="roles.length > 0">
       <div class="mb-3 flex items-center justify-between">
-        <p class="text-sm text-gray-500">
+        <p class="text-sm" style="color: var(--card-sub-text)">
           点击选择角色，最多选 5 个
         </p>
         <n-button
@@ -123,12 +123,12 @@ async function handleOk() {
               class="role-check"
               :class="{ visible: checkedRoleIds.includes(role.id) }"
             >
-              <Icon icon="mdi:check-circle" width="18" color="#18a058" />
+              <Icon icon="mdi:check-circle" width="18" :color="'var(--primary-color)'" />
             </div>
           </div>
         </n-gi>
       </n-grid>
-      <div class="mt-3 text-xs text-gray-400">
+      <div class="mt-3 text-xs" style="color: var(--card-sub-text)">
         已选择 {{ checkedRoleIds.length }} 个角色
       </div>
     </template>
@@ -142,33 +142,33 @@ async function handleOk() {
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border: 1.5px solid #e5e7eb;
+  border: 1.5px solid var(--card-border);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  background: #fff;
+  background: var(--card-bg);
   user-select: none;
 }
 .role-card:hover {
   border-color: #2080f0;
-  background: #f8fbff;
+  background: var(--card-hover-bg);
 }
 .role-card.disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 .role-card.disabled:hover {
-  border-color: #e5e7eb;
-  background: #fff;
+  border-color: var(--card-border);
+  background: var(--card-bg);
 }
 .role-card.selected {
-  border-color: #18a058;
-  background: #f6fffa;
+  border-color: var(--primary-color);
+  background: var(--card-selected-bg);
 }
 .role-card.selected:hover {
-  border-color: #18a058;
-  background: #f6fffa;
+  border-color: var(--primary-color);
+  background: var(--card-selected-bg);
 }
 .role-card-left {
   display: flex;
@@ -223,12 +223,12 @@ async function handleOk() {
 .role-name {
   font-size: 14px;
   font-weight: 500;
-  color: #1f2937;
+  color: var(--card-header-text);
   line-height: 1.3;
 }
 .role-code {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--card-sub-text);
   line-height: 1.3;
   margin-top: 1px;
 }

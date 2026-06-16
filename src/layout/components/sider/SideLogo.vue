@@ -5,7 +5,7 @@ const appStore = useAppStore()
 </script>
 
 <template>
-  <div class="side-logo">
+  <div v-if="appStore.showLogo" class="side-logo">
     <img src="/vite.svg" alt="logo" class="logo">
     <Transition name="fade" mode="out-in">
       <span v-show="appStore.collapsed ? false : true" key="title" class="title">JDM Admin</span>
