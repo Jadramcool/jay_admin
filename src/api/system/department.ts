@@ -23,7 +23,8 @@ export const DepartmentApi = {
 
   create: (data: Partial<System.Department>) => request.post({ url: API.create, data }),
 
-  update: (data: Partial<System.Department>) => request.put({ url: API.update, data }),
+  update: ({ id, ...data }: Partial<System.Department>) =>
+    request.put({ url: `${API.update}/${id}`, data }),
 
   delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
 

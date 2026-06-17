@@ -1,0 +1,125 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+// Light-mode layout surface colors (default)
+:root {
+  --layout-bg: #fff;
+  --layout-bg-secondary: rgb(248, 248, 250);
+  --layout-bg-hover: rgb(244, 244, 247);
+  --layout-border: rgb(217, 217, 224);
+  --layout-border-light: rgb(235, 235, 240);
+  --layout-text-secondary: #999;
+  --layout-text-hover: #666;
+  --layout-separator: rgb(225, 225, 232);
+
+  --card-bg: #fff;
+  --card-border: #e5e7eb;
+  --card-header-text: #1f2937;
+  --card-sub-text: #9ca3af;
+  --card-tag-bg: #f3f4f6;
+  --card-tag-text: #9ca3af;
+  --card-divider: #f0f0f0;
+  --card-toggle-text: #6b7280;
+  --card-empty-text: #c0c4cc;
+  --role-tag-bg: #f0f9ff;
+  --role-tag-text: #0284c7;
+  --card-hover-bg: #f8fbff;
+  --card-selected-bg: #f6fffa;
+}
+
+// Dark-mode surface colors.
+// Toggled by the `dark` class on <html> (see app store applyDarkClass).
+html.dark {
+  --layout-bg: rgb(24, 24, 28);
+  --layout-bg-secondary: rgb(36, 36, 40);
+  --layout-bg-hover: rgb(44, 44, 52);
+  --layout-border: rgb(56, 56, 64);
+  --layout-border-light: rgb(44, 44, 52);
+  --layout-text-secondary: rgb(168, 168, 176);
+  --layout-text-hover: rgb(224, 224, 230);
+  --layout-separator: rgb(48, 48, 56);
+
+  --card-bg: rgb(24, 24, 28);
+  --card-border: rgb(44, 44, 52);
+  --card-header-text: rgb(229, 234, 243);
+  --card-sub-text: rgb(158, 158, 168);
+  --card-tag-bg: rgb(44, 44, 52);
+  --card-tag-text: rgb(158, 158, 168);
+  --card-divider: rgb(40, 40, 48);
+  --card-toggle-text: rgb(158, 158, 168);
+  --card-empty-text: rgb(112, 112, 120);
+  --role-tag-bg: rgb(16, 44, 64);
+  --role-tag-text: rgb(96, 165, 250);
+  --card-hover-bg: rgb(28, 36, 44);
+  --card-selected-bg: rgb(28, 40, 36);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+
+  &-thumb {
+    background-color: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+  }
+
+  &-track {
+    background-color: transparent;
+  }
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  height: 100%;
+  width: 100%;
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.25s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
+}
+
+// === System management pages ===
+.system-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+// Department tree node (rendered via h() — needs global styles)
+.tree-node-name {
+  font-weight: 500;
+  color: var(--card-header-text);
+}
+
+.tree-node-code {
+  color: var(--card-tag-text);
+  background: var(--card-tag-bg);
+  padding: 0 5px;
+  border-radius: 3px;
+  line-height: 1.5;
+  display: inline-block;
+  margin-top: 1px;
+}

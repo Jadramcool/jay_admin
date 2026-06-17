@@ -5,7 +5,7 @@ import router, { setupRouterGuards } from './router'
 import pinia from './store'
 
 import 'uno.css'
-import './style.css'
+import './style.scss'
 
 async function bootstrap() {
   const app = createApp(App)

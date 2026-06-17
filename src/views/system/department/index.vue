@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { DataTableColumn } from 'naive-ui'
 import { Icon } from '@iconify/vue'
-import { h, nextTick, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { DepartmentApi } from '@/api/system'
 import DepartmentModal from './components/DepartmentModal.vue'
+import { useMemberSchema } from './member-schema'
 import { useDepartmentSchema } from './schema'
 
 useDepartmentSchema()
+const { columns: memberColumns } = useMemberSchema()
 
 // ---------- state ----------
 const treeData = ref<any[]>([])
@@ -15,60 +16,10 @@ const selectedKeys = ref<number[]>([])
 const selectedDept = ref<System.Department | null>(null)
 const searchKeyword = ref('')
 
-const includeChildren = ref(false)
+const includeChildren = ref(localStorage.getItem('dept_includeChildren') === 'true')
 
 const tableRef = ref<any>(null)
 const [registerModal, { openModal }] = useModal()
-
-// ---------- member columns ----------
-const memberColumns: DataTableColumn[] = [
-  {
-    title: '姓名',
-    key: 'name',
-    width: 120,
-    render: (row: any) => row.name || row.username || '-',
-  },
-  { title: '账号', key: 'username', width: 130 },
-  {
-    title: '手机号',
-    key: 'phone',
-    width: 130,
-    render: (row: any) => row.phone || '-',
-  },
-  {
-    title: '职位',
-    key: 'position',
-    width: 120,
-    render: (row: any) => row.position || '-',
-  },
-  {
-    title: '角色',
-    key: 'roles',
-    render: (row: any) => {
-      const roles = row.roles || []
-      if (!roles.length)
-        return '-'
-      return h(
-        'span',
-        {},
-        roles.map((r: any) => h('span', { class: 'role-tag' }, r.name)),
-      )
-    },
-  },
-  {
-    title: '状态',
-    key: 'status',
-    width: 80,
-    render: (row: any) => {
-      const color = row.status === 1 ? 'success' : 'warning'
-      return h(
-        'n-tag',
-        { bordered: false, type: color, size: 'small' },
-        { default: () => (row.status === 1 ? '启用' : '禁用') },
-      )
-    },
-  },
-]
 
 // ---------- tree ----------
 const expandedKeys = ref<number[]>([])
@@ -111,16 +62,8 @@ function renderLabel(info: {
   checked: boolean
 }) {
   return h('div', { style: 'line-height:1.4;' }, [
-    h(
-      'div',
-      { class: 'tree-node-name' },
-      info.option.label,
-    ),
-    h(
-      'span',
-      { class: 'tree-node-code' },
-      info.option.code,
-    ),
+    h('div', { class: 'tree-node-name text-sm' }, info.option.label),
+    h('span', { class: 'tree-node-code text-xs' }, info.option.code),
   ])
 }
 
@@ -162,6 +105,7 @@ async function loadMembers(params: any) {
 }
 
 function onIncludeChildrenChange() {
+  localStorage.setItem('dept_includeChildren', String(includeChildren.value))
   if (selectedDeptId.value)
     nextTick(() => tableRef.value?.reload())
 }
@@ -182,7 +126,7 @@ function handleAdd() {
 }
 
 function handleAddChild(dept: System.Department) {
-  openModal({ record: { pid: dept.id }, isUpdate: false })
+  openModal({ record: { parentId: dept.id }, isUpdate: false })
 }
 
 function handleEdit(dept: System.Department) {
@@ -243,7 +187,7 @@ onMounted(() => {
     <!-- 左侧部门树 -->
     <div class="dept-tree-panel">
       <div class="dept-tree-header">
-        <span class="dept-tree-title">部门结构</span>
+        <span class="dept-tree-title text-base">部门结构</span>
         <n-button size="small" circle type="primary" @click="handleAdd">
           <template #icon>
             <Icon icon="mdi:plus" width="16" />
@@ -278,7 +222,7 @@ onMounted(() => {
     <div class="dept-content-panel">
       <template v-if="selectedDept">
         <div class="dept-content-header">
-          <div class="dept-content-title">
+          <div class="dept-content-title text-lg">
             <Icon :icon="getDeptIcon(selectedDept.code)" width="22" />
             <span>{{ selectedDept.name }}</span>
             <n-tag size="small" :bordered="false" type="info">
@@ -292,20 +236,15 @@ onMounted(() => {
               {{ selectedDept.status === 1 ? "启用" : "禁用" }}
             </n-tag>
           </div>
-          <div class="dept-content-actions">
-            <n-button size="small" quaternary @click="handleEdit(selectedDept)">
+          <n-space>
+            <n-button size="small" @click="handleEdit(selectedDept)">
               编辑部门
             </n-button>
-            <n-button
-              size="small"
-              quaternary
-              @click="handleAddChild(selectedDept)"
-            >
+            <n-button size="small" @click="handleAddChild(selectedDept)">
               添加子部门
             </n-button>
             <n-button
               size="small"
-              quaternary
               :type="selectedDept.status === 1 ? 'warning' : 'success'"
               @click="handleToggleStatus(selectedDept)"
             >
@@ -313,16 +252,16 @@ onMounted(() => {
             </n-button>
             <n-popconfirm @positive-click="handleDelete(selectedDept)">
               <template #trigger>
-                <n-button size="small" quaternary type="error">
+                <n-button size="small" type="error">
                   删除
                 </n-button>
               </template>
               确定要删除部门「{{ selectedDept.name }}」吗？
             </n-popconfirm>
-          </div>
+          </n-space>
         </div>
 
-        <div class="dept-stats">
+        <div class="dept-stats text-sm">
           <span v-if="selectedDept">共 {{ selectedDept.children?.length || 0 }} 个子部门</span>
           <label class="include-children-toggle">
             <n-switch
@@ -330,7 +269,7 @@ onMounted(() => {
               size="small"
               @update:value="onIncludeChildrenChange"
             />
-            <span class="toggle-label">包含子部门</span>
+            <span class="toggle-label text-xs">包含子部门</span>
           </label>
         </div>
 
@@ -346,8 +285,12 @@ onMounted(() => {
         />
       </template>
 
-      <div v-else class="dept-empty">
-        <Icon icon="mdi:folder-open-outline" width="64" color="var(--card-empty-text)" />
+      <div v-else class="dept-empty text-sm">
+        <Icon
+          icon="mdi:folder-open-outline"
+          width="64"
+          color="var(--card-empty-text)"
+        />
         <p>请从左侧选择一个部门</p>
       </div>
     </div>
@@ -356,7 +299,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .dept-page {
   display: flex;
   height: 100%;
@@ -382,7 +325,6 @@ onMounted(() => {
 }
 
 .dept-tree-title {
-  font-size: 15px;
   font-weight: 600;
   color: var(--card-header-text);
 }
@@ -423,19 +365,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 18px;
   font-weight: 600;
   color: var(--card-header-text);
 }
 
-.dept-content-actions {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
 .dept-stats {
-  font-size: 13px;
   color: var(--card-sub-text);
   margin-bottom: 12px;
   padding-bottom: 12px;
@@ -452,7 +386,6 @@ onMounted(() => {
   user-select: none;
 }
 .toggle-label {
-  font-size: 12px;
   color: var(--card-toggle-text);
 }
 
@@ -464,7 +397,6 @@ onMounted(() => {
   justify-content: center;
   gap: 12px;
   color: var(--card-empty-text);
-  font-size: 14px;
 }
 
 :deep(.role-tag) {
@@ -473,7 +405,6 @@ onMounted(() => {
   color: var(--role-tag-text);
   padding: 1px 8px;
   border-radius: 4px;
-  font-size: 12px;
   margin: 1px 3px 1px 0;
 }
 </style>

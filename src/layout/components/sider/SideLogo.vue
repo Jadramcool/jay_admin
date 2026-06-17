@@ -7,13 +7,11 @@ const appStore = useAppStore()
 <template>
   <div v-if="appStore.showLogo" class="side-logo">
     <img src="/vite.svg" alt="logo" class="logo">
-    <Transition name="fade" mode="out-in">
-      <span v-show="appStore.collapsed ? false : true" key="title" class="title">JDM Admin</span>
-    </Transition>
+    <span v-show="appStore.collapsed ? false : true" key="title" class="title text-lg">JDM Admin</span>
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .side-logo {
   display: flex;
   align-items: center;
@@ -22,7 +20,6 @@ const appStore = useAppStore()
   height: 64px;
   padding: 0 16px;
   overflow: hidden;
-  border-bottom: 1px solid var(--n-border-color, rgba(239, 239, 245, 1));
 }
 
 .logo {
@@ -32,7 +29,6 @@ const appStore = useAppStore()
 }
 
 .title {
-  font-size: 18px;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;

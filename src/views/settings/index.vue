@@ -24,6 +24,12 @@ const transitionOptions: { label: string, value: App.TransitionAnimation }[] = [
   { label: '无动画', value: 'none' },
 ]
 
+const colorModeOptions: { label: string, value: App.ColorMode }[] = [
+  { label: '亮色', value: 'light' },
+  { label: '暗色', value: 'dark' },
+  { label: '跟随系统', value: 'auto' },
+]
+
 defineExpose({ openDrawer })
 </script>
 
@@ -32,7 +38,7 @@ defineExpose({ openDrawer })
     <div class="settings-content">
       <!-- 系统字体 -->
       <div class="setting-section">
-        <h3 class="section-title">
+        <h3 class="section-title text-sm">
           系统字体
         </h3>
         <n-select
@@ -45,7 +51,7 @@ defineExpose({ openDrawer })
 
       <!-- 主色 -->
       <div class="setting-section">
-        <h3 class="section-title">
+        <h3 class="section-title text-sm">
           主色
         </h3>
         <n-color-picker
@@ -56,25 +62,46 @@ defineExpose({ openDrawer })
         />
       </div>
 
+      <!-- 主题模式 -->
+      <div class="setting-section">
+        <h3 class="section-title text-sm">
+          主题模式
+        </h3>
+        <n-radio-group
+          :value="appStore.colorMode"
+          @update:value="appStore.setColorMode"
+        >
+          <n-space>
+            <n-radio
+              v-for="opt in colorModeOptions"
+              :key="opt.value"
+              :value="opt.value"
+            >
+              {{ opt.label }}
+            </n-radio>
+          </n-space>
+        </n-radio-group>
+      </div>
+
       <!-- 界面显示 -->
       <div class="setting-section">
-        <h3 class="section-title">
+        <h3 class="section-title text-sm">
           界面显示
         </h3>
         <div class="toggle-list">
-          <div class="toggle-item">
+          <div class="toggle-item text-sm">
             <span>显示Logo</span>
             <n-switch v-model:value="appStore.showLogo" size="small" />
           </div>
-          <div class="toggle-item">
+          <div class="toggle-item text-sm">
             <span>显示标签页</span>
             <n-switch v-model:value="appStore.showTabs" size="small" />
           </div>
-          <div class="toggle-item">
+          <div class="toggle-item text-sm">
             <span>显示面包屑</span>
             <n-switch v-model:value="appStore.showBreadcrumb" size="small" />
           </div>
-          <div class="toggle-item">
+          <div class="toggle-item text-sm">
             <span>显示页脚</span>
             <n-switch v-model:value="appStore.showFooter" size="small" />
           </div>
@@ -83,7 +110,7 @@ defineExpose({ openDrawer })
 
       <!-- 页面动画 -->
       <div class="setting-section">
-        <h3 class="section-title">
+        <h3 class="section-title text-sm">
           页面动画
         </h3>
         <n-select
@@ -97,7 +124,7 @@ defineExpose({ openDrawer })
   </BasicDrawer>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .settings-content {
   display: flex;
   flex-direction: column;
@@ -111,7 +138,6 @@ defineExpose({ openDrawer })
 }
 
 .section-title {
-  font-size: 13px;
   font-weight: 600;
   margin: 0 0 12px;
   opacity: 0.65;
@@ -128,7 +154,6 @@ defineExpose({ openDrawer })
   align-items: center;
   justify-content: space-between;
   padding: 8px 0;
-  font-size: 14px;
 }
 
 .toggle-item + .toggle-item {

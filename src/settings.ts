@@ -57,3 +57,12 @@ export const lightThemeOverrides = {
     tabSelectedBg: '#f0f0f4',
   },
 }
+
+// Dark-mode-specific Naive UI overrides.
+// The bulk of dark theming is handled by Naive's built-in `darkTheme` base;
+// here we only tweak the few surface tokens that diverge from the light set.
+export const darkThemeOverrides = {
+  common: {
+    tabSelectedBg: '#333334',
+  },
+}

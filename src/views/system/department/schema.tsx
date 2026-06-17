@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
 import { computed } from 'vue'
+import { DepartmentApi } from '@/api/system'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
 
 export function useDepartmentSchema(methods: any = {}) {
@@ -13,7 +14,24 @@ export function useDepartmentSchema(methods: any = {}) {
         key: 'id',
         label: 'ID',
         defaultValue: undefined,
-        editForm: { componentProps: { disabled: true } },
+        form: { component: 'NInput', componentProps: { disabled: true } },
+        editForm: { componentProps: { disabled: true }, ifShow: false },
+      },
+      {
+        key: 'parentId',
+        label: '父级部门',
+        defaultValue: null,
+        editForm: {
+          component: 'ApiTreeSelect',
+          componentProps: {
+            api: DepartmentApi.tree,
+            placeholder: '请选择父级部门',
+            labelField: 'name',
+            keyField: 'id',
+            clearable: true,
+            filterable: true,
+          },
+        },
       },
       {
         key: 'name',
@@ -91,6 +109,7 @@ export function useDepartmentSchema(methods: any = {}) {
         },
         editForm: {
           component: 'NRadioGroup',
+          defaultValue: 0,
           componentProps: {
             options: [
               { label: '启用', value: 1 },
@@ -174,10 +193,11 @@ export function useDepartmentSchema(methods: any = {}) {
   ]
   const formFields = ['name', 'code', 'status']
   const editFormFields = [
+    'id',
+    'parentId',
     'name',
     'code',
-    'level',
-    'sortOrder',
+    // 'sortOrder',
     'description',
     'status',
   ]

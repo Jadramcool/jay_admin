@@ -212,7 +212,7 @@ function handleWheel(e: WheelEvent) {
         <div
           v-for="(tab, index) in tabStore.tabs"
           :key="tab.path"
-          class="tab-item"
+          class="tab-item text-xs"
           :class="{ 'is-active': tabStore.activeTab === tab.path }"
           @click="handleTabClick(tab)"
         >
@@ -243,7 +243,7 @@ function handleWheel(e: WheelEvent) {
               :size="14"
               class="tab-icon"
             />
-            <span class="tab-title">{{ tab.meta?.title || "未命名" }}</span>
+            <span class="tab-title text-xs">{{ tab.meta?.title || "未命名" }}</span>
             <!--
               @mousedown.stop prevents drag handle activation when clicking close,
               so closing a tab never triggers vue-draggable.
@@ -299,7 +299,7 @@ function handleWheel(e: WheelEvent) {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 /* ================================================================
    TAB BAR — 完整 UI 增强
    ================================================================ */
@@ -344,7 +344,6 @@ function handleWheel(e: WheelEvent) {
   height: 32px;
   padding: 0 10px 0 14px;
   margin: 4px 1px 0;
-  font-size: 12px;
   line-height: 32px;
   border-radius: 6px 6px 0 0;
   color: var(--layout-text-secondary);
@@ -489,7 +488,6 @@ function handleWheel(e: WheelEvent) {
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 120px;
-  font-size: 12px;
   line-height: 1;
   pointer-events: none;
   letter-spacing: 0.01em;

@@ -124,20 +124,20 @@ async function handleRegister() {
       type="primary"
       block
       :loading="loading"
-      class="glass-btn"
+      class="glass-btn text-base"
       @click="handleRegister"
     >
       {{ loading ? '注册中...' : '注 册' }}
     </n-button>
 
     <div class="form-footer">
-      <span class="footer-text">已有账号？</span>
-      <span class="footer-link" @click="emit('switchToLogin')">返回登录</span>
+      <span class="footer-text text-sm">已有账号？</span>
+      <span class="footer-link text-sm" @click="emit('switchToLogin')">返回登录</span>
     </div>
   </n-form>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .glass-form {
   display: flex;
   flex-direction: column;
@@ -173,7 +173,6 @@ async function handleRegister() {
 .glass-btn {
   height: 48px;
   border-radius: 12px !important;
-  font-size: 16px;
   font-weight: 600;
   letter-spacing: 2px;
   margin-top: 8px;
@@ -198,12 +197,10 @@ async function handleRegister() {
 }
 
 .footer-text {
-  font-size: 14px;
   color: rgba(255, 255, 255, 0.45);
 }
 
 .footer-link {
-  font-size: 14px;
   color: #18a058;
   cursor: pointer;
   margin-left: 4px;

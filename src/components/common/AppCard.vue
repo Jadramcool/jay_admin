@@ -9,7 +9,7 @@
   </n-card>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .app-card {
   border-radius: 8px;
   transition: box-shadow 0.2s ease;

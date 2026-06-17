@@ -135,20 +135,20 @@ async function handleLogin() {
       type="primary"
       block
       :loading="loading"
-      class="glass-btn"
+      class="glass-btn text-base"
       @click="handleLogin"
     >
       {{ loading ? "登录中..." : "登 录" }}
     </n-button>
 
     <div class="form-footer">
-      <span class="footer-text">还没有账号？</span>
-      <span class="footer-link" @click="emit('switchToRegister')">立即注册</span>
+      <span class="footer-text text-sm">还没有账号？</span>
+      <span class="footer-link text-sm" @click="emit('switchToRegister')">立即注册</span>
     </div>
   </n-form>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .glass-form {
   display: flex;
   flex-direction: column;
@@ -199,7 +199,6 @@ async function handleLogin() {
 .glass-btn {
   height: 48px;
   border-radius: 12px !important;
-  font-size: 16px;
   font-weight: 600;
   letter-spacing: 2px;
   border: none;
@@ -224,12 +223,10 @@ async function handleLogin() {
 }
 
 .footer-text {
-  font-size: 14px;
   color: rgba(255, 255, 255, 0.45);
 }
 
 .footer-link {
-  font-size: 14px;
   color: #18a058;
   cursor: pointer;
   margin-left: 4px;

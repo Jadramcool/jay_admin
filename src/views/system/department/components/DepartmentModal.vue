@@ -20,8 +20,12 @@ const [registerForm, { setFieldsValue, resetFields, validate, getFieldsValue }] 
 const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data: any) => {
   resetFields()
   isUpdate.value = !!data?.isUpdate
-  if (isUpdate.value)
+  if (isUpdate.value) {
     setFieldsValue(data.record)
+  }
+  else if (data?.record?.parentId) {
+    setFieldsValue({ parentId: data.record.parentId })
+  }
 })
 
 async function handleOk() {
@@ -56,7 +60,6 @@ async function handleOk() {
 <template>
   <BasicModal
     :title="isUpdate ? '编辑部门' : '新增部门'"
-    width="600"
     @register="registerModal"
     @ok="handleOk"
   >

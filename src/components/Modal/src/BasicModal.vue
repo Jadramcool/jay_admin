@@ -146,7 +146,7 @@ const cardHeightStyle = computed(() => {
   </NModal>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .modal-content {
   padding: 0 6px;
   min-height: 100%;

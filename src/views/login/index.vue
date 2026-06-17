@@ -315,10 +315,10 @@ function handleRegisterSuccess() {
                 </text>
               </svg>
             </div>
-            <h2 class="title">
+            <h2 class="title text-2xl">
               欢迎回来
             </h2>
-            <p class="subtitle">
+            <p class="subtitle text-sm">
               登录您的账号以继续
             </p>
           </div>
@@ -351,10 +351,10 @@ function handleRegisterSuccess() {
                 </text>
               </svg>
             </div>
-            <h2 class="title">
+            <h2 class="title text-2xl">
               创建账号
             </h2>
-            <p class="subtitle">
+            <p class="subtitle text-sm">
               注册一个新账号开始使用
             </p>
           </div>
@@ -368,7 +368,7 @@ function handleRegisterSuccess() {
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .login-page {
   position: relative;
   min-height: 100vh;
@@ -509,7 +509,6 @@ function handleRegisterSuccess() {
 }
 
 .title {
-  font-size: 24px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 6px;
@@ -517,7 +516,6 @@ function handleRegisterSuccess() {
 }
 
 .subtitle {
-  font-size: 14px;
   color: rgba(255, 255, 255, 0.45);
   margin: 0;
 }

@@ -49,7 +49,7 @@ function handleMenuSelect(key: string, item: any) {
   />
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .side-menu {
   height: calc(100vh - 64px);
   overflow-y: auto;

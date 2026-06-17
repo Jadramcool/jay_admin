@@ -107,14 +107,14 @@ async function handleOk() {
             @click="toggleRole(role.id)"
           >
             <div class="role-card-left">
-              <div class="role-icon" :class="getIconClass(role.code)">
+              <div class="role-icon text-sm" :class="getIconClass(role.code)">
                 {{ role.name.charAt(0) }}
               </div>
               <div>
-                <div class="role-name">
+                <div class="role-name text-sm">
                   {{ role.name }}
                 </div>
-                <div class="role-code">
+                <div class="role-code text-xs">
                   {{ role.code }}
                 </div>
               </div>
@@ -123,7 +123,7 @@ async function handleOk() {
               class="role-check"
               :class="{ visible: checkedRoleIds.includes(role.id) }"
             >
-              <Icon icon="mdi:check-circle" width="18" :color="'var(--primary-color)'" />
+              <Icon icon="mdi:check-circle" width="18" color="var(--primary-color)" />
             </div>
           </div>
         </n-gi>
@@ -136,7 +136,7 @@ async function handleOk() {
   </BasicModal>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .role-card {
   display: flex;
   align-items: center;
@@ -182,7 +182,6 @@ async function handleOk() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
   font-weight: 600;
   color: #fff;
   flex-shrink: 0;
@@ -221,13 +220,11 @@ async function handleOk() {
   background: linear-gradient(135deg, #78716c, #57534e);
 }
 .role-name {
-  font-size: 14px;
   font-weight: 500;
   color: var(--card-header-text);
   line-height: 1.3;
 }
 .role-code {
-  font-size: 11px;
   color: var(--card-sub-text);
   line-height: 1.3;
   margin-top: 1px;
