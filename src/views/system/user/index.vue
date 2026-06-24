@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { UserManagerApi } from '@/api/system'
+import { UserManagerApi } from '@/api/notice/index.ts'
 import { useForm, useModal } from '@/components/index.ts'
 import { hasPermission } from '@/utils/common/hasPermission'
 import UserResetPwdModal from './components/UserResetPwdModal.vue'

@@ -17,6 +17,7 @@ export default defineConfig((env: ConfigEnv) => {
         '@': path.resolve(__dirname, 'src'),
         '#': path.resolve(__dirname, 'typings'),
       },
+      dedupe: ['vue'],
     },
     server: {
       host: '0.0.0.0',
@@ -26,6 +27,10 @@ export default defineConfig((env: ConfigEnv) => {
         viteEnv.VITE_PROXY === 'true'
           ? {
               '/api': {
+                target: 'http://localhost:3000',
+                changeOrigin: true,
+              },
+              '/uploads': {
                 target: 'http://localhost:3000',
                 changeOrigin: true,
               },
@@ -51,6 +56,7 @@ export default defineConfig((env: ConfigEnv) => {
         'lodash-es',
         '@vueuse/core',
         'naive-ui',
+        '@wangeditor/editor',
       ],
     },
     build: {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { DepartmentApi } from '@/api/system'
+import { DepartmentApi } from '@/api/notice'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
 import { useDepartmentSchema } from '../schema'
 

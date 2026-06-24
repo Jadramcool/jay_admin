@@ -1,4 +1,4 @@
-import { NCheckbox, NCheckboxGroup, NDatePicker, NInput, NInputNumber, NRadioGroup, NSelect, NSwitch, NTimePicker, NTransfer, NTreeSelect } from 'naive-ui'
+import { NCascader, NCheckbox, NCheckboxGroup, NDatePicker, NInput, NInputNumber, NRadioGroup, NSelect, NSwitch, NTimePicker, NTransfer, NTreeSelect } from 'naive-ui'
 import ApiSelect from './components/ApiSelect.vue'
 import ApiTree from './components/ApiTree.vue'
 import ApiTreeSelect from './components/ApiTreeSelect.vue'
@@ -17,6 +17,7 @@ componentMap.set('NSwitch', NSwitch)
 componentMap.set('NDatePicker', NDatePicker)
 componentMap.set('NTimePicker', NTimePicker)
 componentMap.set('NTreeSelect', NTreeSelect)
+componentMap.set('NCascader', NCascader)
 componentMap.set('NTransfer', NTransfer)
 componentMap.set('ApiSelect', ApiSelect)
 componentMap.set('ApiTreeSelect', ApiTreeSelect)

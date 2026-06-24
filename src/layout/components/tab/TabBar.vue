@@ -320,6 +320,7 @@ function handleWheel(e: WheelEvent) {
   flex: 1;
   overflow-x: auto;
   overflow-y: hidden;
+  white-space: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -331,6 +332,7 @@ function handleWheel(e: WheelEvent) {
 .tab-list {
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   height: 40px;
   min-width: fit-content;
   padding: 0 6px;

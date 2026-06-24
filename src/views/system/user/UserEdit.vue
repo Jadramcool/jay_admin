@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { UserManagerApi } from '@/api/system'
+import { UserManagerApi } from '@/api/notice'
 import { useForm } from '@/components/Form'
 import { useUserSchema } from './schema'
 

@@ -1,8 +1,9 @@
 shellEmulator: true
 
-trustPolicy: no-downgrade
+trustPolicy: allow
 
 allowBuilds:
   '@parcel/watcher': true
+  es5-ext: true
   esbuild: true
   vue-demi: true

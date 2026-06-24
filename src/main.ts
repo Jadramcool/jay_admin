@@ -6,6 +6,7 @@ import pinia from './store'
 
 import 'uno.css'
 import './style.scss'
+import '@wangeditor/editor/dist/css/style.css'
 
 async function bootstrap() {
   const app = createApp(App)

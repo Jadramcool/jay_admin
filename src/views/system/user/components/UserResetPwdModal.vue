@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormInst } from 'naive-ui'
 import { reactive, ref } from 'vue'
-import { UserManagerApi } from '@/api/system'
+import { UserManagerApi } from '@/api/notice'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
 
 const emit = defineEmits<{

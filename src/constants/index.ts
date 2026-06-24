@@ -32,6 +32,12 @@ export const methodOptions = [
   { label: 'DELETE', value: 'DELETE' },
 ]
 
+export const operationStatusOptions = [
+  { label: '成功', value: 'SUCCESS' },
+  { label: '失败', value: 'FAILED' },
+  { label: '待处理', value: 'PENDING' },
+]
+
 export const operationTypeOptions = [
   { label: '创建', value: 'CREATE' },
   { label: '更新', value: 'UPDATE' },
@@ -43,3 +49,18 @@ export const operationTypeOptions = [
   { label: '导入', value: 'IMPORT' },
   { label: '其他', value: 'OTHER' },
 ]
+
+export const noticeTypeOptions = [
+  { label: '通知', value: 'NOTICE' },
+  { label: '资讯', value: 'INFO' },
+  { label: '活动', value: 'ACTIVITY' },
+]
+
+export const scopeTypeOptions = [
+  { label: '全部用户', value: 'ALL' },
+  { label: '指定角色', value: 'ROLE' },
+  { label: '指定部门', value: 'DEPARTMENT' },
+  { label: '指定用户', value: 'USER' },
+]
+
+export { cityTreeData } from './city'

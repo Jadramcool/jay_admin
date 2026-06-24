@@ -115,4 +115,31 @@ declare namespace System {
     duration?: number
     createdTime: string
   }
+
+  interface Notice {
+    id: number
+    title: string
+    content?: string
+    type: 'NOTICE' | 'INFO' | 'ACTIVITY'
+    authorId: number
+    authorName?: string
+    status: 0 | 1
+    isPinned: boolean
+    isMandatory: boolean
+    scopeType: string
+    scopeTargets?: NoticeTarget[]
+    publishedAt?: string
+    readCount?: number
+    unreadCount?: number
+    totalReceivers?: number
+    createdTime: string
+    updatedTime: string
+  }
+
+  interface NoticeTarget {
+    id: number
+    noticeId: number
+    targetType: string
+    targetId: number
+  }
 }

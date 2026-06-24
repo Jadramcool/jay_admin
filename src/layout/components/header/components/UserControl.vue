@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { DropdownOption } from 'naive-ui'
 import { Icon } from '@iconify/vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore, useUserStore } from '@/store/modules'
 
 const userStore = useUserStore()
 const authStore = useAuthStore()
+const router = useRouter()
 
 const menuOptions: DropdownOption[] = [
   { label: '个人中心', key: 'profile' },
@@ -13,7 +15,10 @@ const menuOptions: DropdownOption[] = [
 ]
 
 function handleSelect(key: string) {
-  if (key === 'logout') {
+  if (key === 'profile') {
+    router.push('/user-center')
+  }
+  else if (key === 'logout') {
     window.$dialog?.warning({
       title: '提示',
       content: '确定要退出登录吗？',
