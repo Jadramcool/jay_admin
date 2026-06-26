@@ -165,34 +165,39 @@ onUnmounted(() => {
   <!-- 无 UI 渲染，纯逻辑组件 -->
 </template>
 
-<style>
+<style lang="scss">
 .notice-mandatory-content {
   max-height: 55vh;
   overflow-y: auto;
   line-height: 1.7;
   font-size: 14px;
-}
-.notice-mandatory-content table {
-  border-collapse: collapse;
-  width: 100%;
-  margin: 8px 0;
-}
-.notice-mandatory-content th,
-.notice-mandatory-content td {
-  border: 1px solid #d9d9d9;
-  padding: 6px 12px;
-  text-align: left;
-}
-.notice-mandatory-content th {
-  background: #f5f7fa;
-  font-weight: 600;
-}
-.notice-mandatory-content p {
-  margin: 6px 0;
-}
-.notice-mandatory-content h2 {
-  font-size: 18px;
-  margin: 12px 0 8px;
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0;
+  }
+
+  th,
+  td {
+    border: 1px solid #d9d9d9;
+    padding: 6px 12px;
+    text-align: left;
+  }
+
+  th {
+    background: #f5f7fa;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 6px 0;
+  }
+
+  h2 {
+    font-size: 18px;
+    margin: 12px 0 8px;
+  }
 }
 </style>
 

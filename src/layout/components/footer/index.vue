@@ -18,9 +18,9 @@ const year = new Date().getFullYear()
   height: 36px;
   gap: 8px;
   color: var(--layout-text-secondary);
-}
 
-.footer-divider {
-  opacity: 0.3;
+  .footer-divider {
+    opacity: 0.3;
+  }
 }
 </style>

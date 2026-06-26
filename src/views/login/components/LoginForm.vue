@@ -153,89 +153,89 @@ async function handleLogin() {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
 
-/* Input styling */
-.glass-input {
-  --n-border: 1px solid rgba(255, 255, 255, 0.15) !important;
-  --n-border-focus: 1px solid rgba(255, 255, 255, 0.4) !important;
-  --n-border-hover: 1px solid rgba(255, 255, 255, 0.25) !important;
-  --n-color: rgba(255, 255, 255, 0.06) !important;
-  --n-color-focus: rgba(255, 255, 255, 0.1) !important;
-  --n-text-color: #fff !important;
-  --n-placeholder-color: rgba(255, 255, 255, 0.35) !important;
-  --n-caret-color: #18a058 !important;
-  --n-border-radius: 12px !important;
-  height: 48px;
-}
+  /* Input styling */
+  .glass-input {
+    --n-border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    --n-border-focus: 1px solid rgba(255, 255, 255, 0.4) !important;
+    --n-border-hover: 1px solid rgba(255, 255, 255, 0.25) !important;
+    --n-color: rgba(255, 255, 255, 0.06) !important;
+    --n-color-focus: rgba(255, 255, 255, 0.1) !important;
+    --n-text-color: #fff !important;
+    --n-placeholder-color: rgba(255, 255, 255, 0.35) !important;
+    --n-caret-color: #18a058 !important;
+    --n-border-radius: 12px !important;
+    height: 48px;
 
-.glass-input :deep(.n-input-wrapper) {
-  padding: 0 16px;
-}
+    :deep(.n-input-wrapper) {
+      padding: 0 16px;
+    }
 
-.glass-input :deep(.n-input__border),
-.glass-input :deep(.n-input__state-border) {
-  border-radius: 12px !important;
-}
+    :deep(.n-input__border),
+    :deep(.n-input__state-border) {
+      border-radius: 12px !important;
+    }
 
-.glass-input :deep(.n-input__input) {
-  font-size: 15px;
-}
+    :deep(.n-input__input) {
+      font-size: 15px;
+    }
+  }
 
-/* Checkbox */
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 4px 0 16px;
-}
+  /* Checkbox */
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0 16px;
+  }
 
-.glass-checkbox {
-  --n-text-color: rgba(255, 255, 255, 0.6) !important;
-  --n-size: 16px;
-}
+  .glass-checkbox {
+    --n-text-color: rgba(255, 255, 255, 0.6) !important;
+    --n-size: 16px;
+  }
 
-/* Button */
-.glass-btn {
-  height: 48px;
-  border-radius: 12px !important;
-  font-weight: 600;
-  letter-spacing: 2px;
-  border: none;
-  background: linear-gradient(135deg, #18a058, #0d7a3a) !important;
-  box-shadow: 0 4px 16px rgba(24, 160, 88, 0.35);
-  transition: all 0.3s ease;
-}
+  /* Button */
+  .glass-btn {
+    height: 48px;
+    border-radius: 12px !important;
+    font-weight: 600;
+    letter-spacing: 2px;
+    border: none;
+    background: linear-gradient(135deg, #18a058, #0d7a3a) !important;
+    box-shadow: 0 4px 16px rgba(24, 160, 88, 0.35);
+    transition: all 0.3s ease;
 
-.glass-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(24, 160, 88, 0.45);
-}
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(24, 160, 88, 0.45);
+    }
 
-.glass-btn:active {
-  transform: translateY(0);
-}
+    &:active {
+      transform: translateY(0);
+    }
+  }
 
-/* Footer */
-.form-footer {
-  text-align: center;
-  margin-top: 24px;
-}
+  /* Footer */
+  .form-footer {
+    text-align: center;
+    margin-top: 24px;
+  }
 
-.footer-text {
-  color: rgba(255, 255, 255, 0.45);
-}
+  .footer-text {
+    color: rgba(255, 255, 255, 0.45);
+  }
 
-.footer-link {
-  color: #18a058;
-  cursor: pointer;
-  margin-left: 4px;
-  font-weight: 500;
-  transition: color 0.2s;
-}
+  .footer-link {
+    color: #18a058;
+    cursor: pointer;
+    margin-left: 4px;
+    font-weight: 500;
+    transition: color 0.2s;
 
-.footer-link:hover {
-  color: #36ad6a;
-  text-decoration: underline;
+    &:hover {
+      color: #36ad6a;
+      text-decoration: underline;
+    }
+  }
 }
 </style>

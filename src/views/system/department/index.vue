@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { DepartmentApi } from '@/api/system'
 import { Icon } from '@iconify/vue'
 import { nextTick, ref } from 'vue'
-import { DepartmentApi } from '@/api/notice/index.ts'
 import DepartmentModal from './components/DepartmentModal.vue'
 import { useMemberSchema } from './member-schema'
 import { useDepartmentSchema } from './schema'
@@ -304,107 +304,109 @@ onMounted(() => {
   display: flex;
   height: 100%;
   gap: 16px;
-}
 
-.dept-tree-panel {
-  width: 280px;
-  min-width: 280px;
-  background: var(--card-bg);
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  .dept-tree-panel {
+    width: 280px;
+    min-width: 280px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
-.dept-tree-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px 8px;
-}
+    .dept-tree-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 8px;
 
-.dept-tree-title {
-  font-weight: 600;
-  color: var(--card-header-text);
-}
+      .dept-tree-title {
+        font-weight: 600;
+        color: var(--card-header-text);
+      }
+    }
 
-.dept-search {
-  margin: 8px 12px;
-  width: auto;
-}
+    .dept-search {
+      margin: 8px 12px;
+      width: auto;
+    }
 
-.dept-tree-spin {
-  flex: 1;
-  overflow: auto;
-  padding: 4px 8px 12px;
-}
+    .dept-tree-spin {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 8px 12px;
+    }
+  }
 
-/* ---------- right panel ---------- */
-.dept-content-panel {
-  flex: 1;
-  background: var(--card-bg);
-  border-radius: 8px;
-  border: 1px solid var(--card-border);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+  /* ---------- right panel ---------- */
+  .dept-content-panel {
+    flex: 1;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 
-.dept-content-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+    .dept-content-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
 
-.dept-content-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  color: var(--card-header-text);
-}
+      .dept-content-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--card-header-text);
+      }
+    }
 
-.dept-stats {
-  color: var(--card-sub-text);
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--card-divider);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.include-children-toggle {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  user-select: none;
-}
-.toggle-label {
-  color: var(--card-toggle-text);
-}
+    .dept-stats {
+      color: var(--card-sub-text);
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-divider);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
 
-.dept-empty {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  color: var(--card-empty-text);
-}
+      .include-children-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
 
-:deep(.role-tag) {
-  display: inline-block;
-  background: var(--role-tag-bg);
-  color: var(--role-tag-text);
-  padding: 1px 8px;
-  border-radius: 4px;
-  margin: 1px 3px 1px 0;
+        .toggle-label {
+          color: var(--card-toggle-text);
+        }
+      }
+    }
+
+    .dept-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--card-empty-text);
+    }
+  }
+
+  :deep(.role-tag) {
+    display: inline-block;
+    background: var(--role-tag-bg);
+    color: var(--role-tag-text);
+    padding: 1px 8px;
+    border-radius: 4px;
+    margin: 1px 3px 1px 0;
+  }
 }
 </style>

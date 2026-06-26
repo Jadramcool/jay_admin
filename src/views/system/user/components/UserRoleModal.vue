@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
-import { ref } from 'vue'
-import { RoleApi, UserManagerApi } from '@/api/notice'
-import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+import { RoleApi, UserManagerApi } from '@/api/system';
+import { useModalInner } from '@/components/Modal/src/hooks/useModal';
+import { Icon } from '@iconify/vue';
+import { ref } from 'vue';
 
 const emit = defineEmits<{
   success: []
@@ -149,91 +149,113 @@ async function handleOk() {
   position: relative;
   background: var(--card-bg);
   user-select: none;
-}
-.role-card:hover {
-  border-color: #2080f0;
-  background: var(--card-hover-bg);
-}
-.role-card.disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.role-card.disabled:hover {
-  border-color: var(--card-border);
-  background: var(--card-bg);
-}
-.role-card.selected {
-  border-color: var(--primary-color);
-  background: var(--card-selected-bg);
-}
-.role-card.selected:hover {
-  border-color: var(--primary-color);
-  background: var(--card-selected-bg);
-}
-.role-card-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.role-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: #fff;
-  flex-shrink: 0;
-}
-.icon-admin {
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
-}
-.icon-editor {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-.icon-viewer {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-}
-.icon-operator {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-.icon-finance {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
-.icon-dev {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-.icon-tester {
-  background: linear-gradient(135deg, #ec4899, #db2777);
-}
-.icon-pm {
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-}
-.icon-dept {
-  background: linear-gradient(135deg, #f97316, #ea580c);
-}
-.icon-auditor {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-}
-.icon-default {
-  background: linear-gradient(135deg, #78716c, #57534e);
-}
-.role-name {
-  font-weight: 500;
-  color: var(--card-header-text);
-  line-height: 1.3;
-}
-.role-code {
-  color: var(--card-sub-text);
-  line-height: 1.3;
-  margin-top: 1px;
-}
-.role-check {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.role-check.visible {
-  opacity: 1;
+
+  &:hover {
+    border-color: #2080f0;
+    background: var(--card-hover-bg);
+  }
+
+  &.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+
+    &:hover {
+      border-color: var(--card-border);
+      background: var(--card-bg);
+    }
+  }
+
+  &.selected {
+    border-color: var(--primary-color);
+    background: var(--card-selected-bg);
+
+    &:hover {
+      border-color: var(--primary-color);
+      background: var(--card-selected-bg);
+    }
+  }
+
+  .role-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .role-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+
+    &.icon-admin {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+    }
+
+    &.icon-editor {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+    }
+
+    &.icon-viewer {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
+    &.icon-operator {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
+    &.icon-finance {
+      background: linear-gradient(135deg, #10b981, #059669);
+    }
+
+    &.icon-dev {
+      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    }
+
+    &.icon-tester {
+      background: linear-gradient(135deg, #ec4899, #db2777);
+    }
+
+    &.icon-pm {
+      background: linear-gradient(135deg, #14b8a6, #0d9488);
+    }
+
+    &.icon-dept {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+    }
+
+    &.icon-auditor {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+    }
+
+    &.icon-default {
+      background: linear-gradient(135deg, #78716c, #57534e);
+    }
+  }
+
+  .role-name {
+    font-weight: 500;
+    color: var(--card-header-text);
+    line-height: 1.3;
+  }
+
+  .role-code {
+    color: var(--card-sub-text);
+    line-height: 1.3;
+    margin-top: 1px;
+  }
+
+  .role-check {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    &.visible {
+      opacity: 1;
+    }
+  }
 }
 </style>

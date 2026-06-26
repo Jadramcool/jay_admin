@@ -20,19 +20,19 @@ const appStore = useAppStore()
   height: 64px;
   padding: 0 16px;
   overflow: hidden;
-}
 
-.logo {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
+  .logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
 
-.title {
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: opacity 0.2s;
+  .title {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: opacity 0.2s;
+  }
 }
 </style>

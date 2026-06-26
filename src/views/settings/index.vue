@@ -129,34 +129,34 @@ defineExpose({ openDrawer })
   display: flex;
   flex-direction: column;
   gap: 20px;
-}
 
-.setting-section {
-  background: rgba(128, 128, 128, 0.04);
-  border-radius: 8px;
-  padding: 16px;
-}
+  .setting-section {
+    background: rgba(128, 128, 128, 0.04);
+    border-radius: 8px;
+    padding: 16px;
 
-.section-title {
-  font-weight: 600;
-  margin: 0 0 12px;
-  opacity: 0.65;
-}
+    .section-title {
+      font-weight: 600;
+      margin: 0 0 12px;
+      opacity: 0.65;
+    }
 
-.toggle-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+    .toggle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
 
-.toggle-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
+      .toggle-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
 
-.toggle-item + .toggle-item {
-  border-top: 1px solid rgba(128, 128, 128, 0.08);
+        + .toggle-item {
+          border-top: 1px solid rgba(128, 128, 128, 0.08);
+        }
+      }
+    }
+  }
 }
 </style>

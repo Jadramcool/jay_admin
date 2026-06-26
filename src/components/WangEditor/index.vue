@@ -6,14 +6,9 @@
 </template>
 
 <script setup lang="ts">
-import { i18nChangeLanguage, createEditor, createToolbar, Boot } from '@wangeditor/editor'
+import { i18nChangeLanguage, createEditor, createToolbar } from '@wangeditor/editor'
 import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
-
-// 设置中文
-i18nChangeLanguage('zh-CN')
-
-// 设置中文
-i18nChangeLanguage('zh-CN')
+import { debounce } from 'lodash-es'
 
 defineOptions({ name: 'WangEditor' })
 
@@ -29,10 +24,11 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+i18nChangeLanguage('zh-CN')
+
 const toolbarRef = ref<HTMLDivElement | null>(null)
 const editorRef = ref<HTMLDivElement | null>(null)
 let editor: IDomEditor | null = null
-let isInternalChange = false
 
 const toolbarConfig: Partial<IToolbarConfig> = {
   excludeKeys: [
@@ -47,27 +43,23 @@ const toolbarConfig: Partial<IToolbarConfig> = {
 const editorConfig: Partial<IEditorConfig> = {
   placeholder: '请输入公告内容...',
   MENU_CONF: {},
-  onChange: () => {
-    if (editor && !isInternalChange) {
-      const html = editor.getHtml()
-      isInternalChange = false
-      emit('update:modelValue', html)
+  onChange: debounce(() => {
+    if (editor) {
+      emit('update:modelValue', editor.getHtml())
     }
-  },
+  }, 150),
 }
 
 onMounted(() => {
   if (!toolbarRef.value || !editorRef.value) return
 
-  // 创建编辑器
   editor = createEditor({
     selector: editorRef.value,
     config: editorConfig,
-    content: props.modelValue || [],
+    content: [],
     mode: 'default',
   })
 
-  // 创建工具栏
   createToolbar({
     editor,
     selector: toolbarRef.value,
@@ -75,16 +67,13 @@ onMounted(() => {
     mode: 'default',
   })
 
-  // 如果已有内容，设置 HTML
   if (props.modelValue) {
     editor.setHtml(props.modelValue)
   }
 })
 
-// 监听外部值变化
 watch(() => props.modelValue, (val) => {
-  if (editor && val !== editor.getHtml()) {
-    isInternalChange = true
+  if (editor && val != null && val !== editor.getHtml()) {
     editor.setHtml(val || '')
   }
 })
@@ -97,18 +86,18 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style src="@wangeditor/editor/dist/css/style.css"></style>
-
-<style scoped>
+<style lang="scss" scoped>
 .wang-editor-wrapper {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   overflow: hidden;
-}
-.editor-toolbar {
-  border-bottom: 1px solid #d9d9d9;
-}
-.editor-content {
-  overflow-y: auto;
+
+  .editor-toolbar {
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .editor-content {
+    overflow-y: auto;
+  }
 }
 </style>

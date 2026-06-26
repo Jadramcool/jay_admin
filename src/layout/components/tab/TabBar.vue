@@ -313,98 +313,212 @@ function handleWheel(e: WheelEvent) {
   position: relative;
   background: var(--layout-bg);
   border-bottom: 1px solid var(--layout-border);
+
+  /* ─── Scroll container ───────────────────────────────── */
+  .tabs-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* ── 非激活状态 ── */
+  .tab-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 10px 0 14px;
+    margin: 4px 1px 0;
+    line-height: 32px;
+    border-radius: 6px 6px 0 0;
+    color: var(--layout-text-secondary);
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    background: var(--layout-bg-secondary);
+
+    /* ── 边框：每个 tab 有完整边框 ── */
+    border: 1px solid transparent;
+    border-bottom: none;
+
+    /* ── 悬浮 & 切换过渡 ── */
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+
+    /* ── 悬浮效果 ── */
+    &:not(.is-active):hover {
+      color: var(--layout-text-hover);
+      background: var(--layout-bg-hover);
+      border-color: var(--layout-border-light);
+      box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    /* ── 激活状态 ── */
+    &.is-active {
+      color: var(--primary-color, #18a058);
+      font-weight: 500;
+      background: var(--layout-bg);
+      border-color: var(--layout-border);
+      border-bottom-color: var(--layout-bg);
+      margin-bottom: -1px;
+      box-shadow:
+        0 -1px 4px rgba(0, 0, 0, 0.06),
+        1px 0 3px rgba(0, 0, 0, 0.03),
+        -1px 0 3px rgba(0, 0, 0, 0.03);
+      z-index: 1;
+    }
+
+    /* ── 激活 tab 底部主题色条 ── */
+    .tab-active-bar {
+      display: none;
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: -1px;
+      height: 2.5px;
+      background: var(--primary-color, #18a058);
+      border-radius: 3px 3px 0 0;
+      z-index: 2;
+    }
+
+    &.is-active .tab-active-bar {
+      display: block;
+      /* 入场动画：弹性放大，cubic-bezier 带轻微过冲 */
+      animation: activeBarIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ── Tab 之间的分割线 ── */
+    .tab-separator {
+      position: absolute;
+      left: -4px;
+      top: 8px;
+      bottom: 8px;
+      width: 1px;
+      background: var(--layout-separator);
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+
+      /* 相邻激活 tab 隐藏分割线，激活边框已提供视觉边界 */
+      &.is-hidden {
+        opacity: 0;
+      }
+    }
+
+    /* ─── Drag handle area ───────────────────────────────── */
+    .tab-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 100%;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    /* ─── Tab title text ─────────────────────────────────── */
+    .tab-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 120px;
+      line-height: 1;
+      pointer-events: none;
+      letter-spacing: 0.01em;
+    }
+
+    /* Route icon inside tab label */
+    .tab-icon {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* ─── Close button ───────────────────────────────────── */
+    /* 默认隐藏，hover 到 tab 或 tab 激活时才显示 */
+    .tab-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      opacity: 0;
+      transition:
+        opacity 0.2s,
+        background 0.2s,
+        transform 0.2s;
+      flex-shrink: 0;
+      color: var(--layout-text-secondary);
+      pointer-events: auto;
+      transform: scale(0.85);
+    }
+
+    &:hover .tab-close {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+
+    &.is-active .tab-close {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+
+    .tab-close:hover {
+      opacity: 1 !important;
+      background: rgba(128, 128, 128, 0.12);
+      color: var(--layout-text-hover);
+      transform: scale(1.1) !important;
+    }
+  }
+
+  /* ─── Overflow menu button ───────────────────────────── */
+  .tab-bar-actions {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 6px;
+    border-left: 1px solid var(--layout-border);
+    background: var(--layout-bg);
+    position: relative;
+    z-index: 2;
+
+    .overflow-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+
+      &:hover {
+        background: rgba(128, 128, 128, 0.08);
+        transform: scale(1.05);
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+    }
+  }
 }
 
-/* ─── Scroll container ───────────────────────────────── */
-.tabs-scroll-container {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.tabs-scroll-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* ─── Draggable tab list ─────────────────────────────── */
-.tab-list {
-  display: inline-flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  height: 40px;
-  min-width: fit-content;
-  padding: 0 6px;
-}
-
-/* ── 非激活状态 ── */
-.tab-item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0 10px 0 14px;
-  margin: 4px 1px 0;
-  line-height: 32px;
-  border-radius: 6px 6px 0 0;
-  color: var(--layout-text-secondary);
-  cursor: pointer;
-  user-select: none;
-  flex-shrink: 0;
-  background: var(--layout-bg-secondary);
-
-  /* ── 边框：每个 tab 有完整边框 ── */
-  border: 1px solid transparent;
-  border-bottom: none;
-
-  /* ── 悬浮 & 切换过渡 ── */
-  transition:
-    color 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-/* ── 悬浮效果 ── */
-.tab-item:not(.is-active):hover {
-  color: var(--layout-text-hover);
-  background: var(--layout-bg-hover);
-  border-color: var(--layout-border-light);
-  box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.04);
-}
-
-/* ── 激活状态 ── */
-.tab-item.is-active {
-  color: var(--primary-color, #18a058);
-  font-weight: 500;
-  background: var(--layout-bg);
-  border-color: var(--layout-border);
-  border-bottom-color: var(--layout-bg);
-  margin-bottom: -1px;
-  box-shadow:
-    0 -1px 4px rgba(0, 0, 0, 0.06),
-    1px 0 3px rgba(0, 0, 0, 0.03),
-    -1px 0 3px rgba(0, 0, 0, 0.03);
-  z-index: 1;
-}
-
-/* ── 激活 tab 底部主题色条 ── */
-.tab-active-bar {
-  display: none;
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  bottom: -1px;
-  height: 2.5px;
-  background: var(--primary-color, #18a058);
-  border-radius: 3px 3px 0 0;
-  z-index: 2;
-}
-.tab-item.is-active .tab-active-bar {
-  display: block;
-  /* 入场动画：弹性放大，cubic-bezier 带轻微过冲 */
-  animation: activeBarIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
 @keyframes activeBarIn {
   from {
     opacity: 0;
@@ -416,20 +530,14 @@ function handleWheel(e: WheelEvent) {
   }
 }
 
-/* ── Tab 之间的分割线 ── */
-.tab-separator {
-  position: absolute;
-  left: -4px;
-  top: 8px;
-  bottom: 8px;
-  width: 1px;
-  background: var(--layout-separator);
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-/* 相邻激活 tab 隐藏分割线，激活边框已提供视觉边界 */
-.tab-separator.is-hidden {
-  opacity: 0;
+/* ─── Draggable tab list ─────────────────────────────── */
+.tab-list {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  height: 40px;
+  min-width: fit-content;
+  padding: 0 6px;
 }
 
 /* ── Tab 移入/移出动画 ── */
@@ -453,20 +561,6 @@ function handleWheel(e: WheelEvent) {
   transition: transform 0.25s ease;
 }
 
-/* ─── Drag handle area ───────────────────────────────── */
-.tab-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 100%;
-  cursor: pointer;
-  position: relative;
-  z-index: 1;
-}
-.tab-label:active {
-  cursor: grabbing;
-}
-
 /* ─── Draggable-plus states ──────────────────────────── */
 /* 占位 tab：原始位置留下的半透明影子 */
 .tab-ghost {
@@ -482,88 +576,5 @@ function handleWheel(e: WheelEvent) {
   transform: scale(1.02) !important;
   border-color: var(--primary-color, #18a058) !important;
   z-index: 999;
-}
-
-/* ─── Tab title text ─────────────────────────────────── */
-.tab-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 120px;
-  line-height: 1;
-  pointer-events: none;
-  letter-spacing: 0.01em;
-}
-
-/* Route icon inside tab label */
-.tab-icon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* ─── Close button ───────────────────────────────────── */
-/* 默认隐藏，hover 到 tab 或 tab 激活时才显示 */
-.tab-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  opacity: 0;
-  transition:
-    opacity 0.2s,
-    background 0.2s,
-    transform 0.2s;
-  flex-shrink: 0;
-  color: var(--layout-text-secondary);
-  pointer-events: auto;
-  transform: scale(0.85);
-}
-.tab-item:hover .tab-close {
-  opacity: 0.7;
-  transform: scale(1);
-}
-.tab-item.is-active .tab-close {
-  opacity: 0.7;
-  transform: scale(1);
-}
-.tab-close:hover {
-  opacity: 1 !important;
-  background: rgba(128, 128, 128, 0.12);
-  color: var(--layout-text-hover);
-  transform: scale(1.1) !important;
-}
-
-/* ─── Overflow menu button ───────────────────────────── */
-.tab-bar-actions {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  height: 100%;
-  padding: 0 6px;
-  border-left: 1px solid var(--layout-border);
-  background: var(--layout-bg);
-  position: relative;
-  z-index: 2;
-}
-.overflow-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
-}
-.overflow-btn:hover {
-  background: rgba(128, 128, 128, 0.08);
-  transform: scale(1.05);
-}
-.overflow-btn:active {
-  transform: scale(0.95);
 }
 </style>
