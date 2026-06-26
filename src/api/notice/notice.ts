@@ -1,5 +1,31 @@
 import request from '@/utils/http/axios'
 
+interface NoticeTargetInput {
+  targetType: string
+  targetId: number
+}
+
+interface NoticeCreatePayload {
+  title: string
+  type: string
+  content?: string
+  isPinned?: boolean
+  isMandatory?: boolean
+  scopeType: string
+  scopeTargets?: NoticeTargetInput[]
+  status: number
+}
+
+interface NoticeUpdatePayload extends NoticeCreatePayload {
+  id: number
+}
+
+interface ResendResult {
+  id: number
+  resendCount: number
+  message: string
+}
+
 enum API {
   list = '/notice/list',
   detail = '/notice',
@@ -19,11 +45,11 @@ export const NoticeApi = {
   detail: (id: number) =>
     request.get<System.Notice>({ url: `${API.detail}/${id}` }),
 
-  create: (data: Partial<System.Notice> & { scopeTargets?: { targetType: string; targetId: number }[] }) =>
-    request.post({ url: API.create, data }),
+  create: (data: NoticeCreatePayload) =>
+    request.post<System.Notice>({ url: API.create, data }),
 
-  update: (data: Partial<System.Notice> & { id: number; scopeTargets?: { targetType: string; targetId: number }[] }) =>
-    request.put({ url: API.update, data }),
+  update: (data: NoticeUpdatePayload) =>
+    request.put<System.Notice>({ url: API.update, data }),
 
   delete: (id: number) =>
     request.put({ url: `${API.delete}/${id}` }),
@@ -38,5 +64,16 @@ export const NoticeApi = {
     request.put({ url: `${API.togglePin}/${id}` }),
 
   resend: (id: number) =>
-    request.post({ url: `${API.resend}/${id}` }),
+    request.post<ResendResult>({ url: `${API.resend}/${id}` }),
+
+  // 用户端接口
+  getUnreadNotices: () =>
+    request.get<{ noticeId: number; title: string; content?: string; type: string; isMandatory: boolean; isPinned: boolean; publishedAt?: string }[]>({ url: '/notice/user/unread' }),
+
+  markNoticeRead: (id: number) =>
+    request.put({ url: `/notice/user/read/${id}` }),
+
+  // 获取公告接收人列表
+  getReceivers: (id: number, status?: string, page?: number, pageSize?: number) =>
+    request.get<{ list: any[]; pagination: { page: number; pageSize: number; total: number } }>({ url: `/notice/${id}/receivers`, params: { status, page, pageSize } }),
 }

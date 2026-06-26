@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import { NoticeApi } from "@/api/notice";
-import { useNoticeSchema } from "./schema";
+import { useModal } from "@/components/Modal";
+import { useRouter } from "vue-router";
+import NoticeDetailModal from "./components/NoticeDetailModal.vue";
+import NoticeReceiversModal from "./components/NoticeReceiversModal.vue";
+import { useNoticeSchema } from "./schema.tsx";
 
 const router = useRouter();
 const tableRef = ref<any>(null);
 
+const [registerReceiversModal, { openModal: openReceiversModal }] = useModal();
+const [registerDetailModal, { openModal: openDetailModal }] = useModal();
+
 const schemaMethods = {
-  handleDetail(row: any) {},
+  handleDetail(row: any) {
+    openDetailModal({ record: row });
+  },
   handleEdit(row: any) {
     router.push(`/notice/notice/edit/${row.id}`);
   },
@@ -18,9 +26,13 @@ const schemaMethods = {
       positiveText: "确定",
       negativeText: "取消",
       onPositiveClick: async () => {
-        await NoticeApi.delete(row.id);
-        window.$message?.success?.("删除成功");
-        reload();
+        try {
+          await NoticeApi.delete(row.id);
+          window.$message?.success?.("删除成功");
+          reload();
+        } catch {
+          /* handled by interceptor */
+        }
       },
     });
   },
@@ -47,7 +59,7 @@ const schemaMethods = {
     try {
       window.$dialog?.info({
         title: "重新推送",
-        content: `确定要重新推送公告「${row.title}」至未读用户吗？`,
+        content: `确定要重新推送公告「${row.title}」至所有目标用户吗？`,
         positiveText: "确定",
         negativeText: "取消",
         onPositiveClick: async () => {
@@ -60,6 +72,9 @@ const schemaMethods = {
       /* handled by interceptor */
     }
   },
+  handleViewReceivers(row: any) {
+    openReceiversModal({ id: row.id, title: row.title });
+  },
 };
 
 const { columns, formSchemas } = useNoticeSchema(schemaMethods);
@@ -71,7 +86,13 @@ const [register, { getFieldsValue }] = useForm({
   tableRef,
 });
 
-async function loadData(params: any) {
+interface LoadParams {
+  page: number;
+  pageSize: number;
+  [key: string]: any;
+}
+
+async function loadData(params: LoadParams) {
   const filters = getFieldsValue();
   return NoticeApi.list({ ...params, ...filters });
 }
@@ -84,23 +105,27 @@ function handleAdd() {
   router.push("/notice/notice/add");
 }
 
-async function handleBatchDelete(keys: number[]) {
-  if (!keys || keys.length === 0) {
-    window.$message?.warning?.("请先选择要删除的公告");
-    return;
+  async function handleBatchDelete(keys: number[]) {
+    if (!keys || keys.length === 0) {
+      window.$message?.warning?.("请先选择要删除的公告");
+      return;
+    }
+    window.$dialog?.warning({
+      title: "批量删除",
+      content: `确定要删除选中的 ${keys.length} 条公告吗？`,
+      positiveText: "确定",
+      negativeText: "取消",
+      onPositiveClick: async () => {
+        try {
+          await NoticeApi.batchDelete(keys);
+          window.$message?.success?.("批量删除成功");
+          reload();
+        } catch {
+          /* handled by interceptor */
+        }
+      },
+    });
   }
-  window.$dialog?.warning({
-    title: "批量删除",
-    content: `确定要删除选中的 ${keys.length} 条公告吗？`,
-    positiveText: "确定",
-    negativeText: "取消",
-    onPositiveClick: async () => {
-      await NoticeApi.batchDelete(keys);
-      window.$message?.success?.("批量删除成功");
-      reload();
-    },
-  });
-}
 </script>
 
 <template>
@@ -113,8 +138,11 @@ async function handleBatchDelete(keys: number[]) {
       :request="loadData"
       :row-key="(row: any) => row.id"
       :show-add-btn="true"
+      :scroll-x="1550"
       @add="handleAdd"
       @batch-delete="handleBatchDelete" />
+    <NoticeReceiversModal @register="registerReceiversModal" />
+    <NoticeDetailModal @register="registerDetailModal" />
   </div>
 </template>
 

@@ -4,8 +4,144 @@ import dayjs from "dayjs";
 import { NButton, NPopconfirm, NSpace, NTag } from "naive-ui";
 import { computed } from "vue";
 
+
+
+/**
+ * 公告详情弹窗的 Descriptions 配置
+ */
+export function useNoticeDetailSchema() {
+  function getTypeLabel(value: string | null | undefined) {
+    return (
+      noticeTypeOptions.find((o: any) => o.value === value)?.label ||
+      value ||
+      "-"
+    );
+  }
+
+  function getTypeColor(value: string | null | undefined) {
+    const map: Record<string, string> = {
+      NOTICE: "info",
+      INFO: "success",
+      ACTIVITY: "warning",
+    };
+    return map[value || ""] || "default";
+  }
+
+  function formatDateTime(dt: string | null | undefined) {
+    return dt ? dayjs(dt).format("YYYY-MM-DD HH:mm:ss") : "-";
+  }
+
+  const basicSchemas = [
+    {
+      field: "title",
+      label: "公告标题",
+      span: 2,
+      labelBold: true,
+      valueBold: true,
+      render: (data: any) => data.title || "-",
+    },
+    {
+      field: "type",
+      label: "公告类型",
+      render: (data: any) => (
+        <NTag
+          bordered={false}
+          type={getTypeColor(data.type) as any}
+          size="small">
+          {getTypeLabel(data.type)}
+        </NTag>
+      ),
+    },
+    {
+      field: "status",
+      label: "发布状态",
+      render: (data: any) => (
+        <NTag
+          bordered={false}
+          type={data.status === 1 ? "success" : ("default" as any)}
+          size="small">
+          {data.status === 1 ? "已发布" : "草稿"}
+        </NTag>
+      ),
+    },
+    {
+      field: "authorName",
+      label: "发布人",
+      render: (data: any) => data.authorName || "-",
+    },
+    {
+      field: "publishedAt",
+      label: "发布时间",
+      render: (data: any) => formatDateTime(data.publishedAt),
+    },
+    {
+      field: "createdTime",
+      label: "创建时间",
+      render: (data: any) => formatDateTime(data.createdTime),
+    },
+    {
+      field: "updatedTime",
+      label: "更新时间",
+      render: (data: any) => formatDateTime(data.updatedTime),
+    },
+    {
+      field: "isPinned",
+      label: "置顶",
+      render: (data: any) =>
+        data.isPinned ? (
+          <NTag bordered={false} type="error" size="small">
+            置顶
+          </NTag>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      field: "isMandatory",
+      label: "强制阅读",
+      render: (data: any) =>
+        data.isMandatory ? (
+          <NTag bordered={false} type="warning" size="small">
+            强制
+          </NTag>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      field: "scopeType",
+      label: "发布范围",
+      render: (data: any) => {
+        const label =
+          data.scopeType === "ALL"
+            ? "全部用户"
+            : data.scopeType === "ROLE"
+              ? "按角色"
+              : data.scopeType === "DEPARTMENT"
+                ? "按部门"
+                : data.scopeType === "USER"
+                  ? "指定用户"
+                  : data.scopeType || "-";
+        return (
+          <NTag bordered={false} size="small">
+            {label}
+          </NTag>
+        );
+      },
+    },
+    {
+      field: "readCount",
+      label: "已读 / 总数",
+      render: (data: any) =>
+        `${data.readCount ?? "-"} / ${data.totalReceivers ?? "-"}`,
+    },
+  ];
+
+  return { basicSchemas, getTypeLabel, getTypeColor, formatDateTime };
+}
+
 export function useNoticeSchema(methods: any = {}) {
-  const schema = computed(() => ({
+  const schema = {
     properties: [
       {
         table: { type: "selection", options: ["all", "none"] },
@@ -37,10 +173,19 @@ export function useNoticeSchema(methods: any = {}) {
           ),
         },
         editForm: {
+          component: "NInput" as const,
           rules: [
-            { required: true, message: "请输入公告标题", trigger: "blur" },
+            {
+              required: true,
+              message: "请输入公告标题",
+              trigger: ["blur", "input"],
+            },
           ],
-          componentProps: { placeholder: "请输入公告标题" },
+          componentProps: {
+            placeholder: "请输入公告标题",
+            maxlength: 100,
+            showCount: true,
+          },
         },
       },
       {
@@ -118,6 +263,9 @@ export function useNoticeSchema(methods: any = {}) {
         key: "isPinned",
         label: "置顶",
         defaultValue: false,
+        editForm: {
+          component: "NSwitch" as const,
+        },
         table: {
           width: 70,
           render: (row: any) => {
@@ -131,13 +279,54 @@ export function useNoticeSchema(methods: any = {}) {
         },
       },
       {
+        key: "isMandatory",
+        label: "强制阅读",
+        defaultValue: false,
+        editForm: {
+          component: "NSwitch" as const,
+        },
+      },
+      {
+        key: "scopeType",
+        label: "发布范围",
+        defaultValue: "ALL",
+        editForm: {
+          slot: "scopeType",
+        },
+      },
+      {
+        key: "scopeTargets",
+        label: "范围目标",
+        ifShow: ({ values }: any) => values.scopeType !== "ALL",
+        editForm: {
+          slot: "scopeTargets",
+        },
+      },
+      {
+        key: "content",
+        label: "公告内容",
+        defaultValue: "",
+        editForm: {
+          slot: "content",
+          giProps: { span: 2 },
+        },
+      },
+      {
         key: "readCount",
         label: "已读/总数",
         table: {
           width: 100,
           render: (row: any) => {
             if (row.totalReceivers == null) return "-";
-            return `${row.readCount || 0}/${row.totalReceivers || 0}`;
+            return (
+              <NButton
+                text
+                type="info"
+                size="small"
+                onClick={() => methods.handleViewReceivers?.(row)}>
+                {row.readCount || 0}/{row.totalReceivers || 0}
+              </NButton>
+            );
           },
         },
       },
@@ -170,30 +359,40 @@ export function useNoticeSchema(methods: any = {}) {
         },
       },
       {
+        key: "code",
+        label: "编码",
+        table: { width: 120 },
+      },
+      {
+        key: "name",
+        label: "名称",
+        table: { width: 120 },
+      },
+      {
+        key: "username",
+        label: "用户名",
+        table: { width: 120 },
+      },
+      {
         key: "operate",
         label: "操作",
         table: {
           fixed: "right",
-          width: 320,
+          width: 300,
           render: (row: any) => (
             <NSpace justify="center" wrap>
-              {row.status === 1 ? (
-                <NButton
-                  type="warning"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleToggleStatus(row)}>
-                  下刊
-                </NButton>
-              ) : (
-                <NButton
-                  type="success"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleToggleStatus(row)}>
-                  发布
-                </NButton>
-              )}
+              {(() => {
+                const isPublished = row.status === 1;
+                return (
+                  <NButton
+                    type={isPublished ? "warning" : "success"}
+                    ghost
+                    size="small"
+                    onClick={() => methods.handleToggleStatus(row)}>
+                    {isPublished ? "下刊" : "发布"}
+                  </NButton>
+                );
+              })()}
               <NButton
                 type={row.isPinned ? "error" : "primary"}
                 ghost
@@ -231,8 +430,8 @@ export function useNoticeSchema(methods: any = {}) {
         },
       },
     ],
-    setting: { table: { resizable: true } },
-  }));
+    setting: {},
+  };
 
   const tableFields = [
     "title",
@@ -246,14 +445,54 @@ export function useNoticeSchema(methods: any = {}) {
     "operate",
   ];
   const formFields = ["title", "type", "status"];
-  const editFormFields = ["title", "type", "scopeType"];
+  const editFormFields = [
+    "title",
+    "type",
+    "scopeType",
+    "scopeTargets",
+    "isPinned",
+    "isMandatory",
+    "content",
+  ];
 
-  const columns = computed(() => columnsUtil(schema.value, tableFields));
-  const formSchemas = computed(() => formSchemaUtil(schema.value, formFields));
+  const columns = computed(() => columnsUtil(schema, tableFields));
+  const formSchemas = computed(() => formSchemaUtil(schema, formFields));
   const editFormSchemas = computed(() =>
-    editFormSchemaUtil(schema.value, editFormFields),
+    editFormSchemaUtil(schema, editFormFields),
   );
 
-  return { columns, formSchemas, editFormSchemas };
+  function renameTitle(cols: any[], map: Record<string, string>) {
+    return cols.map((c: any) => ({ ...c, title: map[c.key] || c.title }));
+  }
+
+  const roleColumns = computed(() =>
+    renameTitle(columnsUtil(schema, ["code", "name"]), {
+      code: "角色编码",
+      name: "角色名称",
+    }),
+  );
+
+  const departmentColumns = computed(() =>
+    renameTitle(columnsUtil(schema, ["name", "code"]), {
+      name: "姓名",
+      code: "部门编码",
+    }),
+  );
+
+  const userColumns = computed(() =>
+    renameTitle(columnsUtil(schema, ["name", "username"]), {
+      name: "姓名",
+      username: "用户名",
+    }),
+  );
+
+  return {
+    columns,
+    formSchemas,
+    editFormSchemas,
+    roleColumns,
+    departmentColumns,
+    userColumns,
+  };
 }
 

@@ -1,54 +1,104 @@
 <script setup lang="ts">
 import { NoticeApi } from "@/api/notice";
 import { DepartmentApi, RoleApi, UserManagerApi } from "@/api/system";
+import { useForm } from "@/components/Form";
+import { useModal } from "@/components/Modal";
 import WangEditor from "@/components/WangEditor/index.vue";
-import { noticeTypeOptions, scopeTypeOptions } from "@/constants";
-import type { DataTableColumn } from "naive-ui";
-import { h, ref } from "vue";
+import { scopeTypeOptions } from "@/constants";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import ScopeTargetModal from "./components/ScopeTargetModal.vue";
+import { useNoticeSchema } from "./schema.tsx";
 
 const route = useRoute();
 const router = useRouter();
-const noticeId = route.params.id as string | undefined;
-const isUpdate = ref(!!noticeId);
+const rawId = route.params.id as string | undefined;
+const parsedId = rawId ? Number(rawId) : NaN;
+const isValidId = !Number.isNaN(parsedId);
+const isUpdate = ref(isValidId);
+const loading = ref(false);
 
-const formData = ref({
-  title: "",
-  type: "NOTICE",
-  content: "",
-  status: 0,
-  isPinned: false,
-  isMandatory: false,
-  scopeType: "ALL",
+// 无效 ID 时跳回列表
+if (rawId && !isValidId) {
+  window.$message?.warning?.("无效的公告 ID");
+  router.replace("/notice/notice");
+}
+
+const { editFormSchemas } = useNoticeSchema();
+
+const [registerForm, { setFieldsValue, getFieldsValue }] = useForm({
+  schemas: editFormSchemas,
+  showActionButtonGroup: false,
 });
+
 const scopeTargets = ref<
   { targetType: string; targetId: number; targetName?: string }[]
 >([]);
-const showScopeModal = ref(false);
-const loading = ref(false);
 
-// 编辑时加载数据
+const [registerModal, { openModal: openScopeModal, closeModal }] = useModal();
+
+const targetTypeColor: Record<string, string> = {
+  ROLE: "info",
+  DEPARTMENT: "success",
+  USER: "warning",
+};
+
+function clearMismatchedTargets(newScopeType: string) {
+  scopeTargets.value = scopeTargets.value.filter(
+    (t) => t.targetType === newScopeType,
+  );
+}
+
+async function resolveTargetNames(
+  type: string,
+  targets: { targetType: string; targetId: number; targetName?: string }[],
+) {
+  if (!targets.length) return;
+  let list: any[];
+  if (type === "ROLE") {
+    const res = await RoleApi.all();
+    list = Array.isArray(res) ? res : (res as any)?.list || [];
+  } else if (type === "DEPARTMENT") {
+    const res = await DepartmentApi.list({ page: 1, pageSize: 9999 });
+    list = Array.isArray(res) ? res : (res as any)?.list || [];
+  } else if (type === "USER") {
+    const res = await UserManagerApi.list({ page: 1, pageSize: 9999 });
+    list = Array.isArray(res) ? res : (res as any)?.list || [];
+  } else {
+    return;
+  }
+  const map = new Map(
+    list.map((item: any) => [item.id, item.name || item.username]),
+  );
+  targets.forEach((t) => {
+    const name = map.get(t.targetId);
+    if (name) t.targetName = name;
+  });
+}
+
 onMounted(async () => {
   if (isUpdate.value) {
     try {
-      const detail = await NoticeApi.detail(Number(noticeId));
-      formData.value = {
+      const detail = await NoticeApi.detail(parsedId);
+      setFieldsValue({
         title: detail.title || "",
         type: detail.type || "NOTICE",
         content: detail.content || "",
-        status: detail.status ?? 0,
         isPinned: detail.isPinned ?? false,
         isMandatory: detail.isMandatory ?? false,
         scopeType: detail.scopeType || "ALL",
-      };
+      });
       scopeTargets.value = (detail.scopeTargets || []).map((t: any) => ({
         targetType: t.targetType,
         targetId: t.targetId,
         targetName: t.targetName || `目标#${t.targetId}`,
       }));
+      if (detail.scopeType && detail.scopeType !== "ALL") {
+        await resolveTargetNames(detail.scopeType, scopeTargets.value);
+      }
     } catch {
       window.$message?.error?.("加载公告数据失败");
-      router.push("/notice/notice");
+      goBack();
     }
   }
 });
@@ -57,11 +107,13 @@ function goBack() {
   router.push("/notice/notice");
 }
 
-async function handleSubmit() {
-  if (!formData.value.title) {
-    window.$message?.error?.("请输入公告标题");
+async function handleSubmit(status: number) {
+  const values = getFieldsValue();
+  if (values.scopeType !== "ALL" && scopeTargets.value.length === 0) {
+    window.$message?.warning?.("请先选择发布范围目标");
     return;
   }
+
   loading.value = true;
   try {
     const targets =
@@ -72,16 +124,17 @@ async function handleSubmit() {
           }))
         : undefined;
 
-    const payload = {
-      ...formData.value,
-      scopeTargets: formData.value.scopeType !== "ALL" ? targets : undefined,
+    const payload: Parameters<typeof NoticeApi.create>[0] = {
+      ...values as any,
+      status,
+      scopeTargets: values.scopeType !== "ALL" ? targets : undefined,
     };
 
     if (isUpdate.value) {
-      await NoticeApi.update({ id: Number(noticeId), ...payload } as any);
+      await NoticeApi.update({ id: parsedId, ...payload });
       window.$message?.success?.("更新成功");
     } else {
-      await NoticeApi.create(payload as any);
+      await NoticeApi.create(payload);
       window.$message?.success?.("创建成功");
     }
     goBack();
@@ -92,278 +145,138 @@ async function handleSubmit() {
   }
 }
 
-async function handleSaveDraft() {
-  formData.value.status = 0;
-  await handleSubmit();
+function handleSaveDraft() {
+  handleSubmit(0);
 }
 
-async function handlePublish() {
-  formData.value.status = 1;
-  await handleSubmit();
+function handlePublish() {
+  handleSubmit(1);
 }
 
 function removeTarget(index: number) {
   scopeTargets.value.splice(index, 1);
 }
 
-// 角色选择
-const roleList = ref<any[]>([]);
-const roleLoading = ref(false);
-const roleColumns: DataTableColumn[] = [
-  { title: "角色编码", key: "code" },
-  { title: "角色名称", key: "name" },
-  {
-    title: "操作",
-    key: "actions",
-    width: 80,
-    render(row: any) {
-      return h(
-        "button",
-        {
-          class: "n-button n-button--small",
-          onClick: () => {
-            if (
-              !scopeTargets.value.find(
-                (t) => t.targetType === "ROLE" && t.targetId === row.id,
-              )
-            ) {
-              scopeTargets.value.push({
-                targetType: "ROLE",
-                targetId: row.id,
-                targetName: row.name,
-              });
-            }
-          },
-        },
-        "添加",
-      );
-    },
-  },
-];
-async function loadRoles() {
-  roleLoading.value = true;
-  try {
-    const res = await RoleApi.all();
-    roleList.value = Array.isArray(res) ? res : (res as any)?.list || [];
-  } catch {
-    roleList.value = [];
-  } finally {
-    roleLoading.value = false;
-  }
+function handleOpenScopeModal() {
+  const currentScopeType = getFieldsValue().scopeType;
+  clearMismatchedTargets(currentScopeType);
+  openScopeModal({
+    scopeType: currentScopeType,
+    existingKeys: scopeTargets.value.map(
+      (t) => `${t.targetType}-${t.targetId}`,
+    ),
+  });
 }
 
-// 用户选择
-const userList = ref<any[]>([]);
-const userLoading = ref(false);
-const userColumns: DataTableColumn[] = [
-  { title: "用户名", key: "username" },
-  { title: "姓名", key: "name" },
-  {
-    title: "操作",
-    key: "actions",
-    width: 80,
-    render(row: any) {
-      return h(
-        "button",
-        {
-          class: "n-button n-button--small",
-          onClick: () => {
-            if (
-              !scopeTargets.value.find(
-                (t) => t.targetType === "USER" && t.targetId === row.id,
-              )
-            ) {
-              scopeTargets.value.push({
-                targetType: "USER",
-                targetId: row.id,
-                targetName: row.name || row.username,
-              });
-            }
-          },
-        },
-        "添加",
-      );
-    },
-  },
-];
-async function loadUsers() {
-  userLoading.value = true;
-  try {
-    const res = await UserManagerApi.list({ page: 1, pageSize: 100 });
-    userList.value = Array.isArray(res) ? res : (res as any)?.list || [];
-  } catch {
-    userList.value = [];
-  } finally {
-    userLoading.value = false;
+function handleConfirmTargets(
+  targets: { targetType: string; targetId: number; targetName?: string }[],
+) {
+  const type = targets[0]?.targetType;
+  if (type) {
+    scopeTargets.value = [
+      ...scopeTargets.value.filter((t) => t.targetType !== type),
+      ...targets,
+    ];
   }
-}
-
-// 部门选择
-const deptList = ref<any[]>([]);
-const deptLoading = ref(false);
-async function loadDepartments() {
-  deptLoading.value = true;
-  try {
-    const res = await DepartmentApi.list({});
-    deptList.value = Array.isArray(res) ? res : (res as any)?.list || [];
-  } catch {
-    deptList.value = [];
-  } finally {
-    deptLoading.value = false;
-  }
-}
-function addDeptTarget(dept: any) {
-  if (
-    !scopeTargets.value.find(
-      (t) => t.targetType === "DEPARTMENT" && t.targetId === dept.id,
-    )
-  ) {
-    scopeTargets.value.push({
-      targetType: "DEPARTMENT",
-      targetId: dept.id,
-      targetName: dept.name,
-    });
-  }
+  closeModal();
 }
 </script>
 
 <template>
   <div class="system-page">
     <n-page-header :title="isUpdate ? '编辑公告' : '新增公告'" @back="goBack">
+      <template #extra>
+        <n-button variant="text" @click="goBack">返回</n-button>
+      </template>
     </n-page-header>
 
-    <n-form :model="formData" label-placement="top">
-      <n-grid :cols="2" :x-gap="16">
-        <n-gi>
-          <n-form-item label="公告标题" required path="title">
-            <n-input
-              v-model:value="formData.title"
-              placeholder="请输入公告标题" />
-          </n-form-item>
-        </n-gi>
-        <n-gi>
-          <n-form-item label="公告类型" required path="type">
-            <n-select
-              v-model:value="formData.type"
-              :options="noticeTypeOptions" />
-          </n-form-item>
-        </n-gi>
-      </n-grid>
-
-      <n-grid :cols="2" :x-gap="16">
-        <n-gi>
-          <n-form-item label="发布范围" path="scopeType">
-            <n-select
-              v-model:value="formData.scopeType"
-              :options="scopeTypeOptions" />
-          </n-form-item>
-        </n-gi>
-        <n-gi v-if="formData.scopeType !== 'ALL'">
-          <n-form-item label="范围目标">
-            <div style="display: flex; flex-wrap: wrap; gap: 4px; width: 100%">
+    <FormEdit :grid-props="{ cols: 2, xGap: 16 }" @register="registerForm">
+      <template #scopeType="{ model }">
+        <n-select
+          :value="model.scopeType"
+          :options="scopeTypeOptions"
+          @update:value="
+            (v) => {
+              model.scopeType = v;
+              clearMismatchedTargets(v);
+            }
+          " />
+      </template>
+      <template #scopeTargets>
+        <div class="scope-targets__wrap">
+          <div class="scope-targets__tags">
+            <template v-if="scopeTargets.length">
               <n-tag
                 v-for="(t, i) in scopeTargets"
                 :key="i"
+                :type="targetTypeColor[t.targetType] as any"
                 closable
                 @close="removeTarget(i)">
                 {{ t.targetName || `目标#${t.targetId}` }}
               </n-tag>
-              <n-button size="tiny" @click="showScopeModal = true"
-                >选择</n-button
-              >
-            </div>
-          </n-form-item>
-        </n-gi>
-      </n-grid>
-
-      <n-grid :cols="2" :x-gap="16">
-        <n-gi>
-          <n-form-item label="置顶">
-            <n-switch v-model:value="formData.isPinned" />
-          </n-form-item>
-        </n-gi>
-        <n-gi>
-          <n-form-item label="强制阅读">
-            <n-switch v-model:value="formData.isMandatory" />
-          </n-form-item>
-        </n-gi>
-      </n-grid>
-
-      <n-form-item label="公告内容">
-        <WangEditor v-model="formData.content" :height="400" />
-      </n-form-item>
-    </n-form>
-
-    <!-- 选择范围目标弹窗 -->
-    <n-modal
-      v-model:show="showScopeModal"
-      title="选择范围目标"
-      :width="600"
-      preset="card"
-      :mask-closable="false"
-      @close="showScopeModal = false">
-      <template v-if="formData.scopeType === 'ROLE'">
-        <n-button style="margin-bottom: 12px" @click="loadRoles"
-          >加载角色列表</n-button
-        >
-        <n-data-table
-          :columns="roleColumns"
-          :data="roleList"
-          :loading="roleLoading"
-          :bordered="true"
-          size="small" />
+            </template>
+            <span v-else class="scope-targets__empty">未选择</span>
+          </div>
+          <n-button size="small" @click="handleOpenScopeModal">
+            选择目标
+          </n-button>
+        </div>
       </template>
-      <template v-else-if="formData.scopeType === 'DEPARTMENT'">
-        <n-button style="margin-bottom: 12px" @click="loadDepartments"
-          >加载部门列表</n-button
-        >
-        <n-data-table
-          :columns="[
-            { title: '部门名称', key: 'name' },
-            { title: '部门编码', key: 'code' },
-            {
-              title: '操作',
-              key: 'actions',
-              width: 80,
-              render: (row: any) =>
-                h(
-                  'button',
-                  {
-                    class: 'n-button n-button--small',
-                    onClick: () => addDeptTarget(row),
-                  },
-                  '添加',
-                ),
-            },
-          ]"
-          :data="deptList"
-          :loading="deptLoading"
-          :bordered="true"
-          size="small" />
+      <template #content="{ model }">
+        <WangEditor v-model="model.content" :height="420" />
       </template>
-      <template v-else-if="formData.scopeType === 'USER'">
-        <n-button style="margin-bottom: 12px" @click="loadUsers"
-          >加载用户列表</n-button
-        >
-        <n-data-table
-          :columns="userColumns"
-          :data="userList"
-          :loading="userLoading"
-          :bordered="true"
-          size="small" />
-      </template>
-      <template #footer>
-        <n-button @click="showScopeModal = false">关闭</n-button>
-      </template>
-    </n-modal>
+    </FormEdit>
 
-    <n-space>
-      <n-button @click="goBack">取消</n-button>
-      <n-button :loading="loading" @click="handleSaveDraft">保存草稿 </n-button>
-      <n-button type="primary" :loading="loading" @click="handlePublish"
-        >保存并发布</n-button
-      >
-    </n-space>
+    <n-flex justify="center">
+      <n-button @click="goBack"> 取消 </n-button>
+      <n-button :loading="loading" @click="handleSaveDraft">
+        保存草稿
+      </n-button>
+      <n-button type="primary" :loading="loading" @click="handlePublish">
+        保存并发布
+      </n-button>
+    </n-flex>
+
+    <ScopeTargetModal
+      @register="registerModal"
+      @confirm="handleConfirmTargets" />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.scope-targets {
+  &__wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 4px 10px;
+    border: 1px solid var(--n-border-color, #e0e0e6);
+    border-radius: var(--n-border-radius, 4px);
+    background: var(--n-color, #fff);
+    transition: border-color 0.2s;
+
+    &:focus-within {
+      border-color: #2080f0;
+      box-shadow: 0 0 0 2px rgba(32, 128, 240, 0.12);
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__empty {
+    color: #aaa;
+    font-size: 13px;
+    user-select: none;
+  }
+}
+</style>
 
