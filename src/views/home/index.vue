@@ -1,11 +1,5 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/modules'
-import QuickActions from './components/QuickActions.vue'
-import RecentActivity from './components/RecentActivity.vue'
-import StatCards from './components/StatCards.vue'
-import SystemInfo from './components/SystemInfo.vue'
-import TrendChart from './components/TrendChart.vue'
-import WelcomeBanner from './components/WelcomeBanner.vue'
 
 const userStore = useUserStore()
 const isAdmin = computed(() => userStore.userInfo?.roleType === 'admin')
@@ -73,13 +67,13 @@ onMounted(() => {
     radial-gradient(ellipse 70% 40% at 80% -5%, rgba(24, 160, 88, 0.06), transparent),
     radial-gradient(ellipse 50% 30% at 0% 100%, rgba(32, 128, 240, 0.05), transparent),
     color-mix(in srgb, var(--card-color) 35%, var(--body-color, #f4f5f7));
-}
 
-html.dark .dashboard {
-  background:
-    radial-gradient(ellipse 70% 40% at 80% -5%, rgba(24, 160, 88, 0.08), transparent),
-    radial-gradient(ellipse 50% 30% at 0% 100%, rgba(32, 128, 240, 0.06), transparent),
-    color-mix(in srgb, var(--card-color) 25%, rgb(20, 20, 24));
+  html.dark & {
+    background:
+      radial-gradient(ellipse 70% 40% at 80% -5%, rgba(24, 160, 88, 0.08), transparent),
+      radial-gradient(ellipse 50% 30% at 0% 100%, rgba(32, 128, 240, 0.06), transparent),
+      color-mix(in srgb, var(--card-color) 25%, rgb(20, 20, 24));
+  }
 }
 
 .dashboard__ambient {
@@ -120,11 +114,11 @@ html.dark .dashboard {
   background-repeat: repeat;
   background-size: 128px 128px;
   mix-blend-mode: overlay;
-}
 
-html.dark .dashboard__grain {
-  opacity: 0.18;
-  mix-blend-mode: soft-light;
+  html.dark & {
+    opacity: 0.18;
+    mix-blend-mode: soft-light;
+  }
 }
 
 .dashboard__body {

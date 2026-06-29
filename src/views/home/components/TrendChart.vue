@@ -1,12 +1,26 @@
 <script setup lang="ts">
+import { BarChart, LineChart } from 'echarts/charts'
+import {
+  GridComponent,
+  LegendComponent,
+  TitleComponent,
+  TooltipComponent,
+} from 'echarts/components'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import VChart from 'vue-echarts'
 import { DashboardApi } from '@/api/dashboard'
 
 const props = defineProps<{
   visible: boolean
 }>()
 
+use([CanvasRenderer, LineChart, BarChart, TitleComponent, TooltipComponent, LegendComponent, GridComponent])
+
 const trends = ref<Dashboard.Trends | null>(null)
 const loading = ref(true)
+
+const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const activeSeries = ref<'visits' | 'newUsers' | 'operations'>('visits')
 
 const seriesMap: Record<string, { label: string, color: string }> = {
@@ -15,33 +29,55 @@ const seriesMap: Record<string, { label: string, color: string }> = {
   operations: { label: '操作次数', color: '#f0a020' },
 }
 
-const chartData = computed(() => trends.value?.dates ?? [])
-const chartValues = computed(() => {
+const barOption = computed(() => {
   if (!trends.value)
-    return []
-  return trends.value[activeSeries.value] ?? []
+    return {}
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(255,255,255,0.9)',
+      borderColor: 'var(--divider-color)',
+      borderWidth: 1,
+      textStyle: { color: 'var(--text-color-1)', fontSize: 12 },
+      formatter: (params: any) => {
+        const p = Array.isArray(params) ? params[0] : params
+        return `<div style="font-weight:600;margin-bottom:4px">${p.axisValue}</div>${seriesMap[activeSeries.value].label}: <strong>${p.value}</strong>`
+      },
+    },
+    grid: { left: 0, right: 0, top: 4, bottom: 0, containLabel: false },
+    xAxis: {
+      type: 'category',
+      data: trends.value.dates.map(d => `${Number(d.split('-')[1])}日`),
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { show: false },
+    },
+    yAxis: {
+      type: 'value',
+      splitLine: { show: false },
+      axisLabel: { show: false },
+    },
+    series: [
+      {
+        type: 'bar',
+        data: trends.value[activeSeries.value],
+        itemStyle: {
+          color: seriesMap[activeSeries.value].color,
+          borderRadius: [3, 3, 0, 0],
+        },
+        barMaxWidth: 20,
+        animationDuration: 600,
+        animationEasing: 'cubicOut',
+      },
+    ],
+  } as any
 })
 
-const maxVal = computed(() => Math.max(...chartValues.value, 1))
-const pathD = computed(() => {
-  if (chartValues.value.length < 2)
-    return ''
-  const w = 100
-  const h = 40
-  const points = chartValues.value.map((v, i) => {
-    const x = (i / (chartValues.value.length - 1)) * w
-    const y = h - (v / maxVal.value) * h * 0.85 - 2
-    return `${x},${y}`
-  })
-  return `M${points.join(' L')}`
-})
-
-const areaPathD = computed(() => {
-  if (!pathD.value)
-    return ''
-  const w = 100
-  const h = 40
-  return `${pathD.value} L${w},${h} L0,${h} Z`
+const totalValue = computed(() => {
+  if (!trends.value)
+    return 0
+  return trends.value[activeSeries.value].reduce((a, b) => a + b, 0)
 })
 
 watch(() => props.visible, (v) => {
@@ -80,54 +116,24 @@ async function loadTrends() {
       </div>
     </template>
 
-    <n-skeleton v-if="loading" :repeat="4" text />
+    <n-skeleton v-if="loading && !trends" :repeat="4" text />
     <template v-else>
-      <div class="trend-chart">
-        <svg
-          viewBox="0 0 100 40"
-          class="trend-chart__svg"
-          preserveAspectRatio="none"
+      <VChart
+        ref="chartRef"
+        :option="barOption"
+        autoresize
+        class="trend-chart"
+      />
+      <div class="trend-card__summary">
+        <span class="trend-card__summary-label">
+          {{ seriesMap[activeSeries].label }} (7日汇总)
+        </span>
+        <span
+          class="trend-card__summary-value"
+          :style="{ color: seriesMap[activeSeries].color }"
         >
-          <path
-            :d="areaPathD"
-            fill="currentColor"
-            class="trend-chart__area"
-            :style="{ color: `color-mix(in srgb, ${seriesMap[activeSeries].color} 15%, transparent)` }"
-          />
-          <path
-            :d="pathD"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="trend-chart__line"
-            :style="{ color: seriesMap[activeSeries].color }"
-          />
-        </svg>
-
-        <div class="trend-chart__labels">
-          <span
-            v-for="(d, i) in chartData"
-            :key="d"
-            class="trend-chart__label"
-            :class="{ 'trend-chart__label--active': i === chartData.length - 1 }"
-          >
-            {{ Number(d.split('-')[1]) }}日
-          </span>
-        </div>
-
-        <div class="trend-chart__summary">
-          <span class="trend-chart__summary-label">
-            {{ seriesMap[activeSeries].label }} (7日)
-          </span>
-          <span
-            class="trend-chart__summary-value"
-            :style="{ color: seriesMap[activeSeries].color }"
-          >
-            {{ chartValues.reduce((a, b) => a + b, 0) }}
-          </span>
-        </div>
+          {{ totalValue }}
+        </span>
       </div>
     </template>
   </n-card>
@@ -183,57 +189,25 @@ async function loadTrends() {
 }
 
 .trend-chart {
-  padding-top: 8px;
-}
-
-.trend-chart__svg {
   width: 100%;
-  height: 60px;
+  height: 120px;
 }
 
-.trend-chart__area {
-  opacity: 0.6;
-}
-
-.trend-chart__line {
-  filter: drop-shadow(0 0 4px currentColor);
-}
-
-html.dark .trend-chart__line {
-  filter: drop-shadow(0 0 6px currentColor);
-}
-
-.trend-chart__labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 4px;
-}
-
-.trend-chart__label {
-  font-size: 10px;
-  color: var(--text-color-4);
-
-  &--active {
-    color: var(--text-color-2);
-    font-weight: 600;
-  }
-}
-
-.trend-chart__summary {
+.trend-card__summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 8px;
   padding-top: 10px;
   border-top: 1px solid var(--divider-color);
 }
 
-.trend-chart__summary-label {
+.trend-card__summary-label {
   font-size: 12px;
   color: var(--text-color-3);
 }
 
-.trend-chart__summary-value {
+.trend-card__summary-value {
   font-size: 18px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
