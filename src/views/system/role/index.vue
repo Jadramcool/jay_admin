@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RoleApi } from '@/api/notice/index.ts'
+import { RoleApi } from '@/api/system'
 import RoleMenuModal from './components/RoleMenuModal.vue'
 import RoleModal from './components/RoleModal.vue'
 import { useRoleSchema } from './schema'

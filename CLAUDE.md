@@ -40,17 +40,17 @@ pnpm preview
 
 ### Tech Stack
 
-| Layer | Choice |
-|-------|--------|
-| Framework | Vue 3 (Composition API, `<script setup>`) |
-| UI Library | Naive UI |
-| Styling | UnoCSS (atomic) + SCSS (variables/global) |
-| State | Pinia (with persisted state plugin) |
-| Router | Vue Router 4 (hash mode, dynamic routes) |
-| HTTP | Axios (with interceptor — token refresh, dedup, error handling) |
-| Icons | @iconify/vue (`icon-park-outline` preset) |
-| Build | Vite 6 |
-| Lint | ESLint 10 + @antfu/eslint-config (flat config) |
+| Layer      | Choice                                                          |
+| ---------- | --------------------------------------------------------------- |
+| Framework  | Vue 3 (Composition API, `<script setup>`)                       |
+| UI Library | Naive UI                                                        |
+| Styling    | UnoCSS (atomic) + SCSS (variables/global)                       |
+| State      | Pinia (with persisted state plugin)                             |
+| Router     | Vue Router 4 (hash mode, dynamic routes)                        |
+| HTTP       | Axios (with interceptor — token refresh, dedup, error handling) |
+| Icons      | @iconify/vue (`icon-park-outline` preset)                       |
+| Build      | Vite 6                                                          |
+| Lint       | ESLint 10 + @antfu/eslint-config (flat config)                  |
 
 ### Directory Structure
 

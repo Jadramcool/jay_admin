@@ -1,30 +1,32 @@
 <script setup lang="ts">
-import { NoticeApi } from "@/api/notice";
-import { useSocket } from "@/composables/useSocket";
-import { useAuthStore, useUserStore } from "@/store/modules";
-import storage from "@/utils/storage";
-import { getToken } from "@/utils/token";
-import { h } from "vue";
+import { h } from 'vue'
+import { NoticeApi } from '@/api/notice'
+import { useSocket } from '@/composables/useSocket'
+import { useAuthStore, useUserStore } from '@/store/modules'
+import storage from '@/utils/storage'
+import { getToken } from '@/utils/token'
 
-const authStore = useAuthStore();
-const userStore = useUserStore();
+const authStore = useAuthStore()
+const userStore = useUserStore()
 
-const { connect, disconnect, on, off } = useSocket();
+const { connect, disconnect, on, off } = useSocket()
 
-const timerIds: ReturnType<typeof setTimeout>[] = [];
-const READ_STORAGE_KEY = "notice_read";
+const timerIds: ReturnType<typeof setTimeout>[] = []
+const READ_STORAGE_KEY = 'notice_read'
 
 function getReadSet(): Set<number> {
-  const userId = userStore.userInfo?.id;
-  if (!userId) return new Set();
-  const stored = storage.get(`${READ_STORAGE_KEY}_${userId}`);
-  return new Set<number>(Array.isArray(stored) ? stored : []);
+  const userId = userStore.userInfo?.id
+  if (!userId)
+    return new Set()
+  const stored = storage.get(`${READ_STORAGE_KEY}_${userId}`)
+  return new Set<number>(Array.isArray(stored) ? stored : [])
 }
 
 function saveReadSet(ids: Set<number>) {
-  const userId = userStore.userInfo?.id;
-  if (!userId) return;
-  storage.set(`${READ_STORAGE_KEY}_${userId}`, Array.from(ids));
+  const userId = userStore.userInfo?.id
+  if (!userId)
+    return
+  storage.set(`${READ_STORAGE_KEY}_${userId}`, Array.from(ids))
 }
 
 function markAsRead(id: number) {
@@ -35,26 +37,26 @@ function markAsRead(id: number) {
 }
 
 function isRead(id: number): boolean {
-  return getReadSet().has(id);
+  return getReadSet().has(id)
 }
 
 /**
  * 展示一条公告
  */
 function showNotice(notice: {
-  noticeId: number;
-  id: number;
-  title: string;
-  content?: string;
-  type: string;
-  isMandatory: boolean;
+  noticeId: number
+  id: number
+  title: string
+  content?: string
+  type: string
+  isMandatory: boolean
 }) {
-  const id = notice.noticeId || notice.id;
+  const id = notice.noticeId || notice.id
   // 如果本地已标记已读，说明是重推 → 清除缓存以重新展示
   if (isRead(id)) {
-    const set = getReadSet();
-    set.delete(id);
-    saveReadSet(set);
+    const set = getReadSet()
+    set.delete(id)
+    saveReadSet(set)
   }
 
   if (notice.isMandatory) {
@@ -62,17 +64,18 @@ function showNotice(notice: {
     window.$dialog?.warning({
       title: notice.title,
       content: () =>
-        h("div", {
-          class: "notice-mandatory-content",
-          innerHTML: normalizeHtml(notice.content || ""),
+        h('div', {
+          class: 'notice-mandatory-content',
+          innerHTML: normalizeHtml(notice.content || ''),
         }),
       maskClosable: false,
       closable: false,
-      style: { maxHeight: "70vh", overflow: "auto" },
-      positiveText: "我知道了",
+      style: { maxHeight: '70vh', overflow: 'auto' },
+      positiveText: '我知道了',
       onPositiveClick: () => markAsRead(id),
-    });
-  } else {
+    })
+  }
+  else {
     // 普通公告 → 通知栏（不自动消失）
     window.$notification?.info({
       title: notice.title,
@@ -80,7 +83,7 @@ function showNotice(notice: {
       duration: 0,
       closable: true,
       onClose: () => markAsRead(id),
-    });
+    })
   }
 }
 
@@ -92,18 +95,19 @@ function showNotice(notice: {
  */
 function normalizeHtml(html: string): string {
   return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/colSpan\b/g, "colspan")
-    .replace(/rowSpan\b/g, "rowspan")
-    .replace(/\bwidth="auto"/g, 'style="width:auto"');
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/colSpan\b/g, 'colspan')
+    .replace(/rowSpan\b/g, 'rowspan')
+    .replace(/\bwidth="auto"/g, 'style="width:auto"')
 }
 
 function truncateContent(content: string | undefined, maxLen: number): string {
-  if (!content) return "";
+  if (!content)
+    return ''
   // 去除 HTML 标签
-  const text = content.replace(/<[^>]+>/g, "");
-  return text.length > maxLen ? `${text.slice(0, maxLen)}...` : text;
+  const text = content.replace(/<[^>]+>/g, '')
+  return text.length > maxLen ? `${text.slice(0, maxLen)}...` : text
 }
 
 /**
@@ -111,17 +115,18 @@ function truncateContent(content: string | undefined, maxLen: number): string {
  */
 async function loadExistingUnread() {
   try {
-    const list = await NoticeApi.getUnreadNotices();
+    const list = await NoticeApi.getUnreadNotices()
     if (Array.isArray(list)) {
       // 逐个弹窗展示，但带延迟防止同时弹出过多
       list.forEach((notice, index) => {
         const timer = setTimeout(() => {
-          showNotice(notice as any);
-        }, index * 500);
-        timerIds.push(timer);
-      });
+          showNotice(notice as any)
+        }, index * 500)
+        timerIds.push(timer)
+      })
     }
-  } catch {
+  }
+  catch {
     // 静默处理
   }
 }
@@ -130,15 +135,16 @@ async function loadExistingUnread() {
  * 建立 WebSocket 连接
  */
 function connectSocket() {
-  const token = getToken();
-  if (!token) return;
+  const token = getToken()
+  if (!token)
+    return
 
-  connect(token);
+  connect(token)
 
   // 监听新公告推送
-  on("newNotice", (payload: any) => {
-    showNotice(payload);
-  });
+  on('newNotice', (payload: any) => {
+    showNotice(payload)
+  })
 }
 
 // 用户登录后启动监听
@@ -146,19 +152,20 @@ watch(
   () => userStore.userInfo?.id,
   (userId) => {
     if (userId) {
-      loadExistingUnread();
-      connectSocket();
-    } else {
-      disconnect();
+      loadExistingUnread()
+      connectSocket()
+    }
+    else {
+      disconnect()
     }
   },
   { immediate: true },
-);
+)
 
 onUnmounted(() => {
-  timerIds.forEach(clearTimeout);
-  disconnect();
-});
+  timerIds.forEach(clearTimeout)
+  disconnect()
+})
 </script>
 
 <template>
@@ -200,4 +207,3 @@ onUnmounted(() => {
   }
 }
 </style>
-

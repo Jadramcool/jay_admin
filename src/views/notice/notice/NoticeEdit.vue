@@ -1,184 +1,193 @@
 <script setup lang="ts">
-import { NoticeApi } from "@/api/notice";
-import { DepartmentApi, RoleApi, UserManagerApi } from "@/api/system";
-import { useForm } from "@/components/Form";
-import { useModal } from "@/components/Modal";
-import WangEditor from "@/components/WangEditor/index.vue";
-import { scopeTypeOptions } from "@/constants";
-import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import ScopeTargetModal from "./components/ScopeTargetModal.vue";
-import { useNoticeSchema } from "./schema.tsx";
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { NoticeApi } from '@/api/notice'
+import { DepartmentApi, RoleApi, UserManagerApi } from '@/api/system'
+import { useForm } from '@/components/Form'
+import { useModal } from '@/components/Modal'
+import WangEditor from '@/components/WangEditor/index.vue'
+import { scopeTypeOptions } from '@/constants'
+import ScopeTargetModal from './components/ScopeTargetModal.vue'
+import { useNoticeSchema } from './schema.tsx'
 
-const route = useRoute();
-const router = useRouter();
-const rawId = route.params.id as string | undefined;
-const parsedId = rawId ? Number(rawId) : NaN;
-const isValidId = !Number.isNaN(parsedId);
-const isUpdate = ref(isValidId);
-const loading = ref(false);
+const route = useRoute()
+const router = useRouter()
+const rawId = route.params.id as string | undefined
+const parsedId = rawId ? Number(rawId) : Number.NaN
+const isValidId = !Number.isNaN(parsedId)
+const isUpdate = ref(isValidId)
+const loading = ref(false)
 
 // 无效 ID 时跳回列表
 if (rawId && !isValidId) {
-  window.$message?.warning?.("无效的公告 ID");
-  router.replace("/notice/notice");
+  window.$message?.warning?.('无效的公告 ID')
+  router.replace('/notice/notice')
 }
 
-const { editFormSchemas } = useNoticeSchema();
+const { editFormSchemas } = useNoticeSchema()
 
 const [registerForm, { setFieldsValue, getFieldsValue }] = useForm({
   schemas: editFormSchemas,
   showActionButtonGroup: false,
-});
+})
 
 const scopeTargets = ref<
-  { targetType: string; targetId: number; targetName?: string }[]
->([]);
+  { targetType: string, targetId: number, targetName?: string }[]
+>([])
 
-const [registerModal, { openModal: openScopeModal, closeModal }] = useModal();
+const [registerModal, { openModal: openScopeModal, closeModal }] = useModal()
 
 const targetTypeColor: Record<string, string> = {
-  ROLE: "info",
-  DEPARTMENT: "success",
-  USER: "warning",
-};
+  ROLE: 'info',
+  DEPARTMENT: 'success',
+  USER: 'warning',
+}
 
 function clearMismatchedTargets(newScopeType: string) {
   scopeTargets.value = scopeTargets.value.filter(
-    (t) => t.targetType === newScopeType,
-  );
+    t => t.targetType === newScopeType,
+  )
 }
 
 async function resolveTargetNames(
   type: string,
-  targets: { targetType: string; targetId: number; targetName?: string }[],
+  targets: { targetType: string, targetId: number, targetName?: string }[],
 ) {
-  if (!targets.length) return;
-  let list: any[];
-  if (type === "ROLE") {
-    const res = await RoleApi.all();
-    list = Array.isArray(res) ? res : (res as any)?.list || [];
-  } else if (type === "DEPARTMENT") {
-    const res = await DepartmentApi.list({ page: 1, pageSize: 9999 });
-    list = Array.isArray(res) ? res : (res as any)?.list || [];
-  } else if (type === "USER") {
-    const res = await UserManagerApi.list({ page: 1, pageSize: 9999 });
-    list = Array.isArray(res) ? res : (res as any)?.list || [];
-  } else {
-    return;
+  if (!targets.length)
+    return
+  let list: any[]
+  if (type === 'ROLE') {
+    const res = await RoleApi.all()
+    list = Array.isArray(res) ? res : (res as any)?.list || []
+  }
+  else if (type === 'DEPARTMENT') {
+    const res = await DepartmentApi.list({ page: 1, pageSize: 9999 })
+    list = Array.isArray(res) ? res : (res as any)?.list || []
+  }
+  else if (type === 'USER') {
+    const res = await UserManagerApi.list({ page: 1, pageSize: 9999 })
+    list = Array.isArray(res) ? res : (res as any)?.list || []
+  }
+  else {
+    return
   }
   const map = new Map(
     list.map((item: any) => [item.id, item.name || item.username]),
-  );
+  )
   targets.forEach((t) => {
-    const name = map.get(t.targetId);
-    if (name) t.targetName = name;
-  });
+    const name = map.get(t.targetId)
+    if (name)
+      t.targetName = name
+  })
 }
 
 onMounted(async () => {
   if (isUpdate.value) {
     try {
-      const detail = await NoticeApi.detail(parsedId);
+      const detail = await NoticeApi.detail(parsedId)
       setFieldsValue({
-        title: detail.title || "",
-        type: detail.type || "NOTICE",
-        content: detail.content || "",
+        title: detail.title || '',
+        type: detail.type || 'NOTICE',
+        content: detail.content || '',
         isPinned: detail.isPinned ?? false,
         isMandatory: detail.isMandatory ?? false,
-        scopeType: detail.scopeType || "ALL",
-      });
+        scopeType: detail.scopeType || 'ALL',
+      })
       scopeTargets.value = (detail.scopeTargets || []).map((t: any) => ({
         targetType: t.targetType,
         targetId: t.targetId,
         targetName: t.targetName || `目标#${t.targetId}`,
-      }));
-      if (detail.scopeType && detail.scopeType !== "ALL") {
-        await resolveTargetNames(detail.scopeType, scopeTargets.value);
+      }))
+      if (detail.scopeType && detail.scopeType !== 'ALL') {
+        await resolveTargetNames(detail.scopeType, scopeTargets.value)
       }
-    } catch {
-      window.$message?.error?.("加载公告数据失败");
-      goBack();
+    }
+    catch {
+      window.$message?.error?.('加载公告数据失败')
+      goBack()
     }
   }
-});
+})
 
 function goBack() {
-  router.push("/notice/notice");
+  router.push('/notice/notice')
 }
 
 async function handleSubmit(status: number) {
-  const values = getFieldsValue();
-  if (values.scopeType !== "ALL" && scopeTargets.value.length === 0) {
-    window.$message?.warning?.("请先选择发布范围目标");
-    return;
+  const values = getFieldsValue()
+  if (values.scopeType !== 'ALL' && scopeTargets.value.length === 0) {
+    window.$message?.warning?.('请先选择发布范围目标')
+    return
   }
 
-  loading.value = true;
+  loading.value = true
   try {
-    const targets =
-      scopeTargets.value.length > 0
-        ? scopeTargets.value.map((t) => ({
+    const targets
+      = scopeTargets.value.length > 0
+        ? scopeTargets.value.map(t => ({
             targetType: t.targetType,
             targetId: t.targetId,
           }))
-        : undefined;
+        : undefined
 
     const payload: Parameters<typeof NoticeApi.create>[0] = {
       ...values as any,
       status,
-      scopeTargets: values.scopeType !== "ALL" ? targets : undefined,
-    };
+      scopeTargets: values.scopeType !== 'ALL' ? targets : undefined,
+    }
 
     if (isUpdate.value) {
-      await NoticeApi.update({ id: parsedId, ...payload });
-      window.$message?.success?.("更新成功");
-    } else {
-      await NoticeApi.create(payload);
-      window.$message?.success?.("创建成功");
+      await NoticeApi.update({ id: parsedId, ...payload })
+      window.$message?.success?.('更新成功')
     }
-    goBack();
-  } catch {
+    else {
+      await NoticeApi.create(payload)
+      window.$message?.success?.('创建成功')
+    }
+    goBack()
+  }
+  catch {
     /* handled by interceptor */
-  } finally {
-    loading.value = false;
+  }
+  finally {
+    loading.value = false
   }
 }
 
 function handleSaveDraft() {
-  handleSubmit(0);
+  handleSubmit(0)
 }
 
 function handlePublish() {
-  handleSubmit(1);
+  handleSubmit(1)
 }
 
 function removeTarget(index: number) {
-  scopeTargets.value.splice(index, 1);
+  scopeTargets.value.splice(index, 1)
 }
 
 function handleOpenScopeModal() {
-  const currentScopeType = getFieldsValue().scopeType;
-  clearMismatchedTargets(currentScopeType);
+  const currentScopeType = getFieldsValue().scopeType
+  clearMismatchedTargets(currentScopeType)
   openScopeModal({
     scopeType: currentScopeType,
     existingKeys: scopeTargets.value.map(
-      (t) => `${t.targetType}-${t.targetId}`,
+      t => `${t.targetType}-${t.targetId}`,
     ),
-  });
+  })
 }
 
 function handleConfirmTargets(
-  targets: { targetType: string; targetId: number; targetName?: string }[],
+  targets: { targetType: string, targetId: number, targetName?: string }[],
 ) {
-  const type = targets[0]?.targetType;
+  const type = targets[0]?.targetType
   if (type) {
     scopeTargets.value = [
-      ...scopeTargets.value.filter((t) => t.targetType !== type),
+      ...scopeTargets.value.filter(t => t.targetType !== type),
       ...targets,
-    ];
+    ]
   }
-  closeModal();
+  closeModal()
 }
 </script>
 
@@ -186,7 +195,9 @@ function handleConfirmTargets(
   <div class="system-page">
     <n-page-header :title="isUpdate ? '编辑公告' : '新增公告'" @back="goBack">
       <template #extra>
-        <n-button variant="text" @click="goBack">返回</n-button>
+        <n-button variant="text" @click="goBack">
+          返回
+        </n-button>
       </template>
     </n-page-header>
 
@@ -200,7 +211,8 @@ function handleConfirmTargets(
               model.scopeType = v;
               clearMismatchedTargets(v);
             }
-          " />
+          "
+        />
       </template>
       <template #scopeTargets>
         <div class="scope-targets__wrap">
@@ -211,7 +223,8 @@ function handleConfirmTargets(
                 :key="i"
                 :type="targetTypeColor[t.targetType] as any"
                 closable
-                @close="removeTarget(i)">
+                @close="removeTarget(i)"
+              >
                 {{ t.targetName || `目标#${t.targetId}` }}
               </n-tag>
             </template>
@@ -228,7 +241,9 @@ function handleConfirmTargets(
     </FormEdit>
 
     <n-flex justify="center">
-      <n-button @click="goBack"> 取消 </n-button>
+      <n-button @click="goBack">
+        取消
+      </n-button>
       <n-button :loading="loading" @click="handleSaveDraft">
         保存草稿
       </n-button>
@@ -239,7 +254,8 @@ function handleConfirmTargets(
 
     <ScopeTargetModal
       @register="registerModal"
-      @confirm="handleConfirmTargets" />
+      @confirm="handleConfirmTargets"
+    />
   </div>
 </template>
 
@@ -279,4 +295,3 @@ function handleConfirmTargets(
   }
 }
 </style>
-

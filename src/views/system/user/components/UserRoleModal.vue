@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { RoleApi, UserManagerApi } from '@/api/system';
-import { useModalInner } from '@/components/Modal/src/hooks/useModal';
-import { Icon } from '@iconify/vue';
-import { ref } from 'vue';
+import { Icon } from '@iconify/vue'
+import { ref } from 'vue'
+import { RoleApi, UserManagerApi } from '@/api/system'
+import { useModalInner } from '@/components/Modal/src/hooks/useModal'
 
 const emit = defineEmits<{
   success: []

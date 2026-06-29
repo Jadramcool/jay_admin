@@ -1,13 +1,6 @@
-<template>
-  <div class="wang-editor-wrapper">
-    <div ref="toolbarRef" class="editor-toolbar" />
-    <div ref="editorRef" class="editor-content" :style="{ height: height + 'px' }" />
-  </div>
-</template>
-
 <script setup lang="ts">
-import { i18nChangeLanguage, createEditor, createToolbar } from '@wangeditor/editor'
 import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
+import { createEditor, createToolbar, i18nChangeLanguage } from '@wangeditor/editor'
 import { debounce } from 'lodash-es'
 
 defineOptions({ name: 'WangEditor' })
@@ -51,7 +44,8 @@ const editorConfig: Partial<IEditorConfig> = {
 }
 
 onMounted(() => {
-  if (!toolbarRef.value || !editorRef.value) return
+  if (!toolbarRef.value || !editorRef.value)
+    return
 
   editor = createEditor({
     selector: editorRef.value,
@@ -85,6 +79,13 @@ onBeforeUnmount(() => {
   }
 })
 </script>
+
+<template>
+  <div class="wang-editor-wrapper">
+    <div ref="toolbarRef" class="editor-toolbar" />
+    <div ref="editorRef" class="editor-content" :style="{ height: `${height}px` }" />
+  </div>
+</template>
 
 <style lang="scss" scoped>
 .wang-editor-wrapper {

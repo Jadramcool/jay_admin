@@ -68,12 +68,12 @@ export const NoticeApi = {
 
   // 用户端接口
   getUnreadNotices: () =>
-    request.get<{ noticeId: number; title: string; content?: string; type: string; isMandatory: boolean; isPinned: boolean; publishedAt?: string }[]>({ url: '/notice/user/unread' }),
+    request.get<{ noticeId: number, title: string, content?: string, type: string, isMandatory: boolean, isPinned: boolean, publishedAt?: string }[]>({ url: '/notice/user/unread' }),
 
   markNoticeRead: (id: number) =>
     request.put({ url: `/notice/user/read/${id}` }),
 
   // 获取公告接收人列表
   getReceivers: (id: number, status?: string, page?: number, pageSize?: number) =>
-    request.get<{ list: any[]; pagination: { page: number; pageSize: number; total: number } }>({ url: `/notice/${id}/receivers`, params: { status, page, pageSize } }),
+    request.get<{ list: any[], pagination: { page: number, pageSize: number, total: number } }>({ url: `/notice/${id}/receivers`, params: { status, page, pageSize } }),
 }

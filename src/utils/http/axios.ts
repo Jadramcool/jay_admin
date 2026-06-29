@@ -103,6 +103,11 @@ class HttpRequest {
           return ret
         }
 
+        // 标记了静默失败 → 不弹 toast，直接 reject
+        if ((error.config as any)?.silentFail) {
+          return Promise.reject(error)
+        }
+
         // 其余所有错误：默认用后端返回的 message 弹 toast
         errorHandler(error)
         return Promise.reject(error)

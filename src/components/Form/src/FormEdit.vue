@@ -195,7 +195,13 @@ defineExpose(formAction)
     <NGrid v-bind="getGrid">
       <template v-for="schema in getSchema" :key="schema.field">
         <NGi v-if="getShow(schema)" v-bind="schema.giProps">
+          <template v-if="schema.slot && $slots[schema.slot]">
+            <n-form-item :label="schema.label" :path="schema.field">
+              <slot :name="schema.slot" :model="formModel" :field="schema.field" :schema="schema" />
+            </n-form-item>
+          </template>
           <FormItem
+            v-else
             v-model:form-model="formModel"
             :schema="schema"
             :component-props-map="componentPropsMap"

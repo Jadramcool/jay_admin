@@ -22,4 +22,5 @@ declare global {
       </n-notification-provider>
     </n-message-provider>
   </n-dialog-provider>
+  <GlobalLoading />
 </template>

@@ -6,6 +6,8 @@ interface DescriptionItem {
   field: string
   label: string
   span?: number
+  labelBold?: boolean
+  valueBold?: boolean
   render?: (data: any) => any
 }
 
@@ -49,14 +51,22 @@ const renderItems = computed(() => {
     <n-descriptions-item
       v-for="item in renderItems"
       :key="item.field"
-      :label="item.label"
       :span="item.span || 1"
     >
+      <template #label>
+        <span :style="item.labelBold ? 'font-weight: 600;' : ''">{{
+          item.label
+        }}</span>
+      </template>
       <template v-if="item.render">
-        <component :is="item.render" v-bind="data" />
+        <span :style="item.valueBold ? 'font-weight: 600;' : ''">
+          <component :is="item.render" v-bind="data" />
+        </span>
       </template>
       <template v-else>
-        {{ data ? (data[item.field] ?? "-") : "-" }}
+        <span :style="item.valueBold ? 'font-weight: 600;' : ''">{{
+          data ? (data[item.field] ?? "-") : "-"
+        }}</span>
       </template>
     </n-descriptions-item>
   </n-descriptions>

@@ -19,6 +19,7 @@ interface AppState {
   showFooter: boolean
   showBreadcrumb: boolean
   loadFlag: boolean
+  globalLoading: boolean
   transitionAnimation: App.TransitionAnimation
   loginSet: { formShowLabel: boolean }
 }
@@ -35,6 +36,7 @@ export const useAppStore = defineStore('app', {
     showFooter: true,
     showBreadcrumb: true,
     loadFlag: true,
+    globalLoading: true,
     transitionAnimation: 'fade-slide',
     loginSet: { formShowLabel: true },
   }),
@@ -119,6 +121,9 @@ export const useAppStore = defineStore('app', {
           common: { ...this.theme.common, fontFamily: fontValue },
         }
       }
+    },
+    setGlobalLoading(loading: boolean) {
+      this.globalLoading = loading
     },
     reloadPage(delay = 0) {
       setTimeout(() => {

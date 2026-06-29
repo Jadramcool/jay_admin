@@ -100,6 +100,7 @@ const keepAliveRoutes = computed(() => {
     </n-layout>
 
     <SettingsDrawer ref="settingsRef" />
+    <NoticePopup />
   </n-layout>
 </template>
 

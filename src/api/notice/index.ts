@@ -1,2 +1,1 @@
-export { NoticeApi } from "./notice";
-
+export { NoticeApi } from './notice'

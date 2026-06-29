@@ -39,7 +39,8 @@ export function useMemberSchema() {
         table: {
           render: (row: any) => {
             const roles = row.roles || []
-            if (!roles.length) return '-'
+            if (!roles.length)
+              return '-'
             return roles.map((r: any) => r.name).join('、')
           },
         },

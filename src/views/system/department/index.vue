@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { DepartmentApi } from '@/api/system'
 import { Icon } from '@iconify/vue'
 import { nextTick, ref } from 'vue'
+import { DepartmentApi } from '@/api/system'
 import DepartmentModal from './components/DepartmentModal.vue'
 import { useMemberSchema } from './member-schema'
 import { useDepartmentSchema } from './schema'

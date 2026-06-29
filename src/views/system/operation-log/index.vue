@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { OperationLogApi } from '@/api/notice/index.ts'
+import { OperationLogApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
 import OperationLogDetailModal from './components/OperationLogDetailModal.vue'
 import { useOperationLogSchema } from './schema'

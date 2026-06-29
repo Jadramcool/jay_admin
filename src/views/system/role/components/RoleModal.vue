@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RoleApi } from '@/api/notice'
+import { RoleApi } from '@/api/system'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
 import { useRoleSchema } from '../schema'
 

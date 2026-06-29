@@ -1,8 +1,10 @@
 import type { Router } from 'vue-router'
-import { useAuthStore, usePermissionStore, useUserStore } from '@/store/modules'
+import { useAppStore, useAuthStore, usePermissionStore, useUserStore } from '@/store/modules'
 import request from '@/utils/http/axios'
 
 const WHITE_LIST: string[] = ['/login', '/404', '/403']
+
+let initialCheckDone = false
 
 async function getUserInfo(): Promise<Api.UserInfo | null> {
   try {
@@ -22,6 +24,13 @@ async function getMenus(): Promise<System.Menu[] | null> {
   }
 }
 
+function finishInitialLoad() {
+  if (!initialCheckDone) {
+    initialCheckDone = true
+    useAppStore().globalLoading = false
+  }
+}
+
 export function createPermissionGuard(router: Router) {
   router.beforeEach(async (to: any) => {
     try {
@@ -32,6 +41,7 @@ export function createPermissionGuard(router: Router) {
 
       // ========== 无 token ==========
       if (!token) {
+        finishInitialLoad()
         if (to.path === '/login')
           return true
         const redirect = to.path === '/' ? undefined : to.path
@@ -50,6 +60,7 @@ export function createPermissionGuard(router: Router) {
 
         if (!user) {
           authStore.resetLoginState()
+          finishInitialLoad()
           return { path: '/login' }
         }
 
@@ -58,6 +69,7 @@ export function createPermissionGuard(router: Router) {
         if (!menus) {
           authStore.resetLoginState()
           window.$message?.error?.('无法获取权限信息，请重新登录')
+          finishInitialLoad()
           return { path: '/login' }
         }
 
@@ -85,6 +97,7 @@ export function createPermissionGuard(router: Router) {
       }
 
       // 用户信息已加载 → 检查路由是否存在
+      finishInitialLoad()
       if (router.getRoutes().some((r: any) => r.name === to.name))
         return true
 
@@ -98,6 +111,7 @@ export function createPermissionGuard(router: Router) {
     }
     catch (error) {
       console.error('路由守卫异常:', error)
+      finishInitialLoad()
       return { path: '/login' }
     }
   })
