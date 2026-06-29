@@ -48,12 +48,6 @@ onUnmounted(() => {
 
 <template>
   <n-card :bordered="false" size="small" class="hero">
-    <div class="hero__bg" aria-hidden="true">
-      <div class="hero__orb hero__orb--a" />
-      <div class="hero__orb hero__orb--b" />
-      <div class="hero__grid" />
-    </div>
-
     <div class="hero__content">
       <div class="hero__identity">
         <div class="hero__avatar">
@@ -91,71 +85,12 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .hero {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  background: var(--card-color);
-
-  html.dark & {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    background: var(--card-color);
-  }
-
   :deep(.n-card-header) {
     display: none;
-  }
-
-  :deep(.n-card__content) {
-    padding: 28px 32px !important;
-  }
-}
-
-.hero__bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.hero__orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.3;
-
-  &--a {
-    width: 400px;
-    height: 400px;
-    top: -160px;
-    right: -80px;
-    background: color-mix(in srgb, var(--primary-color) 30%, transparent);
-  }
-
-  &--b {
-    width: 200px;
-    height: 200px;
-    bottom: -60px;
-    left: 20%;
-    background: color-mix(in srgb, #2080f0 20%, transparent);
-  }
-}
-
-.hero__grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
-
-  html.dark & {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
   }
 }
 
 .hero__content {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -166,10 +101,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 16px;
-}
-
-.hero__avatar {
-  flex-shrink: 0;
 }
 
 .hero__avatar-fallback {
@@ -209,10 +140,6 @@ onUnmounted(() => {
   color: var(--text-color-2);
 }
 
-.hero__dot {
-  color: var(--divider-color);
-}
-
 .hero__tags {
   display: flex;
   align-items: center;
@@ -246,10 +173,6 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
-  .hero {
-    padding: 20px;
-  }
-
   .hero__content {
     flex-direction: column;
     align-items: flex-start;
