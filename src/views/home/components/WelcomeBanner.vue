@@ -47,7 +47,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="hero">
+  <n-card :bordered="false" size="small" class="hero">
     <div class="hero__bg" aria-hidden="true">
       <div class="hero__orb hero__orb--a" />
       <div class="hero__orb hero__orb--b" />
@@ -86,15 +86,14 @@ onUnmounted(() => {
         <span v-if="user?.position" class="hero__tag hero__tag--position">{{ user.position }}</span>
       </div>
     </div>
-  </div>
+  </n-card>
 </template>
 
 <style lang="scss" scoped>
 .hero {
-  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
   overflow: hidden;
-  padding: 28px 32px;
-  border-radius: 16px;
   background: linear-gradient(
     135deg,
     color-mix(in srgb, var(--primary-color) 8%, var(--body-color)) 0%,
@@ -102,11 +101,20 @@ onUnmounted(() => {
   );
 
   html.dark & {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
     background: linear-gradient(
       135deg,
       color-mix(in srgb, var(--primary-color) 10%, rgb(16, 16, 20)) 0%,
       rgb(16, 16, 20) 100%
     );
+  }
+
+  :deep(.n-card-header) {
+    display: none;
+  }
+
+  :deep(.n-card__content) {
+    padding: 28px 32px !important;
   }
 }
 
