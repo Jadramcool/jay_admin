@@ -93,20 +93,11 @@ onUnmounted(() => {
 .hero {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   border-radius: 14px;
-  overflow: hidden;
-  background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--primary-color) 8%, var(--body-color)) 0%,
-    var(--body-color) 100%
-  );
+  background: var(--card-color);
 
   html.dark & {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--primary-color) 10%, rgb(16, 16, 20)) 0%,
-      rgb(16, 16, 20) 100%
-    );
+    background: var(--card-color);
   }
 
   :deep(.n-card-header) {
