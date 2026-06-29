@@ -37,61 +37,46 @@ async function loadStats() {
 </script>
 
 <template>
-  <div class="card card--stats">
-    <div class="card__bar" />
-    <div class="card__body">
-      <h3 class="card__title">
-        数据概览
-      </h3>
-      <div class="stats__grid">
-        <div v-for="(item, i) in statItems" :key="item.label" class="stat" :style="{ '--clr': item.color, '--i': i }">
-          <n-skeleton v-if="loading && !stats" text :repeat="2" class="stat__skel" />
-          <template v-else>
-            <div class="stat__icon">
-              {{ item.icon }}
+  <n-card title="数据概览" :bordered="false" size="small" class="card card--stats" content-style="padding: 0 20px 20px">
+    <div class="stats__grid">
+      <div v-for="(item, i) in statItems" :key="item.label" class="stat" :style="{ '--clr': item.color, '--i': i }">
+        <n-skeleton v-if="loading && !stats" text :repeat="2" class="stat__skel" />
+        <template v-else>
+          <div class="stat__icon">
+            {{ item.icon }}
+          </div>
+          <div class="stat__info">
+            <span class="stat__val">{{ item.value }}</span>
+            <div class="stat__meta">
+              <span class="stat__label">{{ item.label }}</span>
+              <span v-if="item.trend !== undefined && item.trend !== 0" class="stat__trend" :class="item.trend > 0 ? 'up' : 'dn'">
+                {{ item.trend > 0 ? '+' : '' }}{{ item.trend }}%
+              </span>
             </div>
-            <div class="stat__info">
-              <span class="stat__val">{{ item.value }}</span>
-              <div class="stat__meta">
-                <span class="stat__label">{{ item.label }}</span>
-                <span v-if="item.trend !== undefined && item.trend !== 0" class="stat__trend" :class="item.trend > 0 ? 'up' : 'dn'">
-                  {{ item.trend > 0 ? '+' : '' }}{{ item.trend }}%
-                </span>
-              </div>
-            </div>
-          </template>
-        </div>
+          </div>
+        </template>
       </div>
     </div>
-  </div>
+  </n-card>
 </template>
 
 <style lang="scss" scoped>
 .card {
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
 
   html.dark & {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
-}
 
-.card__bar {
-  height: 3px;
-  background: linear-gradient(90deg, #18a058, #36ad6a);
-}
+  :deep(.n-card-header) {
+    padding: 18px 20px 0 !important;
+  }
 
-.card__body {
-  padding: 18px 20px 20px;
-}
-
-.card__title {
-  margin: 0 0 14px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-color-1);
+  :deep(.n-card-header__title) {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
 }
 
 .stats__grid {

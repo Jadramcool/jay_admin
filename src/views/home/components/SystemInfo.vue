@@ -32,77 +32,62 @@ async function loadSysInfo() {
 </script>
 
 <template>
-  <div class="card card--sys">
-    <div class="card__bar" />
-    <div class="card__body">
-      <h3 class="card__title">
-        系统信息
-      </h3>
-      <n-skeleton v-if="loading" :repeat="5" text />
-      <template v-else>
-        <div v-for="res in resources" :key="res.label" class="sys__res">
-          <div class="sys__res-top">
-            <span class="sys__res-label">{{ res.label }}</span>
-            <span class="sys__res-val" :style="{ color: res.color }">{{ res.value }}%</span>
-          </div>
-          <div class="sys__bar" :style="{ '--c': res.color }">
-            <div class="sys__bar-fill" :style="{ width: `${res.value}%` }" />
-          </div>
+  <n-card title="系统信息" :bordered="false" size="small" class="card card--sys" content-style="padding: 0 20px 20px">
+    <n-skeleton v-if="loading" :repeat="5" text />
+    <template v-else>
+      <div v-for="res in resources" :key="res.label" class="sys__res">
+        <div class="sys__res-top">
+          <span class="sys__res-label">{{ res.label }}</span>
+          <span class="sys__res-val" :style="{ color: res.color }">{{ res.value }}%</span>
         </div>
-        <div class="sys__meta">
-          <div class="sys__kv">
-            <span class="sys__k">运行时间</span>
-            <span class="sys__v">{{ sysInfo?.uptime ?? '-' }}</span>
-          </div>
-          <div class="sys__kv">
-            <span class="sys__k">版本</span>
-            <span class="sys__v">v{{ sysInfo?.version ?? '-' }}</span>
-          </div>
-          <div class="sys__kv">
-            <span class="sys__k">Node.js</span>
-            <span class="sys__v">{{ sysInfo?.nodeVersion ?? '-' }}</span>
-          </div>
-          <div class="sys__kv">
-            <span class="sys__k">平台</span>
-            <span class="sys__v">{{ sysInfo?.platform ?? '-' }}</span>
-          </div>
-          <div class="sys__kv">
-            <span class="sys__k">数据记录</span>
-            <span class="sys__v">{{ sysInfo?.dbRecords ?? '-' }}</span>
-          </div>
+        <div class="sys__bar" :style="{ '--c': res.color }">
+          <div class="sys__bar-fill" :style="{ width: `${res.value}%` }" />
         </div>
-      </template>
-    </div>
-  </div>
+      </div>
+      <div class="sys__meta">
+        <div class="sys__kv">
+          <span class="sys__k">运行时间</span>
+          <span class="sys__v">{{ sysInfo?.uptime ?? '-' }}</span>
+        </div>
+        <div class="sys__kv">
+          <span class="sys__k">版本</span>
+          <span class="sys__v">v{{ sysInfo?.version ?? '-' }}</span>
+        </div>
+        <div class="sys__kv">
+          <span class="sys__k">Node.js</span>
+          <span class="sys__v">{{ sysInfo?.nodeVersion ?? '-' }}</span>
+        </div>
+        <div class="sys__kv">
+          <span class="sys__k">平台</span>
+          <span class="sys__v">{{ sysInfo?.platform ?? '-' }}</span>
+        </div>
+        <div class="sys__kv">
+          <span class="sys__k">数据记录</span>
+          <span class="sys__v">{{ sysInfo?.dbRecords ?? '-' }}</span>
+        </div>
+      </div>
+    </template>
+  </n-card>
 </template>
 
 <style lang="scss" scoped>
 .card {
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
   height: 100%;
 
   html.dark & {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
-}
 
-.card__bar {
-  height: 3px;
-  background: linear-gradient(90deg, #7c3aed, #a855f7);
-}
+  :deep(.n-card-header) {
+    padding: 18px 20px 0 !important;
+  }
 
-.card__body {
-  padding: 18px 20px 20px;
-}
-
-.card__title {
-  margin: 0 0 16px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-color-1);
+  :deep(.n-card-header__title) {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
 }
 
 .sys__res {

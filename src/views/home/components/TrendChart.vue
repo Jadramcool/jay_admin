@@ -81,68 +81,43 @@ async function loadTrends() {
 </script>
 
 <template>
-  <div class="card card--trend">
-    <div class="card__bar" />
-    <div class="card__body">
-      <div class="card__header">
-        <h3 class="card__title">
-          趋势分析
-        </h3>
-        <div class="trend__tabs">
-          <button v-for="(cfg, key) in seriesConfig" :key="key" class="trend__tab" :class="{ on: activeSeries === key }" :style="activeSeries === key ? { '--t': cfg.color } : {}" @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'">
-            {{ cfg.label }}
-          </button>
-        </div>
+  <n-card title="趋势分析" :bordered="false" size="small" class="card card--trend" content-style="display:flex;flex-direction:column;padding:0 20px 20px;flex:1">
+    <template #header-extra>
+      <div class="trend__tabs">
+        <button v-for="(cfg, key) in seriesConfig" :key="key" class="trend__tab" :class="{ on: activeSeries === key }" :style="activeSeries === key ? { '--t': cfg.color } : {}" @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'">
+          {{ cfg.label }}
+        </button>
       </div>
-      <n-skeleton v-if="loading && !trends" :repeat="4" text />
-      <template v-else>
-        <VChart :option="chartOption" autoresize class="trend__chart" />
-        <div class="trend__total">
-          <span class="trend__total-label">{{ seriesConfig[activeSeries].label }} · 近7日</span>
-          <span class="trend__total-val" :style="{ color: seriesConfig[activeSeries].color }">{{ totalValue }}</span>
-        </div>
-      </template>
-    </div>
-  </div>
+    </template>
+    <n-skeleton v-if="loading && !trends" :repeat="4" text />
+    <template v-else>
+      <VChart :option="chartOption" autoresize class="trend__chart" />
+      <div class="trend__total">
+        <span class="trend__total-label">{{ seriesConfig[activeSeries].label }} · 近7日</span>
+        <span class="trend__total-val" :style="{ color: seriesConfig[activeSeries].color }">{{ totalValue }}</span>
+      </div>
+    </template>
+  </n-card>
 </template>
 
 <style lang="scss" scoped>
 .card {
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
   height: 100%;
 
   html.dark & {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
-}
 
-.card__bar {
-  height: 3px;
-  background: linear-gradient(90deg, #2080f0, #4098fc);
-}
+  :deep(.n-card-header) {
+    padding: 18px 20px 0 !important;
+  }
 
-.card__body {
-  padding: 18px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.card__title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-color-1);
+  :deep(.n-card-header__title) {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
 }
 
 .trend__tabs {

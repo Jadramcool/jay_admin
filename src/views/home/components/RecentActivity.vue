@@ -60,62 +60,58 @@ async function loadActivities() {
 </script>
 
 <template>
-  <div class="card card--activity">
-    <div class="card__bar" />
-    <div class="card__body">
-      <div class="activity__top">
-        <h3 class="card__title">
-          实时动态
-        </h3>
-        <button class="activity__more" @click="router.push('/system/operation-log')">
-          查看全部
-        </button>
-      </div>
-      <n-skeleton v-if="loading" :repeat="6" text />
-      <div v-else-if="activities.length === 0" class="activity__empty">
-        暂无动态
-      </div>
-      <div v-else class="activity__list">
-        <div v-for="(act, i) in activities" :key="act.id" class="activity__item" :style="{ '--i': i }">
-          <div class="activity__line">
-            <div class="activity__dot" :style="{ background: typeColor[act.operationType] || '#909090' }" />
-            <div v-if="i < activities.length - 1" class="activity__bar" />
+  <n-card title="实时动态" :bordered="false" size="small" class="card card--activity" content-style="padding: 0 20px 20px">
+    <template #header-extra>
+      <button class="activity__more" @click="router.push('/system/operation-log')">
+        查看全部
+      </button>
+    </template>
+    <n-skeleton v-if="loading" :repeat="6" text />
+    <div v-else-if="activities.length === 0" class="activity__empty">
+      暂无动态
+    </div>
+    <div v-else class="activity__list">
+      <div v-for="(act, i) in activities" :key="act.id" class="activity__item" :style="{ '--i': i }">
+        <div class="activity__line">
+          <div class="activity__dot" :style="{ background: typeColor[act.operationType] || '#909090' }" />
+          <div v-if="i < activities.length - 1" class="activity__bar" />
+        </div>
+        <div class="activity__body">
+          <div class="activity__head">
+            <span class="activity__user">{{ act.username }}</span>
+            <span class="activity__op" :style="{ background: `${typeColor[act.operationType] || '#909090'}18`, color: typeColor[act.operationType] || '#909090' }">
+              {{ typeLabel[act.operationType] || act.operationType }}
+            </span>
+            <span class="activity__mod">{{ act.module }}</span>
           </div>
-          <div class="activity__body">
-            <div class="activity__head">
-              <span class="activity__user">{{ act.username }}</span>
-              <span class="activity__op" :style="{ background: `${typeColor[act.operationType] || '#909090'}18`, color: typeColor[act.operationType] || '#909090' }">
-                {{ typeLabel[act.operationType] || act.operationType }}
-              </span>
-              <span class="activity__mod">{{ act.module }}</span>
-            </div>
-            <div class="activity__foot">
-              <span class="activity__desc">{{ act.action }}</span>
-              <span class="activity__time">{{ formatTime(act.time) }}</span>
-            </div>
+          <div class="activity__foot">
+            <span class="activity__desc">{{ act.action }}</span>
+            <span class="activity__time">{{ formatTime(act.time) }}</span>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </n-card>
 </template>
 
 <style lang="scss" scoped>
 .card {
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--card-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
   height: 100%;
 
   html.dark & {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
-}
 
-.card__bar {
-  height: 3px;
-  background: linear-gradient(90deg, #ec4899, #f472b6);
+  :deep(.n-card-header) {
+    padding: 18px 20px 0 !important;
+  }
+
+  :deep(.n-card-header__title) {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+  }
 }
 
 .card__body {
