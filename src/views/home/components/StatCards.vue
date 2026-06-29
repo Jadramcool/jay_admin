@@ -70,11 +70,11 @@ async function loadStats() {
 .card {
   border-radius: 14px;
   overflow: hidden;
-  background: color-mix(in srgb, var(--card-color) 92%, transparent);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  background: var(--card-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
   html.dark & {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
