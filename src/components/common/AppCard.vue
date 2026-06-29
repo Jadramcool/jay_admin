@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 
+/**
+ * AppCard — 基于 n-card 的统一卡片封装。
+ *
+ * 特性：
+ * - 内置 loading/empty/collapsible 状态管理
+ * - 可配置阴影层级 shadow (none/light/medium/heavy)
+ * - 透传 n-card 常用 props (size/hoverable/segmented/closable/…)
+ * - 透传全部 slots (header/header-extra/footer/action/cover)
+ */
 interface AppCardProps {
   title?: string
   size?: 'small' | 'medium' | 'large' | 'huge'
