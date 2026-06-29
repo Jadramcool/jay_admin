@@ -1,6 +1,6 @@
 shellEmulator: true
 
-trustPolicy: allow
+trustPolicy: no-downgrade
 
 allowBuilds:
   '@parcel/watcher': true
