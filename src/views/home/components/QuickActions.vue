@@ -24,36 +24,47 @@ function go(route: string) {
 </script>
 
 <template>
-  <div class="quick">
-    <h3 class="quick__title">
-      快捷入口
-    </h3>
-    <div class="quick__grid">
-      <button
-        v-for="link in quickLinks"
-        :key="link.label"
-        class="quick__item"
-        :style="{ '--accent': link.color }"
-        @click="go(link.route)"
-      >
-        <div class="quick__item-icon">
-          {{ link.label.charAt(0) }}
-        </div>
-        <span class="quick__item-label">{{ link.label }}</span>
-      </button>
+  <div class="card card--quick">
+    <div class="card__bar" />
+    <div class="card__body">
+      <h3 class="card__title">
+        快捷入口
+      </h3>
+      <div class="quick__grid">
+        <button v-for="link in quickLinks" :key="link.label" class="quick__item" :style="{ '--c': link.color }" @click="go(link.route)">
+          <div class="quick__icon">
+            {{ link.label.charAt(0) }}
+          </div>
+          <span class="quick__label">{{ link.label }}</span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.quick {
-  padding: 20px 22px;
+.card {
   border-radius: 14px;
-  background: color-mix(in srgb, var(--card-color) 90%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-color) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   height: 100%;
+
+  html.dark & {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
 }
 
-.quick__title {
+.card__bar {
+  height: 3px;
+  background: linear-gradient(90deg, #f0a020, #fcb040);
+}
+
+.card__body {
+  padding: 18px 20px 20px;
+}
+
+.card__title {
   margin: 0 0 14px;
   font-size: 14px;
   font-weight: 700;
@@ -64,6 +75,10 @@ function go(route: string) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .quick__item {
@@ -81,38 +96,32 @@ function go(route: string) {
   color: var(--text-color-2);
 
   &:hover {
-    background: color-mix(in srgb, var(--accent) 8%, var(--card-color));
+    background: color-mix(in srgb, var(--c) 8%, transparent);
     transform: translateY(-1px);
   }
 }
 
-.quick__item-icon {
+.quick__icon {
   width: 34px;
   height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+  color: var(--c);
   font-size: 13px;
   font-weight: 800;
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
 
-.quick__item:hover .quick__item-icon {
+.quick__item:hover .quick__icon {
   transform: scale(1.1);
 }
 
-.quick__item-label {
+.quick__label {
   font-size: 13px;
   font-weight: 600;
-}
-
-@media (max-width: 768px) {
-  .quick__grid {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

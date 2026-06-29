@@ -5,9 +5,7 @@ import { useRouter } from 'vue-router'
 import { DashboardApi } from '@/api/dashboard'
 import 'dayjs/locale/zh-cn'
 
-const props = defineProps<{
-  visible: boolean
-}>()
+const props = defineProps<{ visible: boolean }>()
 
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
@@ -62,44 +60,39 @@ async function loadActivities() {
 </script>
 
 <template>
-  <div class="activity">
-    <div class="activity__top">
-      <h3 class="activity__title">
-        实时动态
-      </h3>
-      <button class="activity__more" @click="router.push('/system/operation-log')">
-        查看全部
-      </button>
-    </div>
-
-    <n-skeleton v-if="loading" :repeat="6" text />
-
-    <div v-else-if="activities.length === 0" class="activity__empty">
-      暂无动态
-    </div>
-
-    <div v-else class="activity__list">
-      <div
-        v-for="(act, i) in activities"
-        :key="act.id"
-        class="activity__item"
-        :style="{ '--i': i }"
-      >
-        <div class="activity__line">
-          <div class="activity__dot" :style="{ background: typeColor[act.operationType] || '#909090' }" />
-          <div v-if="i < activities.length - 1" class="activity__bar" />
-        </div>
-        <div class="activity__body">
-          <div class="activity__head">
-            <span class="activity__user">{{ act.username }}</span>
-            <span class="activity__op" :style="{ background: `${typeColor[act.operationType] || '#909090'}18`, color: typeColor[act.operationType] || '#909090' }">
-              {{ typeLabel[act.operationType] || act.operationType }}
-            </span>
-            <span class="activity__module">{{ act.module }}</span>
+  <div class="card card--activity">
+    <div class="card__bar" />
+    <div class="card__body">
+      <div class="activity__top">
+        <h3 class="card__title">
+          实时动态
+        </h3>
+        <button class="activity__more" @click="router.push('/system/operation-log')">
+          查看全部
+        </button>
+      </div>
+      <n-skeleton v-if="loading" :repeat="6" text />
+      <div v-else-if="activities.length === 0" class="activity__empty">
+        暂无动态
+      </div>
+      <div v-else class="activity__list">
+        <div v-for="(act, i) in activities" :key="act.id" class="activity__item" :style="{ '--i': i }">
+          <div class="activity__line">
+            <div class="activity__dot" :style="{ background: typeColor[act.operationType] || '#909090' }" />
+            <div v-if="i < activities.length - 1" class="activity__bar" />
           </div>
-          <div class="activity__foot">
-            <span class="activity__desc">{{ act.action }}</span>
-            <span class="activity__time">{{ formatTime(act.time) }}</span>
+          <div class="activity__body">
+            <div class="activity__head">
+              <span class="activity__user">{{ act.username }}</span>
+              <span class="activity__op" :style="{ background: `${typeColor[act.operationType] || '#909090'}18`, color: typeColor[act.operationType] || '#909090' }">
+                {{ typeLabel[act.operationType] || act.operationType }}
+              </span>
+              <span class="activity__mod">{{ act.module }}</span>
+            </div>
+            <div class="activity__foot">
+              <span class="activity__desc">{{ act.action }}</span>
+              <span class="activity__time">{{ formatTime(act.time) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -108,11 +101,32 @@ async function loadActivities() {
 </template>
 
 <style lang="scss" scoped>
-.activity {
-  padding: 20px 22px;
+.card {
   border-radius: 14px;
-  background: color-mix(in srgb, var(--card-color) 90%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-color) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   height: 100%;
+
+  html.dark & {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.card__bar {
+  height: 3px;
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+}
+
+.card__body {
+  padding: 18px 20px 20px;
+}
+
+.card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color-1);
 }
 
 .activity__top {
@@ -120,13 +134,6 @@ async function loadActivities() {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
-}
-
-.activity__title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-color-1);
 }
 
 .activity__more {
@@ -139,7 +146,6 @@ async function loadActivities() {
   border-radius: 6px;
   font-family: inherit;
   transition: all 0.2s ease;
-
   &:hover {
     background: var(--hover-color);
     color: var(--text-color-1);
@@ -225,7 +231,7 @@ async function loadActivities() {
   line-height: 1.6;
 }
 
-.activity__module {
+.activity__mod {
   font-size: 11.5px;
   color: var(--text-color-4);
 }

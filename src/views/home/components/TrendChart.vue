@@ -6,9 +6,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
 import { DashboardApi } from '@/api/dashboard'
 
-const props = defineProps<{
-  visible: boolean
-}>()
+const props = defineProps<{ visible: boolean }>()
 
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent])
 
@@ -25,11 +23,9 @@ const seriesConfig = {
 function buildOption() {
   if (!trends.value)
     return {}
-
   const clr = seriesConfig[activeSeries.value].color
   const data = trends.value[activeSeries.value]
   const dates = trends.value.dates.map(d => `${Number(d.split('-')[1])}/${Number(d.split('-')[2])}`)
-
   return {
     tooltip: {
       trigger: 'axis',
@@ -43,47 +39,22 @@ function buildOption() {
       },
     },
     grid: { left: 0, right: 0, top: 8, bottom: 0, containLabel: false },
-    xAxis: {
-      type: 'category',
-      data: dates,
-      axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { show: false },
-    },
-    yAxis: {
-      type: 'value',
-      splitLine: { show: false },
-      axisLabel: { show: false },
-    },
-    series: [
-      {
-        type: 'line',
-        data,
-        smooth: true,
-        showSymbol: false,
-        lineStyle: { width: 2.5, color: clr },
-        areaStyle: {
-          color: {
-            type: 'linear',
-            x: 0,
-            y: 0,
-            x2: 0,
-            y2: 1,
-            colorStops: [
-              { offset: 0, color: `${clr}50` },
-              { offset: 1, color: `${clr}05` },
-            ],
-          },
-        },
-        animationDuration: 800,
-        animationEasing: 'cubicOut',
-      },
-    ],
+    xAxis: { type: 'category', data: dates, axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false } },
+    yAxis: { type: 'value', splitLine: { show: false }, axisLabel: { show: false } },
+    series: [{
+      type: 'line',
+      data,
+      smooth: true,
+      showSymbol: false,
+      lineStyle: { width: 2.5, color: clr },
+      areaStyle: { color: { type: 'linear', x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: `${clr}50` }, { offset: 1, color: `${clr}05` }] } },
+      animationDuration: 800,
+      animationEasing: 'cubicOut',
+    }],
   }
 }
 
 const chartOption = computed(() => buildOption())
-
 const totalValue = computed(() => {
   if (!trends.value)
     return 0
@@ -101,7 +72,7 @@ async function loadTrends() {
     trends.value = await DashboardApi.trends(7)
   }
   catch {
-    // ignore
+    /* ignore */
   }
   finally {
     loading.value = false
@@ -110,56 +81,64 @@ async function loadTrends() {
 </script>
 
 <template>
-  <div class="trend">
-    <div class="trend__top">
-      <h3 class="trend__title">
-        趋势分析
-      </h3>
-      <div class="trend__tabs">
-        <button
-          v-for="(cfg, key) in seriesConfig"
-          :key="key"
-          class="trend__tab"
-          :class="{ 'trend__tab--on': activeSeries === key }"
-          :style="activeSeries === key ? { '--tab-clr': cfg.color } : {}"
-          @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'"
-        >
-          {{ cfg.label }}
-        </button>
+  <div class="card card--trend">
+    <div class="card__bar" />
+    <div class="card__body">
+      <div class="card__header">
+        <h3 class="card__title">
+          趋势分析
+        </h3>
+        <div class="trend__tabs">
+          <button v-for="(cfg, key) in seriesConfig" :key="key" class="trend__tab" :class="{ on: activeSeries === key }" :style="activeSeries === key ? { '--t': cfg.color } : {}" @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'">
+            {{ cfg.label }}
+          </button>
+        </div>
       </div>
+      <n-skeleton v-if="loading && !trends" :repeat="4" text />
+      <template v-else>
+        <VChart :option="chartOption" autoresize class="trend__chart" />
+        <div class="trend__total">
+          <span class="trend__total-label">{{ seriesConfig[activeSeries].label }} · 近7日</span>
+          <span class="trend__total-val" :style="{ color: seriesConfig[activeSeries].color }">{{ totalValue }}</span>
+        </div>
+      </template>
     </div>
-
-    <n-skeleton v-if="loading && !trends" :repeat="4" text />
-    <template v-else>
-      <VChart :option="chartOption" autoresize class="trend__chart" />
-      <div class="trend__total">
-        <span class="trend__total-label">{{ seriesConfig[activeSeries].label }} · 近7日</span>
-        <span class="trend__total-value" :style="{ color: seriesConfig[activeSeries].color }">
-          {{ totalValue }}
-        </span>
-      </div>
-    </template>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.trend {
-  padding: 20px 22px;
+.card {
   border-radius: 14px;
-  background: color-mix(in srgb, var(--card-color) 90%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-color) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   height: 100%;
-  display: flex;
-  flex-direction: column;
+
+  html.dark & {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
 }
 
-.trend__top {
+.card__bar {
+  height: 3px;
+  background: linear-gradient(90deg, #2080f0, #4098fc);
+}
+
+.card__body {
+  padding: 18px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 4px;
 }
 
-.trend__title {
+.card__title {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
@@ -186,10 +165,9 @@ async function loadTrends() {
     background: var(--hover-color);
     color: var(--text-color-1);
   }
-
-  &--on {
-    background: color-mix(in srgb, var(--tab-clr) 12%, transparent) !important;
-    color: var(--tab-clr) !important;
+  &.on {
+    background: color-mix(in srgb, var(--t) 12%, transparent) !important;
+    color: var(--t) !important;
     font-weight: 600;
   }
 }
@@ -213,8 +191,7 @@ async function loadTrends() {
   font-size: 12px;
   color: var(--text-color-4);
 }
-
-.trend__total-value {
+.trend__total-val {
   font-size: 20px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;

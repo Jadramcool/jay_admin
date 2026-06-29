@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { DashboardApi } from '@/api/dashboard'
 
-const props = defineProps<{
-  visible: boolean
-}>()
+const props = defineProps<{ visible: boolean }>()
 
 const sysInfo = ref<Dashboard.SystemInfo | null>(null)
 const loading = ref(true)
@@ -25,7 +23,7 @@ async function loadSysInfo() {
     sysInfo.value = await DashboardApi.systemInfo()
   }
   catch {
-    // ignore
+    /* ignore */
   }
   finally {
     loading.value = false
@@ -34,102 +32,117 @@ async function loadSysInfo() {
 </script>
 
 <template>
-  <div class="sysinfo">
-    <h3 class="sysinfo__title">
-      系统信息
-    </h3>
-
-    <n-skeleton v-if="loading" :repeat="5" text />
-    <template v-else>
-      <div v-for="res in resources" :key="res.label" class="sysinfo__resource">
-        <div class="sysinfo__res-top">
-          <span class="sysinfo__res-label">{{ res.label }}</span>
-          <span class="sysinfo__res-value" :style="{ color: res.color }">{{ res.value }}%</span>
+  <div class="card card--sys">
+    <div class="card__bar" />
+    <div class="card__body">
+      <h3 class="card__title">
+        系统信息
+      </h3>
+      <n-skeleton v-if="loading" :repeat="5" text />
+      <template v-else>
+        <div v-for="res in resources" :key="res.label" class="sys__res">
+          <div class="sys__res-top">
+            <span class="sys__res-label">{{ res.label }}</span>
+            <span class="sys__res-val" :style="{ color: res.color }">{{ res.value }}%</span>
+          </div>
+          <div class="sys__bar" :style="{ '--c': res.color }">
+            <div class="sys__bar-fill" :style="{ width: `${res.value}%` }" />
+          </div>
         </div>
-        <div class="sysinfo__bar" :style="{ '--bar-clr': res.color }">
-          <div class="sysinfo__bar-fill" :style="{ width: `${res.value}%` }" />
+        <div class="sys__meta">
+          <div class="sys__kv">
+            <span class="sys__k">运行时间</span>
+            <span class="sys__v">{{ sysInfo?.uptime ?? '-' }}</span>
+          </div>
+          <div class="sys__kv">
+            <span class="sys__k">版本</span>
+            <span class="sys__v">v{{ sysInfo?.version ?? '-' }}</span>
+          </div>
+          <div class="sys__kv">
+            <span class="sys__k">Node.js</span>
+            <span class="sys__v">{{ sysInfo?.nodeVersion ?? '-' }}</span>
+          </div>
+          <div class="sys__kv">
+            <span class="sys__k">平台</span>
+            <span class="sys__v">{{ sysInfo?.platform ?? '-' }}</span>
+          </div>
+          <div class="sys__kv">
+            <span class="sys__k">数据记录</span>
+            <span class="sys__v">{{ sysInfo?.dbRecords ?? '-' }}</span>
+          </div>
         </div>
-      </div>
-
-      <div class="sysinfo__meta">
-        <div class="sysinfo__kv">
-          <span class="sysinfo__k">运行时间</span>
-          <span class="sysinfo__v">{{ sysInfo?.uptime ?? '-' }}</span>
-        </div>
-        <div class="sysinfo__kv">
-          <span class="sysinfo__k">版本</span>
-          <span class="sysinfo__v">v{{ sysInfo?.version ?? '-' }}</span>
-        </div>
-        <div class="sysinfo__kv">
-          <span class="sysinfo__k">Node.js</span>
-          <span class="sysinfo__v">{{ sysInfo?.nodeVersion ?? '-' }}</span>
-        </div>
-        <div class="sysinfo__kv">
-          <span class="sysinfo__k">平台</span>
-          <span class="sysinfo__v">{{ sysInfo?.platform ?? '-' }}</span>
-        </div>
-        <div class="sysinfo__kv">
-          <span class="sysinfo__k">数据记录</span>
-          <span class="sysinfo__v">{{ sysInfo?.dbRecords ?? '-' }}</span>
-        </div>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.sysinfo {
-  padding: 20px 22px;
+.card {
   border-radius: 14px;
-  background: color-mix(in srgb, var(--card-color) 90%, transparent);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--card-color) 92%, transparent);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   height: 100%;
+
+  html.dark & {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  }
 }
 
-.sysinfo__title {
+.card__bar {
+  height: 3px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+}
+
+.card__body {
+  padding: 18px 20px 20px;
+}
+
+.card__title {
   margin: 0 0 16px;
   font-size: 14px;
   font-weight: 700;
   color: var(--text-color-1);
 }
 
-.sysinfo__resource {
+.sys__res {
   margin-bottom: 14px;
 }
 
-.sysinfo__res-top {
+.sys__res-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
 }
 
-.sysinfo__res-label {
+.sys__res-label {
   font-size: 13px;
   color: var(--text-color-2);
   font-weight: 500;
 }
 
-.sysinfo__res-value {
+.sys__res-val {
   font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.sysinfo__bar {
+.sys__bar {
   height: 6px;
   border-radius: 3px;
-  background: color-mix(in srgb, var(--bar-clr) 10%, transparent);
+  background: color-mix(in srgb, var(--c) 10%, transparent);
   overflow: hidden;
 }
 
-.sysinfo__bar-fill {
+.sys__bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--bar-clr);
+  background: var(--c);
   transition: width 0.6s ease;
 }
 
-.sysinfo__meta {
+.sys__meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
@@ -138,18 +151,18 @@ async function loadSysInfo() {
   border-top: 1px solid var(--divider-color);
 }
 
-.sysinfo__kv {
+.sys__kv {
   display: flex;
   flex-direction: column;
   gap: 1px;
 }
 
-.sysinfo__k {
+.sys__k {
   font-size: 11.5px;
   color: var(--text-color-4);
 }
 
-.sysinfo__v {
+.sys__v {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color-1);

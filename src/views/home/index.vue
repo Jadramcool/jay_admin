@@ -18,43 +18,27 @@ onMounted(() => {
 
 <template>
   <div class="db">
-    <div class="db__bg" aria-hidden="true">
-      <div class="db__grain" />
-    </div>
-
     <div class="db__body">
       <WelcomeBanner />
 
       <template v-if="isAdmin">
         <StatCards :visible="visible" />
 
-        <div class="db__cols-3">
-          <div class="db__span-2">
-            <TrendChart :visible="visible" />
-          </div>
-          <div class="db__span-1">
-            <SystemInfo :visible="visible" />
-          </div>
+        <div class="db__row">
+          <TrendChart :visible="visible" />
+          <SystemInfo :visible="visible" />
         </div>
 
-        <div class="db__cols-3">
-          <div class="db__span-1">
-            <QuickActions />
-          </div>
-          <div class="db__span-2">
-            <RecentActivity :visible="visible" />
-          </div>
+        <div class="db__row db__row--wide-left">
+          <QuickActions />
+          <RecentActivity :visible="visible" />
         </div>
       </template>
 
       <template v-else>
-        <div class="db__cols-3">
-          <div class="db__span-1">
-            <QuickActions />
-          </div>
-          <div class="db__span-2">
-            <RecentActivity :visible="visible" />
-          </div>
+        <div class="db__row db__row--wide-left">
+          <QuickActions />
+          <RecentActivity :visible="visible" />
         </div>
       </template>
     </div>
@@ -74,31 +58,7 @@ onMounted(() => {
   }
 }
 
-.db__bg {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.db__grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.25;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 160px 160px;
-  mix-blend-mode: overlay;
-
-  html.dark & {
-    opacity: 0.08;
-    mix-blend-mode: soft-light;
-  }
-}
-
 .db__body {
-  position: relative;
-  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -106,10 +66,14 @@ onMounted(() => {
   min-height: 100%;
 }
 
-.db__cols-3 {
+.db__row {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 2fr 1fr;
   gap: 14px;
+
+  &--wide-left {
+    grid-template-columns: 1fr 2fr;
+  }
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
