@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import { DashboardApi } from '@/api/dashboard'
 
 const props = defineProps<{
@@ -10,9 +9,9 @@ const sysInfo = ref<Dashboard.SystemInfo | null>(null)
 const loading = ref(true)
 
 const resources = computed(() => [
-  { label: 'CPU', value: sysInfo.value?.cpu ?? 0, icon: 'icon-park-outline:computer', color: '#18a058' },
-  { label: '内存', value: sysInfo.value?.memory ?? 0, icon: 'icon-park-outline:memory', color: '#2080f0' },
-  { label: '磁盘', value: sysInfo.value?.disk ?? 0, icon: 'icon-park-outline:hard-disk', color: '#f0a020' },
+  { label: 'CPU', value: sysInfo.value?.cpu ?? 0, color: '#18a058' },
+  { label: '内存', value: sysInfo.value?.memory ?? 0, color: '#2080f0' },
+  { label: '磁盘', value: sysInfo.value?.disk ?? 0, color: '#f0a020' },
 ])
 
 watch(() => props.visible, (v) => {
@@ -35,126 +34,122 @@ async function loadSysInfo() {
 </script>
 
 <template>
-  <n-card title="系统信息" size="small" :bordered="false" class="sys-card">
+  <div class="sysinfo">
+    <h3 class="sysinfo__title">
+      系统信息
+    </h3>
+
     <n-skeleton v-if="loading" :repeat="5" text />
     <template v-else>
-      <div v-for="res in resources" :key="res.label" class="sys-resource">
-        <div class="sys-resource__header">
-          <div class="sys-resource__label">
-            <Icon :icon="res.icon" class="sys-resource__icon" :style="{ color: res.color }" />
-            <span>{{ res.label }}</span>
-          </div>
-          <span class="sys-resource__value" :style="{ color: res.color }">
-            {{ res.value }}%
-          </span>
+      <div v-for="res in resources" :key="res.label" class="sysinfo__resource">
+        <div class="sysinfo__res-top">
+          <span class="sysinfo__res-label">{{ res.label }}</span>
+          <span class="sysinfo__res-value" :style="{ color: res.color }">{{ res.value }}%</span>
         </div>
-        <n-progress
-          type="line"
-          :percentage="res.value"
-          :color="res.color"
-          :rail-color="`${res.color}15`"
-          :height="6"
-          :border-radius="3"
-          indicator-placement="inside"
-        />
+        <div class="sysinfo__bar" :style="{ '--bar-clr': res.color }">
+          <div class="sysinfo__bar-fill" :style="{ width: `${res.value}%` }" />
+        </div>
       </div>
 
-      <div class="sys-meta">
-        <div class="sys-meta__item">
-          <span class="sys-meta__label">运行时间</span>
-          <span class="sys-meta__value">{{ sysInfo?.uptime ?? '-' }}</span>
+      <div class="sysinfo__meta">
+        <div class="sysinfo__kv">
+          <span class="sysinfo__k">运行时间</span>
+          <span class="sysinfo__v">{{ sysInfo?.uptime ?? '-' }}</span>
         </div>
-        <div class="sys-meta__item">
-          <span class="sys-meta__label">系统版本</span>
-          <span class="sys-meta__value">v{{ sysInfo?.version ?? '-' }}</span>
+        <div class="sysinfo__kv">
+          <span class="sysinfo__k">版本</span>
+          <span class="sysinfo__v">v{{ sysInfo?.version ?? '-' }}</span>
         </div>
-        <div class="sys-meta__item">
-          <span class="sys-meta__label">Node.js</span>
-          <span class="sys-meta__value">{{ sysInfo?.nodeVersion ?? '-' }}</span>
+        <div class="sysinfo__kv">
+          <span class="sysinfo__k">Node.js</span>
+          <span class="sysinfo__v">{{ sysInfo?.nodeVersion ?? '-' }}</span>
         </div>
-        <div class="sys-meta__item">
-          <span class="sys-meta__label">平台</span>
-          <span class="sys-meta__value">{{ sysInfo?.platform ?? '-' }}</span>
+        <div class="sysinfo__kv">
+          <span class="sysinfo__k">平台</span>
+          <span class="sysinfo__v">{{ sysInfo?.platform ?? '-' }}</span>
         </div>
-        <div class="sys-meta__item">
-          <span class="sys-meta__label">数据记录</span>
-          <span class="sys-meta__value">{{ sysInfo?.dbRecords ?? '-' }}</span>
+        <div class="sysinfo__kv">
+          <span class="sysinfo__k">数据记录</span>
+          <span class="sysinfo__v">{{ sysInfo?.dbRecords ?? '-' }}</span>
         </div>
       </div>
     </template>
-  </n-card>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.sys-card {
-  border-radius: var(--border-radius) !important;
+.sysinfo {
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card-color) 90%, transparent);
   height: 100%;
-
-  :deep(.n-card-header) {
-    padding: 14px 18px !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-
-  :deep(.n-card__content) {
-    padding: 0 18px 14px !important;
-  }
 }
 
-.sys-resource {
+.sysinfo__title {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color-1);
+}
+
+.sysinfo__resource {
   margin-bottom: 14px;
 }
 
-.sys-resource__header {
+.sysinfo__res-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 6px;
 }
 
-.sys-resource__label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.sysinfo__res-label {
   font-size: 13px;
   color: var(--text-color-2);
   font-weight: 500;
 }
 
-.sys-resource__icon {
-  font-size: 16px;
-}
-
-.sys-resource__value {
+.sysinfo__res-value {
   font-size: 13px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.sys-meta {
+.sysinfo__bar {
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--bar-clr) 10%, transparent);
+  overflow: hidden;
+}
+
+.sysinfo__bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--bar-clr);
+  transition: width 0.6s ease;
+}
+
+.sysinfo__meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 14px;
+  gap: 10px;
+  margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid var(--divider-color);
 }
 
-.sys-meta__item {
+.sysinfo__kv {
   display: flex;
   flex-direction: column;
   gap: 1px;
 }
 
-.sys-meta__label {
+.sysinfo__k {
   font-size: 11.5px;
   color: var(--text-color-4);
 }
 
-.sys-meta__value {
+.sysinfo__v {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color-1);

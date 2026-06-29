@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import dayjs from 'dayjs'
 import { useUserStore } from '@/store/modules'
 
@@ -23,130 +22,180 @@ const greeting = computed(() => {
 })
 
 const weekday = computed(() => {
-  const days = ['日', '一', '二', '三', '四', '五', '六']
-  return `星期${days[dayjs().day()]}`
+  return ['日', '一', '二', '三', '四', '五', '六'][dayjs().day()]
 })
 
 const now = ref(dayjs().format('HH:mm:ss'))
-let timer: ReturnType<typeof setInterval> | null = null
+let timer: ReturnType<typeof setInterval>
+
+function initGreeting() {
+  const n = dayjs()
+  now.value = n.format('HH:mm')
+  document.documentElement.style.setProperty('--greeting-hour', String(n.hour()))
+}
 
 onMounted(() => {
+  initGreeting()
   timer = setInterval(() => {
-    now.value = dayjs().format('HH:mm:ss')
-  }, 1000)
+    now.value = dayjs().format('HH:mm')
+  }, 15000)
 })
 
 onUnmounted(() => {
-  if (timer)
-    clearInterval(timer)
+  clearInterval(timer)
 })
 </script>
 
 <template>
-  <div class="welcome-banner">
-    <div class="welcome-banner__content">
-      <div class="welcome-banner__avatar">
-        <n-avatar
-          v-if="user?.avatar"
-          :src="user.avatar"
-          :size="52"
-          round
-          fallback-src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ccc'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E"
-        />
-        <n-avatar v-else :size="52" round>
-          {{ user?.name?.charAt(0) ?? user?.username?.charAt(0) ?? '?' }}
-        </n-avatar>
-      </div>
-      <div class="welcome-banner__text">
-        <h2 class="welcome-banner__greeting">
-          {{ greeting }}，{{ user?.name ?? user?.username }}
-        </h2>
-        <p class="welcome-banner__meta">
-          <span class="welcome-banner__time">{{ now }}</span>
-          <span class="welcome-banner__sep">·</span>
-          <span>{{ weekday }}</span>
-          <span v-if="user?.departmentName" class="welcome-banner__sep">·</span>
-          <span v-if="user?.departmentName">{{ user.departmentName }}</span>
-        </p>
-      </div>
+  <div class="hero">
+    <div class="hero__bg" aria-hidden="true">
+      <div class="hero__orb hero__orb--a" />
+      <div class="hero__orb hero__orb--b" />
+      <div class="hero__grid" />
     </div>
-    <div class="welcome-banner__badges">
-      <n-tag
-        v-if="isAdmin"
-        type="warning"
-        round
-        size="small"
-        :bordered="false"
-      >
-        <template #icon>
-          <Icon icon="icon-park-outline:badge" />
-        </template>
-        管理员
-      </n-tag>
-      <n-tag v-else type="info" round size="small" :bordered="false">
-        <template #icon>
-          <Icon icon="icon-park-outline:user" />
-        </template>
-        普通用户
-      </n-tag>
-      <n-tag v-if="user?.position" type="success" round size="small" :bordered="false">
-        <template #icon>
-          <Icon icon="icon-park-outline:briefcase" />
-        </template>
-        {{ user.position }}
-      </n-tag>
+
+    <div class="hero__content">
+      <div class="hero__identity">
+        <div class="hero__avatar">
+          <n-avatar
+            v-if="user?.avatar"
+            :src="user.avatar"
+            :size="44"
+            round
+          />
+          <n-avatar v-else :size="44" round class="hero__avatar-fallback">
+            {{ user?.name?.charAt(0) ?? user?.username?.charAt(0) ?? '?' }}
+          </n-avatar>
+        </div>
+        <div class="hero__text">
+          <h1 class="hero__greeting">
+            {{ greeting }}，{{ user?.name ?? user?.username }}
+          </h1>
+          <p class="hero__meta">
+            <span class="hero__time">{{ now }}</span>
+            <span class="hero__dot">·</span>
+            <span>星期{{ weekday }}</span>
+            <span v-if="user?.departmentName" class="hero__dot">·</span>
+            <span v-if="user?.departmentName">{{ user.departmentName }}</span>
+          </p>
+        </div>
+      </div>
+      <div class="hero__tags">
+        <span v-if="isAdmin" class="hero__tag hero__tag--admin">管理员</span>
+        <span v-else class="hero__tag hero__tag--user">用户</span>
+        <span v-if="user?.position" class="hero__tag hero__tag--position">{{ user.position }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.welcome-banner {
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 32px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--primary-color) 8%, var(--body-color)) 0%,
+    var(--body-color) 100%
+  );
+
+  html.dark & {
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--primary-color) 10%, rgb(16, 16, 20)) 0%,
+      rgb(16, 16, 20) 100%
+    );
+  }
+}
+
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.hero__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+
+  &--a {
+    width: 400px;
+    height: 400px;
+    top: -160px;
+    right: -80px;
+    background: color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+
+  &--b {
+    width: 200px;
+    height: 200px;
+    bottom: -60px;
+    left: 20%;
+    background: color-mix(in srgb, #2080f0 20%, transparent);
+  }
+}
+
+.hero__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+
+  html.dark & {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  }
+}
+
+.hero__content {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 20px 24px;
-  border-radius: calc(var(--border-radius) + 4px);
-  background:
-    linear-gradient(135deg, rgba(24, 160, 88, 0.08) 0%, rgba(32, 128, 240, 0.05) 100%),
-    color-mix(in srgb, var(--card-color) 80%, transparent);
-  border: 1px solid rgba(24, 160, 88, 0.12);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  gap: 20px;
 }
 
-html.dark .welcome-banner {
-  background:
-    linear-gradient(135deg, rgba(24, 160, 88, 0.12) 0%, rgba(32, 128, 240, 0.08) 100%),
-    color-mix(in srgb, rgb(28, 28, 32) 80%, transparent);
-  border-color: rgba(24, 160, 88, 0.15);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.welcome-banner__content {
+.hero__identity {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.welcome-banner__text {
+.hero__avatar {
+  flex-shrink: 0;
+}
+
+.hero__avatar-fallback {
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent) !important;
+  color: var(--primary-color) !important;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.hero__text {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.welcome-banner__greeting {
+.hero__greeting {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--text-color-1);
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
-.welcome-banner__meta {
+.hero__meta {
   margin: 0;
   font-size: 13px;
   color: var(--text-color-3);
@@ -155,32 +204,60 @@ html.dark .welcome-banner {
   gap: 6px;
 }
 
-.welcome-banner__sep {
-  color: var(--divider-color);
-}
-
-.welcome-banner__time {
+.hero__time {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   color: var(--text-color-2);
 }
 
-.welcome-banner__badges {
+.hero__dot {
+  color: var(--divider-color);
+}
+
+.hero__tags {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-  .welcome-banner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 16px;
+.hero__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+
+  &--admin {
+    background: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
   }
 
-  .welcome-banner__badges {
-    align-self: flex-start;
+  &--user {
+    background: color-mix(in srgb, #2080f0 12%, transparent);
+    color: #2080f0;
+  }
+
+  &--position {
+    background: color-mix(in srgb, rgb(212, 168, 83) 12%, transparent);
+    color: rgb(212, 168, 83);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 20px;
+  }
+
+  .hero__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero__greeting {
+    font-size: 18px;
   }
 }
 </style>

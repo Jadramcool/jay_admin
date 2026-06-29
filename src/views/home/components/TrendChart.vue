@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { BarChart, LineChart } from 'echarts/charts'
-import {
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, TooltipComponent } from 'echarts/components'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import VChart from 'vue-echarts'
@@ -15,40 +10,42 @@ const props = defineProps<{
   visible: boolean
 }>()
 
-use([CanvasRenderer, LineChart, BarChart, TitleComponent, TooltipComponent, LegendComponent, GridComponent])
+use([CanvasRenderer, LineChart, GridComponent, TooltipComponent])
 
 const trends = ref<Dashboard.Trends | null>(null)
 const loading = ref(true)
-
-const chartRef = ref<InstanceType<typeof VChart> | null>(null)
 const activeSeries = ref<'visits' | 'newUsers' | 'operations'>('visits')
 
-const seriesMap: Record<string, { label: string, color: string }> = {
+const seriesConfig = {
   visits: { label: '访问量', color: '#2080f0' },
   newUsers: { label: '新增用户', color: '#18a058' },
   operations: { label: '操作次数', color: '#f0a020' },
 }
 
-const barOption = computed(() => {
+function buildOption() {
   if (!trends.value)
     return {}
+
+  const clr = seriesConfig[activeSeries.value].color
+  const data = trends.value[activeSeries.value]
+  const dates = trends.value.dates.map(d => `${Number(d.split('-')[1])}/${Number(d.split('-')[2])}`)
 
   return {
     tooltip: {
       trigger: 'axis',
-      backgroundColor: 'rgba(255,255,255,0.9)',
+      backgroundColor: 'var(--card-color)',
       borderColor: 'var(--divider-color)',
       borderWidth: 1,
       textStyle: { color: 'var(--text-color-1)', fontSize: 12 },
       formatter: (params: any) => {
         const p = Array.isArray(params) ? params[0] : params
-        return `<div style="font-weight:600;margin-bottom:4px">${p.axisValue}</div>${seriesMap[activeSeries.value].label}: <strong>${p.value}</strong>`
+        return `<div style="font-weight:600;margin-bottom:4px">${p.axisValue}</div><span style="color:${clr};font-weight:700;font-size:15px">${p.value}</span>`
       },
     },
-    grid: { left: 0, right: 0, top: 4, bottom: 0, containLabel: false },
+    grid: { left: 0, right: 0, top: 8, bottom: 0, containLabel: false },
     xAxis: {
       type: 'category',
-      data: trends.value.dates.map(d => `${Number(d.split('-')[1])}日`),
+      data: dates,
       axisLine: { show: false },
       axisTick: { show: false },
       axisLabel: { show: false },
@@ -60,19 +57,32 @@ const barOption = computed(() => {
     },
     series: [
       {
-        type: 'bar',
-        data: trends.value[activeSeries.value],
-        itemStyle: {
-          color: seriesMap[activeSeries.value].color,
-          borderRadius: [3, 3, 0, 0],
+        type: 'line',
+        data,
+        smooth: true,
+        showSymbol: false,
+        lineStyle: { width: 2.5, color: clr },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: `${clr}50` },
+              { offset: 1, color: `${clr}05` },
+            ],
+          },
         },
-        barMaxWidth: 20,
-        animationDuration: 600,
+        animationDuration: 800,
         animationEasing: 'cubicOut',
       },
     ],
-  } as any
-})
+  }
+}
+
+const chartOption = computed(() => buildOption())
 
 const totalValue = computed(() => {
   if (!trends.value)
@@ -100,73 +110,71 @@ async function loadTrends() {
 </script>
 
 <template>
-  <n-card title="趋势分析" size="small" :bordered="false" class="trend-card">
-    <template #header-extra>
-      <div class="trend-card__tabs">
+  <div class="trend">
+    <div class="trend__top">
+      <h3 class="trend__title">
+        趋势分析
+      </h3>
+      <div class="trend__tabs">
         <button
-          v-for="[key, s] in Object.entries(seriesMap)"
+          v-for="(cfg, key) in seriesConfig"
           :key="key"
-          class="trend-card__tab"
-          :class="{ 'trend-card__tab--active': activeSeries === key }"
-          :style="activeSeries === key ? { '--tab-color': s.color } : {}"
+          class="trend__tab"
+          :class="{ 'trend__tab--on': activeSeries === key }"
+          :style="activeSeries === key ? { '--tab-clr': cfg.color } : {}"
           @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'"
         >
-          {{ s.label }}
+          {{ cfg.label }}
         </button>
       </div>
-    </template>
+    </div>
 
     <n-skeleton v-if="loading && !trends" :repeat="4" text />
     <template v-else>
-      <VChart
-        ref="chartRef"
-        :option="barOption"
-        autoresize
-        class="trend-chart"
-      />
-      <div class="trend-card__summary">
-        <span class="trend-card__summary-label">
-          {{ seriesMap[activeSeries].label }} (7日汇总)
-        </span>
-        <span
-          class="trend-card__summary-value"
-          :style="{ color: seriesMap[activeSeries].color }"
-        >
+      <VChart :option="chartOption" autoresize class="trend__chart" />
+      <div class="trend__total">
+        <span class="trend__total-label">{{ seriesConfig[activeSeries].label }} · 近7日</span>
+        <span class="trend__total-value" :style="{ color: seriesConfig[activeSeries].color }">
           {{ totalValue }}
         </span>
       </div>
     </template>
-  </n-card>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.trend-card {
-  border-radius: var(--border-radius) !important;
+.trend {
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card-color) 90%, transparent);
   height: 100%;
-
-  :deep(.n-card-header) {
-    padding: 14px 18px !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-
-  :deep(.n-card__content) {
-    padding: 0 18px 14px !important;
-  }
+  display: flex;
+  flex-direction: column;
 }
 
-.trend-card__tabs {
+.trend__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.trend__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color-1);
+}
+
+.trend__tabs {
   display: flex;
   gap: 4px;
 }
 
-.trend-card__tab {
-  padding: 2px 10px;
+.trend__tab {
+  padding: 3px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-color-3);
   font-size: 12px;
@@ -179,34 +187,35 @@ async function loadTrends() {
     color: var(--text-color-1);
   }
 
-  &--active {
-    background: color-mix(in srgb, var(--tab-color) 12%, transparent) !important;
-    color: var(--tab-color) !important;
+  &--on {
+    background: color-mix(in srgb, var(--tab-clr) 12%, transparent) !important;
+    color: var(--tab-clr) !important;
     font-weight: 600;
   }
 }
 
-.trend-chart {
+.trend__chart {
+  flex: 1;
   width: 100%;
-  height: 120px;
+  min-height: 100px;
 }
 
-.trend-card__summary {
+.trend__total {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
   padding-top: 10px;
+  margin-top: 4px;
   border-top: 1px solid var(--divider-color);
 }
 
-.trend-card__summary-label {
+.trend__total-label {
   font-size: 12px;
-  color: var(--text-color-3);
+  color: var(--text-color-4);
 }
 
-.trend-card__summary-value {
-  font-size: 18px;
+.trend__total-value {
+  font-size: 20px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
 }

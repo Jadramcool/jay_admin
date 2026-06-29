@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import { DashboardApi } from '@/api/dashboard'
 
 const props = defineProps<{
@@ -9,55 +8,49 @@ const props = defineProps<{
 const stats = ref<Dashboard.Stats | null>(null)
 const loading = ref(true)
 
-const cards = computed(() => [
+const statItems = computed(() => [
   {
     label: '用户总数',
     value: stats.value?.userCount ?? '-',
     trend: stats.value?.userTrend,
-    icon: 'icon-park-outline:user',
     color: '#18a058',
-    bg: 'rgba(24,160,88,0.10)',
-    sub: '系统注册用户',
+    icon: 'U',
+    sub: stats.value ? '系统注册用户' : '',
   },
   {
     label: '角色数量',
     value: stats.value?.roleCount ?? '-',
-    icon: 'icon-park-outline:permissions',
     color: '#2080f0',
-    bg: 'rgba(32,128,240,0.10)',
-    sub: '权限角色配置',
+    icon: 'R',
+    sub: stats.value ? '权限角色配置' : '',
   },
   {
     label: '菜单数量',
     value: stats.value?.menuCount ?? '-',
-    icon: 'icon-park-outline:menu-fold',
     color: '#f0a020',
-    bg: 'rgba(240,160,32,0.10)',
-    sub: '导航与路由项',
+    icon: 'M',
+    sub: stats.value ? '导航与路由项' : '',
   },
   {
     label: '部门数量',
     value: stats.value?.departmentCount ?? '-',
-    icon: 'icon-park-outline:tree',
     color: '#7c3aed',
-    bg: 'rgba(124,58,237,0.10)',
-    sub: '组织架构部门',
+    icon: 'D',
+    sub: stats.value ? '组织架构部门' : '',
   },
   {
     label: '操作日志',
     value: stats.value?.logCount ?? '-',
-    icon: 'icon-park-outline:log',
     color: '#d03050',
-    bg: 'rgba(208,48,80,0.10)',
-    sub: `今日 ${stats.value?.logTodayCount ?? 0} 条`,
+    icon: 'L',
+    sub: stats.value ? `今日 ${stats.value.logTodayCount} 条` : '',
   },
   {
     label: '在线用户',
     value: stats.value?.onlineCount ?? '-',
-    icon: 'icon-park-outline:link-cloud',
     color: '#ec4899',
-    bg: 'rgba(236,72,153,0.10)',
-    sub: '当前在线人数',
+    icon: 'O',
+    sub: stats.value ? '当前在线人数' : '',
   },
 ])
 
@@ -81,36 +74,26 @@ async function loadStats() {
 </script>
 
 <template>
-  <div class="stat-grid">
+  <div class="stats">
     <div
-      v-for="card in cards"
-      :key="card.label"
-      class="stat-card"
-      :style="{ '--stat-color': card.color, '--stat-bg': card.bg }"
+      v-for="(item, i) in statItems"
+      :key="item.label"
+      class="stat"
+      :style="{ '--stat-clr': item.color, '--i': i }"
     >
-      <n-skeleton v-if="loading && !stats" text :repeat="3" />
+      <n-skeleton v-if="loading && !stats" text :repeat="2" :style="{ '--i': i }" class="stat__skeleton" />
       <template v-else>
-        <div class="stat-card__header">
-          <span class="stat-card__label">{{ card.label }}</span>
-          <div class="stat-card__icon">
-            <Icon :icon="card.icon" />
+        <div class="stat__icon">
+          {{ item.icon }}
+        </div>
+        <div class="stat__body">
+          <span class="stat__value">{{ item.value }}</span>
+          <div class="stat__footer">
+            <span class="stat__label">{{ item.label }}</span>
+            <span v-if="item.trend !== undefined && item.trend !== 0" class="stat__trend" :class="item.trend > 0 ? 'stat__trend--up' : 'stat__trend--down'">
+              {{ item.trend > 0 ? '+' : '' }}{{ item.trend }}%
+            </span>
           </div>
-        </div>
-        <div class="stat-card__value-row">
-          <span class="stat-card__number">{{ card.value }}</span>
-          <span
-            v-if="card.trend !== undefined && card.trend !== 0"
-            class="stat-card__trend"
-            :class="{ 'stat-card__trend--up': card.trend > 0, 'stat-card__trend--down': card.trend < 0 }"
-          >
-            <Icon
-              :icon="card.trend > 0 ? 'icon-park-outline:trending-up' : 'icon-park-outline:trending-down'"
-            />
-            {{ Math.abs(card.trend) }}%
-          </span>
-        </div>
-        <div class="stat-card__footer">
-          {{ card.sub }}
         </div>
       </template>
     </div>
@@ -118,97 +101,113 @@ async function loadStats() {
 </template>
 
 <style lang="scss" scoped>
-.stat-grid {
+.stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
+  gap: 12px;
 
-@media (max-width: 1024px) {
-  .stat-grid {
+  @media (max-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
-}
 
-@media (max-width: 768px) {
-  .stat-grid {
+  @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-}
 
-@media (max-width: 480px) {
-  .stat-grid {
+  @media (max-width: 480px) {
     grid-template-columns: 1fr;
   }
 }
 
-.stat-card {
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
   padding: 16px 18px;
-  border-radius: var(--border-radius);
-  background:
-    linear-gradient(135deg, var(--stat-bg) 0%, transparent 100%), color-mix(in srgb, var(--card-color) 85%, transparent);
-  border: 1px solid color-mix(in srgb, var(--stat-color) 12%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card-color) 90%, transparent);
   transition:
     transform 0.2s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+    box-shadow 0.25s ease;
+  animation: statIn 0.4s ease both;
+  animation-delay: calc(var(--i) * 0.05s);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px color-mix(in srgb, var(--stat-color) 8%, transparent);
-    border-color: color-mix(in srgb, var(--stat-color) 20%, transparent);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.06),
+      0 0 0 1px color-mix(in srgb, var(--stat-clr) 10%, transparent);
   }
 }
 
-.stat-card__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+@keyframes statIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.stat-card__label {
-  font-size: 13px;
-  color: var(--text-color-3);
-  font-weight: 500;
+.stat__skeleton {
+  width: 100%;
 }
 
-.stat-card__icon {
-  width: 32px;
-  height: 32px;
+.stat__icon {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: var(--stat-bg);
-  color: var(--stat-color);
-  font-size: 18px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--stat-clr) 12%, transparent);
+  color: var(--stat-clr);
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
 }
 
-.stat-card__value-row {
+.stat:hover .stat__icon {
+  transform: scale(1.08);
+  background: color-mix(in srgb, var(--stat-clr) 18%, transparent);
+}
+
+.stat__body {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 6px;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.stat-card__number {
-  font-size: 26px;
+.stat__value {
+  font-size: 24px;
   font-weight: 800;
   color: var(--text-color-1);
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
 
-.stat-card__trend {
-  display: inline-flex;
+.stat__footer {
+  display: flex;
   align-items: center;
-  gap: 2px;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 0 6px;
+  gap: 8px;
+}
+
+.stat__label {
+  font-size: 12.5px;
+  color: var(--text-color-3);
+}
+
+.stat__trend {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
   border-radius: 4px;
-  line-height: 1.6;
+  line-height: 1.5;
 
   &--up {
     color: #18a058;
@@ -218,17 +217,6 @@ async function loadStats() {
   &--down {
     color: #d03050;
     background: rgba(208, 48, 80, 0.1);
-  }
-}
-
-.stat-card__footer {
-  font-size: 12px;
-  color: var(--text-color-4);
-}
-
-@media (max-width: 768px) {
-  .stat-card__number {
-    font-size: 22px;
   }
 }
 </style>

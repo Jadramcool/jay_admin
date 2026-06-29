@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { useRouter } from 'vue-router'
@@ -9,52 +8,38 @@ import 'dayjs/locale/zh-cn'
 const props = defineProps<{
   visible: boolean
 }>()
+
 dayjs.extend(relativeTime)
 dayjs.locale('zh-cn')
-
 const router = useRouter()
 
 const activities = ref<Dashboard.Activity[]>([])
 const loading = ref(true)
 
-function operationTypeColor(type: string): string {
-  const map: Record<string, string> = {
-    CREATE: '#18a058',
-    UPDATE: '#2080f0',
-    DELETE: '#d03050',
-    LOGIN: '#7c3aed',
-    LOGOUT: '#f0a020',
-    READ: '#0ec7b0',
-    EXPORT: '#ec4899',
-    IMPORT: '#909090',
-  }
-  return map[type] ?? '#909090'
+const typeColor: Record<string, string> = {
+  CREATE: '#18a058',
+  UPDATE: '#2080f0',
+  DELETE: '#d03050',
+  LOGIN: '#7c3aed',
+  LOGOUT: '#f0a020',
 }
 
-function operationTypeLabel(type: string): string {
-  const map: Record<string, string> = {
-    CREATE: '新增',
-    UPDATE: '修改',
-    DELETE: '删除',
-    LOGIN: '登录',
-    LOGOUT: '登出',
-    READ: '查询',
-    EXPORT: '导出',
-    IMPORT: '导入',
-  }
-  return map[type] ?? type
+const typeLabel: Record<string, string> = {
+  CREATE: '新增',
+  UPDATE: '修改',
+  DELETE: '删除',
+  LOGIN: '登录',
+  LOGOUT: '登出',
 }
 
 function formatTime(time: string): string {
   const d = dayjs(time)
   const now = dayjs()
   if (d.isSame(now, 'day'))
-    return d.format('HH:mm:ss')
+    return d.format('HH:mm')
   if (d.isSame(now.subtract(1, 'day'), 'day'))
-    return `昨天 ${d.format('HH:mm')}`
-  if (d.isSame(now, 'year'))
-    return d.format('MM-DD HH:mm')
-  return d.format('YYYY-MM-DD HH:mm')
+    return '昨天'
+  return d.format('MM/DD')
 }
 
 watch(() => props.visible, (v) => {
@@ -77,154 +62,182 @@ async function loadActivities() {
 </script>
 
 <template>
-  <n-card title="实时动态" size="small" :bordered="false" class="activity-card">
-    <template #header-extra>
-      <n-button
-        text
-        size="tiny"
-        @click="router.push('/system/operation-log')"
-      >
+  <div class="activity">
+    <div class="activity__top">
+      <h3 class="activity__title">
+        实时动态
+      </h3>
+      <button class="activity__more" @click="router.push('/system/operation-log')">
         查看全部
-        <template #icon>
-          <Icon icon="icon-park-outline:right" />
-        </template>
-      </n-button>
-    </template>
+      </button>
+    </div>
 
     <n-skeleton v-if="loading" :repeat="6" text />
 
-    <n-thing v-else-if="activities.length === 0" class="activity-empty">
-      <template #description>
-        暂无动态
-      </template>
-    </n-thing>
+    <div v-else-if="activities.length === 0" class="activity__empty">
+      暂无动态
+    </div>
 
-    <div v-else class="activity-list">
+    <div v-else class="activity__list">
       <div
-        v-for="act in activities"
+        v-for="(act, i) in activities"
         :key="act.id"
-        class="activity-item"
+        class="activity__item"
+        :style="{ '--i': i }"
       >
-        <div
-          class="activity-item__dot"
-          :style="{ background: operationTypeColor(act.operationType) }"
-        />
-        <div class="activity-item__body">
-          <div class="activity-item__top">
-            <span class="activity-item__user">{{ act.username }}</span>
-            <n-tag
-              :color="{
-                textColor: '#fff',
-                borderColor: operationTypeColor(act.operationType),
-                color: operationTypeColor(act.operationType),
-              }"
-              size="tiny"
-              :bordered="false"
-              round
-            >
-              {{ operationTypeLabel(act.operationType) }}
-            </n-tag>
-            <span class="activity-item__module">{{ act.module }}</span>
+        <div class="activity__line">
+          <div class="activity__dot" :style="{ background: typeColor[act.operationType] || '#909090' }" />
+          <div v-if="i < activities.length - 1" class="activity__bar" />
+        </div>
+        <div class="activity__body">
+          <div class="activity__head">
+            <span class="activity__user">{{ act.username }}</span>
+            <span class="activity__op" :style="{ background: `${typeColor[act.operationType] || '#909090'}18`, color: typeColor[act.operationType] || '#909090' }">
+              {{ typeLabel[act.operationType] || act.operationType }}
+            </span>
+            <span class="activity__module">{{ act.module }}</span>
           </div>
-          <div class="activity-item__bottom">
-            <span class="activity-item__desc">{{ act.action }}</span>
-            <span class="activity-item__time">{{ formatTime(act.time) }}</span>
+          <div class="activity__foot">
+            <span class="activity__desc">{{ act.action }}</span>
+            <span class="activity__time">{{ formatTime(act.time) }}</span>
           </div>
         </div>
       </div>
     </div>
-  </n-card>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.activity-card {
-  border-radius: var(--border-radius) !important;
-  :deep(.n-card-header) {
-    padding: 14px 18px !important;
-  }
+.activity {
+  padding: 20px 22px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--card-color) 90%, transparent);
+  height: 100%;
+}
 
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
+.activity__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
 
-  :deep(.n-card__content) {
-    padding: 0 18px 14px !important;
+.activity__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-color-1);
+}
+
+.activity__more {
+  border: none;
+  background: transparent;
+  color: var(--text-color-4);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: var(--hover-color);
+    color: var(--text-color-1);
   }
 }
 
-.activity-list {
+.activity__list {
   display: flex;
   flex-direction: column;
 }
 
-.activity-item {
+.activity__item {
   display: flex;
   gap: 12px;
-  padding: 9px 0;
-  cursor: default;
-  border-bottom: 1px solid var(--divider-color);
-  margin: 0 -6px;
-  padding: 9px 6px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
+  animation: slideIn 0.35s ease both;
+  animation-delay: calc(var(--i) * 0.04s);
+}
 
-  &:last-child {
-    border-bottom: none;
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
   }
-
-  &:hover {
-    background: var(--hover-color);
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.activity-item__dot {
+.activity__line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 8px;
+  flex-shrink: 0;
+  padding-top: 6px;
+}
+
+.activity__dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  margin-top: 6px;
-  flex-shrink: 0;
   box-shadow: 0 0 6px currentColor;
+  flex-shrink: 0;
+  z-index: 1;
 }
 
-.activity-item__body {
+.activity__bar {
+  width: 1.5px;
+  flex: 1;
+  background: var(--divider-color);
+  margin: 2px 0;
+}
+
+.activity__body {
   flex: 1;
   min-width: 0;
+  padding-bottom: 14px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.activity-item__top {
+.activity__head {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.activity-item__user {
+.activity__user {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color-1);
 }
 
-.activity-item__module {
-  font-size: 11.5px;
-  color: var(--text-color-3);
-  background: var(--hover-color);
-  padding: 0 5px;
+.activity__op {
+  padding: 0 7px;
   border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
   line-height: 1.6;
 }
 
-.activity-item__bottom {
+.activity__module {
+  font-size: 11.5px;
+  color: var(--text-color-4);
+}
+
+.activity__foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.activity-item__desc {
+.activity__desc {
   font-size: 12px;
   color: var(--text-color-3);
   overflow: hidden;
@@ -234,7 +247,7 @@ async function loadActivities() {
   min-width: 0;
 }
 
-.activity-item__time {
+.activity__time {
   font-size: 11px;
   color: var(--text-color-4);
   white-space: nowrap;
@@ -242,12 +255,10 @@ async function loadActivities() {
   font-variant-numeric: tabular-nums;
 }
 
-.activity-empty {
-  :deep(.n-thing-description) {
-    text-align: center;
-    padding: 20px 0;
-    color: var(--text-color-4);
-    font-size: 13px;
-  }
+.activity__empty {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--text-color-4);
+  font-size: 13px;
 }
 </style>
