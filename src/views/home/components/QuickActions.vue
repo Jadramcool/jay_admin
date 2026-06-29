@@ -49,8 +49,6 @@ function handleNavigate(route: string) {
 <style lang="scss" scoped>
 .qa-card {
   border-radius: var(--border-radius) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   height: 100%;
 
   :deep(.n-card-header) {

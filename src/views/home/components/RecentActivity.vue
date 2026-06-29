@@ -139,9 +139,6 @@ async function loadActivities() {
 <style lang="scss" scoped>
 .activity-card {
   border-radius: var(--border-radius) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-
   :deep(.n-card-header) {
     padding: 14px 18px !important;
   }

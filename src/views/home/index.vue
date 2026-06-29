@@ -30,7 +30,7 @@ onMounted(() => {
       <template v-if="isAdmin">
         <StatCards :visible="visible" />
 
-        <n-grid cols="1 l:3" :x-gap="14" :y-gap="14">
+        <n-grid cols="1 l:4" :x-gap="14" :y-gap="14">
           <n-gi :span="2">
             <TrendChart :visible="visible" />
           </n-gi>
