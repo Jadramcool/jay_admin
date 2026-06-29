@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { useUserStore } from '@/store/modules'
+import QuickActions from './components/QuickActions.vue'
+import RecentActivity from './components/RecentActivity.vue'
+import StatCards from './components/StatCards.vue'
+import SystemInfo from './components/SystemInfo.vue'
+import TrendChart from './components/TrendChart.vue'
+import WelcomeBanner from './components/WelcomeBanner.vue'
 
 const userStore = useUserStore()
 const isAdmin = computed(() => userStore.userInfo?.roleType === 'admin')
