@@ -24,7 +24,7 @@ function go(route: string) {
 </script>
 
 <template>
-  <n-card title="快捷入口" :bordered="false" size="small" class="card card--quick" content-style="padding: 0 20px 20px">
+  <AppCard title="快捷入口">
     <div class="quick__grid">
       <button v-for="link in quickLinks" :key="link.label" class="quick__item" :style="{ '--c': link.color }" @click="go(link.route)">
         <div class="quick__icon">
@@ -33,29 +33,10 @@ function go(route: string) {
         <span class="quick__label">{{ link.label }}</span>
       </button>
     </div>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>
-.card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  height: 100%;
-
-  html.dark & {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  :deep(.n-card-header) {
-    padding: 18px 20px 0 !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-}
-
 .quick__grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

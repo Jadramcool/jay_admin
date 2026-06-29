@@ -32,7 +32,7 @@ async function loadSysInfo() {
 </script>
 
 <template>
-  <n-card title="系统信息" :bordered="false" size="small" class="card card--sys" content-style="padding: 0 20px 20px">
+  <AppCard title="系统信息">
     <n-skeleton v-if="loading" :repeat="5" text />
     <template v-else>
       <div v-for="res in resources" :key="res.label" class="sys__res">
@@ -67,29 +67,10 @@ async function loadSysInfo() {
         </div>
       </div>
     </template>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>
-.card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  height: 100%;
-
-  html.dark & {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  :deep(.n-card-header) {
-    padding: 18px 20px 0 !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-}
-
 .sys__res {
   margin-bottom: 14px;
 }

@@ -60,7 +60,7 @@ async function loadActivities() {
 </script>
 
 <template>
-  <n-card title="实时动态" :bordered="false" size="small" class="card card--activity" content-style="padding: 0 20px 20px">
+  <AppCard title="实时动态">
     <template #header-extra>
       <button class="activity__more" @click="router.push('/system/operation-log')">
         查看全部
@@ -91,7 +91,7 @@ async function loadActivities() {
         </div>
       </div>
     </div>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>

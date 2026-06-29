@@ -81,7 +81,7 @@ async function loadTrends() {
 </script>
 
 <template>
-  <n-card title="趋势分析" :bordered="false" size="small" class="card card--trend" content-style="display:flex;flex-direction:column;padding:0 20px 20px;flex:1">
+  <AppCard title="趋势分析" content-style="display:flex;flex-direction:column;padding:16px;flex:1">
     <template #header-extra>
       <div class="trend__tabs">
         <button v-for="(cfg, key) in seriesConfig" :key="key" class="trend__tab" :class="{ on: activeSeries === key }" :style="activeSeries === key ? { '--t': cfg.color } : {}" @click="activeSeries = key as 'visits' | 'newUsers' | 'operations'">
@@ -97,29 +97,10 @@ async function loadTrends() {
         <span class="trend__total-val" :style="{ color: seriesConfig[activeSeries].color }">{{ totalValue }}</span>
       </div>
     </template>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>
-.card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-  height: 100%;
-
-  html.dark & {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  :deep(.n-card-header) {
-    padding: 18px 20px 0 !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-}
-
 .trend__tabs {
   display: flex;
   gap: 4px;

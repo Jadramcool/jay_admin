@@ -47,7 +47,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <n-card :bordered="false" size="small" class="hero">
+  <AppCard>
     <div class="hero__content">
       <div class="hero__identity">
         <div class="hero__avatar">
@@ -80,16 +80,10 @@ onUnmounted(() => {
         <span v-if="user?.position" class="hero__tag hero__tag--position">{{ user.position }}</span>
       </div>
     </div>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>
-.hero {
-  :deep(.n-card-header) {
-    display: none;
-  }
-}
-
 .hero__content {
   display: flex;
   align-items: center;

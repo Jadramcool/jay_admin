@@ -37,7 +37,7 @@ async function loadStats() {
 </script>
 
 <template>
-  <n-card title="数据概览" :bordered="false" size="small" class="card card--stats" content-style="padding: 0 20px 20px">
+  <AppCard title="数据概览">
     <div class="stats__grid">
       <div v-for="(item, i) in statItems" :key="item.label" class="stat" :style="{ '--clr': item.color, '--i': i }">
         <n-skeleton v-if="loading && !stats" text :repeat="2" class="stat__skel" />
@@ -57,28 +57,10 @@ async function loadStats() {
         </template>
       </div>
     </div>
-  </n-card>
+  </AppCard>
 </template>
 
 <style lang="scss" scoped>
-.card {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 14px;
-
-  html.dark & {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-  }
-
-  :deep(.n-card-header) {
-    padding: 18px 20px 0 !important;
-  }
-
-  :deep(.n-card-header__title) {
-    font-size: 14px !important;
-    font-weight: 700 !important;
-  }
-}
-
 .stats__grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
