@@ -81,45 +81,65 @@ async function loadStats() {
 </script>
 
 <template>
-  <n-grid cols="1 s:2 m:3 l:6" :x-gap="14" :y-gap="14" class="stat-grid">
-    <n-gi v-for="card in cards" :key="card.label">
-      <div
-        class="stat-card"
-        :style="{ '--stat-color': card.color, '--stat-bg': card.bg }"
-      >
-        <n-skeleton v-if="loading && !stats" text :repeat="3" />
-        <template v-else>
-          <div class="stat-card__header">
-            <span class="stat-card__label">{{ card.label }}</span>
-            <div class="stat-card__icon">
-              <Icon :icon="card.icon" />
-            </div>
+  <div class="stat-grid">
+    <div
+      v-for="card in cards"
+      :key="card.label"
+      class="stat-card"
+      :style="{ '--stat-color': card.color, '--stat-bg': card.bg }"
+    >
+      <n-skeleton v-if="loading && !stats" text :repeat="3" />
+      <template v-else>
+        <div class="stat-card__header">
+          <span class="stat-card__label">{{ card.label }}</span>
+          <div class="stat-card__icon">
+            <Icon :icon="card.icon" />
           </div>
-          <div class="stat-card__value-row">
-            <span class="stat-card__number">{{ card.value }}</span>
-            <span
-              v-if="card.trend !== undefined && card.trend !== 0"
-              class="stat-card__trend"
-              :class="{ 'stat-card__trend--up': card.trend > 0, 'stat-card__trend--down': card.trend < 0 }"
-            >
-              <Icon
-                :icon="card.trend > 0 ? 'icon-park-outline:trending-up' : 'icon-park-outline:trending-down'"
-              />
-              {{ Math.abs(card.trend) }}%
-            </span>
-          </div>
-          <div class="stat-card__footer">
-            {{ card.sub }}
-          </div>
-        </template>
-      </div>
-    </n-gi>
-  </n-grid>
+        </div>
+        <div class="stat-card__value-row">
+          <span class="stat-card__number">{{ card.value }}</span>
+          <span
+            v-if="card.trend !== undefined && card.trend !== 0"
+            class="stat-card__trend"
+            :class="{ 'stat-card__trend--up': card.trend > 0, 'stat-card__trend--down': card.trend < 0 }"
+          >
+            <Icon
+              :icon="card.trend > 0 ? 'icon-park-outline:trending-up' : 'icon-park-outline:trending-down'"
+            />
+            {{ Math.abs(card.trend) }}%
+          </span>
+        </div>
+        <div class="stat-card__footer">
+          {{ card.sub }}
+        </div>
+      </template>
+    </div>
+  </div>
 </template>
 
 <style lang="scss" scoped>
 .stat-grid {
-  margin: 0 !important;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .stat-card {
