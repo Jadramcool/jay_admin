@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { MenuApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
-import { arrayToTree } from '@/utils/common'
 import MenuModal from './components/MenuModal.vue'
 import { useMenuSchema } from './schema'
 

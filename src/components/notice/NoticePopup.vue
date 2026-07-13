@@ -2,14 +2,13 @@
 import { h } from 'vue'
 import { NoticeApi } from '@/api/notice'
 import { useSocket } from '@/composables/useSocket'
-import { useAuthStore, useUserStore } from '@/store/modules'
+import { useUserStore } from '@/store/modules'
 import storage from '@/utils/storage'
 import { getToken } from '@/utils/token'
 
-const authStore = useAuthStore()
 const userStore = useUserStore()
 
-const { connect, disconnect, on, off } = useSocket()
+const { connect, disconnect, on } = useSocket()
 
 const timerIds: ReturnType<typeof setTimeout>[] = []
 const READ_STORAGE_KEY = 'notice_read'
@@ -169,7 +168,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- 无 UI 渲染，纯逻辑组件 -->
+  <span v-if="false" />
 </template>
 
 <style lang="scss">

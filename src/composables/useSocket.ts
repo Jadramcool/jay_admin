@@ -32,12 +32,12 @@ export function useSocket() {
     })
 
     s.on('connect', () => {
-      console.log('[WebSocket] 已连接')
+      console.warn('[WebSocket] 已连接')
       connected.value = true
     })
 
     s.on('disconnect', (reason) => {
-      console.log('[WebSocket] 已断开:', reason)
+      console.warn('[WebSocket] 已断开:', reason)
       connected.value = false
     })
 

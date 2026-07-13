@@ -78,29 +78,6 @@ function init() {
   ]
 
   // ── Operation Logs ──
-  const actions = [
-    { username: 'admin', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'CREATE', module: '用户管理', desc: '创建了新用户「张三」', url: '/system/user/create', status: 'SUCCESS' },
-    { username: 'zhangsan', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'UPDATE', module: '角色管理', desc: '修改了角色「编辑者」的权限', url: '/system/role/update', status: 'SUCCESS' },
-    { username: 'admin', type: 'DELETE', module: '用户管理', desc: '删除了用户「test_user」', url: '/system/user/delete', status: 'SUCCESS' },
-    { username: 'lisi', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'CREATE', module: '菜单管理', desc: '新增了菜单「通知管理」', url: '/system/menu/create', status: 'SUCCESS' },
-    { username: 'wangwu', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'FAILED' },
-    { username: 'zhaoliu', type: 'LOGOUT', module: '认证模块', desc: '退出系统', url: '/auth/logout', status: 'SUCCESS' },
-    { username: 'admin', type: 'UPDATE', module: '部门管理', desc: '修改了部门「测试组」的信息', url: '/system/department/update', status: 'SUCCESS' },
-    { username: 'sunqi', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'EXPORT', module: '操作日志', desc: '导出操作日志报表', url: '/system/operation-log/export', status: 'SUCCESS' },
-    { username: 'zhouba', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'CREATE', module: '部门管理', desc: '创建了新部门「运营组」', url: '/system/department/create', status: 'SUCCESS' },
-    { username: 'wujiu', type: 'LOGIN', module: '认证模块', desc: '登录系统', url: '/auth/login', status: 'SUCCESS' },
-    { username: 'admin', type: 'UPDATE', module: '用户管理', desc: '修改了用户「赵六」的信息', url: '/system/user/update', status: 'SUCCESS' },
-    { username: 'zhangsan', type: 'LOGOUT', module: '认证模块', desc: '退出系统', url: '/auth/logout', status: 'SUCCESS' },
-    { username: 'admin', type: 'CREATE', module: '角色管理', desc: '创建了新角色「审计员」', url: '/system/role/create', status: 'SUCCESS' },
-    { username: 'lisi', type: 'UPDATE', module: '个人中心', desc: '修改了个人密码', url: '/auth/user/updatePassword', status: 'SUCCESS' },
-    { username: 'admin', type: 'READ', module: '操作日志', desc: '查询了操作日志列表', url: '/system/operation-log/list', status: 'SUCCESS' },
-  ]
-
   const logTypes = ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'READ', 'EXPORT', 'IMPORT']
   const modules = ['用户管理', '角色管理', '菜单管理', '部门管理', '操作日志', '认证模块', '个人中心', '通知管理']
   const usernames = ['admin', 'zhangsan', 'lisi', 'wangwu', 'zhaoliu', 'sunqi', 'zhouba', 'wujiu']

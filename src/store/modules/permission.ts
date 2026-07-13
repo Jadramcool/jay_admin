@@ -3,7 +3,6 @@ import type { RouteRecordRaw } from 'vue-router'
 import { hyphenate } from '@vueuse/core'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { defineStore } from 'pinia'
-import { arrayToTree, isExternal, renderIcon } from '@/utils/common'
 
 export const routeComponents = import.meta.glob('/src/views/**/*.vue')
 

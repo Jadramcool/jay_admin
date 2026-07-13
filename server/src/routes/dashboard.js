@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { Router } from 'express'
 import db from '../data/index.js'
 import { authMiddleware } from '../middleware/auth.js'

@@ -47,9 +47,9 @@
 - **影响**: Token 过期 → 刷新失败 → `authFailing = true` → 后续即使有新 Token 也无法正常使用 → 用户无法正常使用系统
 - **修复方案**: 在 `handleRefreshToken` 的成功回调中添加 `this.authFailing = false`：
   ```typescript
-  this.refreshTokenPromise = axios.post(...)
+  this.refreshTokenPromise = axios.post('/auth/refresh', payload)
     .then((res) => {
-      this.authFailing = false  // 新增
+      this.authFailing = false // 新增
       const { accessToken, refreshToken: newRefreshToken } = res.data.data
       setToken({ accessToken, refreshToken: newRefreshToken })
       return accessToken

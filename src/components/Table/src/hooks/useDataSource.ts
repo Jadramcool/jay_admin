@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { isBoolean } from '@/utils/common'
 import { APISETTING } from '../const'
 
 interface TableProps {

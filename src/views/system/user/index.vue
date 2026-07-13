@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import { UserManagerApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
-import { hasPermission } from '@/utils/common/hasPermission'
+import { hasPermission } from '@/utils/common'
 import UserResetPwdModal from './components/UserResetPwdModal.vue'
 import UserRoleModal from './components/UserRoleModal.vue'
 import { useUserSchema } from './schema'

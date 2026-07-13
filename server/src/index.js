@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 
 // Request logging
 app.use((req, _res, next) => {
-  console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`)
+  console.warn(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`)
   next()
 })
 
@@ -34,8 +34,8 @@ app.use((err, _req, res, _next) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`\n  🚀 jdm-admin 后端服务已启动`)
-  console.log(`  📡 地址: http://localhost:${PORT}`)
-  console.log(`  📋 API: http://localhost:${PORT}/api`)
-  console.log(`  🔑 默认账号: admin / admin123\n`)
+  console.warn(`\n  🚀 jdm-admin 后端服务已启动`)
+  console.warn(`  📡 地址: http://localhost:${PORT}`)
+  console.warn(`  📋 API: http://localhost:${PORT}/api`)
+  console.warn(`  🔑 默认账号: admin / admin123\n`)
 })

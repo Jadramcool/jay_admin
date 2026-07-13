@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { CSSProperties } from 'vue'
+import type { CSSProperties, Slots, VNode } from 'vue'
+import { computed, shallowRef, useSlots } from 'vue'
 
 /**
  * AppCard — 基于 n-card 的统一卡片封装。
@@ -28,17 +29,17 @@ interface AppCardProps {
 
 defineProps<AppCardProps>()
 
-const collapsed = ref(false)
-const slots = useSlots()
+const collapsed = shallowRef(false)
+const slots: Slots = useSlots()
 
 function toggleCollapse() {
   collapsed.value = !collapsed.value
 }
 
-const hasContent = computed(() => {
-  return slots.default && !slots.default().every((vnode) => {
-    const children = (vnode.children as any) ?? []
-    return typeof children === 'string' ? !children.trim() : false
+const hasContent = computed<boolean>(() => {
+  return !!slots.default?.().some((vnode: VNode) => {
+    const children = vnode.children
+    return typeof children === 'string' ? !!children.trim() : true
   })
 })
 </script>

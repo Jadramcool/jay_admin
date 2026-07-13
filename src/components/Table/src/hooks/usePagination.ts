@@ -1,4 +1,3 @@
-import { isBoolean } from '@/utils/common'
 import { APISETTING, DEFAULTPAGESIZE, PAGESIZES } from '../const'
 
 export function usePagination(refProps: any) {
