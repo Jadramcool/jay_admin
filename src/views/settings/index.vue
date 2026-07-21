@@ -36,33 +36,11 @@ defineExpose({ openDrawer })
 <template>
   <BasicDrawer title="系统设置" width="380" @register="register">
     <div class="settings-content">
-      <!-- 系统字体 -->
-      <div class="setting-section">
-        <h3 class="section-title text-sm">
-          系统字体
-        </h3>
-        <n-select
-          :value="appStore.currentFont"
-          :options="fontOptionsList"
-          size="small"
-          @update:value="appStore.setFont"
-        />
+      <!-- ===== 外观 ===== -->
+      <div class="section-caption text-xs">
+        外观
       </div>
 
-      <!-- 主色 -->
-      <div class="setting-section">
-        <h3 class="section-title text-sm">
-          主色
-        </h3>
-        <n-color-picker
-          :value="appStore.primaryColor"
-          :swatches="['#18a058', '#2080f0', '#f0a020', '#d03050', '#8a2be2']"
-          size="small"
-          @update:value="appStore.setPrimaryColor"
-        />
-      </div>
-
-      <!-- 主题模式 -->
       <div class="setting-section">
         <h3 class="section-title text-sm">
           主题模式
@@ -83,35 +61,87 @@ defineExpose({ openDrawer })
         </n-radio-group>
       </div>
 
-      <!-- 界面显示 -->
       <div class="setting-section">
         <h3 class="section-title text-sm">
-          界面显示
+          主色
         </h3>
+        <n-color-picker
+          :value="appStore.primaryColor"
+          :swatches="['#18a058', '#2080f0', '#f0a020', '#d03050', '#8a2be2']"
+          size="small"
+          @update:value="appStore.setPrimaryColor"
+        />
+      </div>
+
+      <div class="setting-section">
+        <h3 class="section-title text-sm">
+          系统字体
+        </h3>
+        <n-select
+          :value="appStore.currentFont"
+          :options="fontOptionsList"
+          size="small"
+          @update:value="appStore.setFont"
+        />
+      </div>
+
+      <!-- ===== 导航 ===== -->
+      <div class="section-caption text-xs">
+        导航
+      </div>
+
+      <div class="setting-section">
+        <div class="toggle-list">
+          <div class="toggle-item text-sm">
+            <span>侧边栏默认折叠</span>
+            <n-switch
+              :value="appStore.collapsed"
+              size="small"
+              @update:value="appStore.switchCollapsed"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-section">
         <div class="toggle-list">
           <div class="toggle-item text-sm">
             <span>显示Logo</span>
             <n-switch v-model:value="appStore.showLogo" size="small" />
           </div>
           <div class="toggle-item text-sm">
-            <span>显示标签页</span>
-            <n-switch v-model:value="appStore.showTabs" size="small" />
-          </div>
-          <div class="toggle-item text-sm">
             <span>显示面包屑</span>
             <n-switch v-model:value="appStore.showBreadcrumb" size="small" />
-          </div>
-          <div class="toggle-item text-sm">
-            <span>显示页脚</span>
-            <n-switch v-model:value="appStore.showFooter" size="small" />
           </div>
         </div>
       </div>
 
-      <!-- 页面动画 -->
+      <!-- ===== 标签页 ===== -->
+      <div class="section-caption text-xs">
+        标签页
+      </div>
+
+      <div class="setting-section">
+        <div class="toggle-list">
+          <div class="toggle-item text-sm">
+            <span>显示标签页</span>
+            <n-switch v-model:value="appStore.showTabs" size="small" />
+          </div>
+          <div class="toggle-item text-sm">
+            <span>显示标签页图标</span>
+            <n-switch v-model:value="appStore.showTabIcon" size="small" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 页面 ===== -->
+      <div class="section-caption text-xs">
+        页面
+      </div>
+
       <div class="setting-section">
         <h3 class="section-title text-sm">
-          页面动画
+          切换动画
         </h3>
         <n-select
           :value="appStore.transitionAnimation"
@@ -119,6 +149,31 @@ defineExpose({ openDrawer })
           size="small"
           @update:value="appStore.transitionAnimation = $event"
         />
+      </div>
+
+      <div class="setting-section">
+        <div class="toggle-list">
+          <div class="toggle-item text-sm">
+            <span>显示页脚</span>
+            <n-switch v-model:value="appStore.showFooter" size="small" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 重置 -->
+      <div class="setting-section reset-section">
+        <n-button
+          quaternary
+          type="error"
+          size="small"
+          block
+          @click="appStore.resetSettings"
+        >
+          <template #icon>
+            <JIcon icon="icon-park-outline:refresh" :size="16" />
+          </template>
+          恢复默认设置
+        </n-button>
       </div>
     </div>
   </BasicDrawer>
@@ -129,6 +184,14 @@ defineExpose({ openDrawer })
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  .section-caption {
+    font-weight: 700;
+    color: var(--primary-color);
+    padding: 0 4px;
+    margin-bottom: -12px;
+    letter-spacing: 0.5px;
+  }
 
   .setting-section {
     background: rgba(128, 128, 128, 0.04);

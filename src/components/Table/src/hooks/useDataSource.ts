@@ -33,8 +33,9 @@ export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagi
 
     setPagination({
       [pageField]: page,
-      [totalField]: Math.ceil(data.length / pageSize),
+      [totalField]: data.length,
       [itemCountField]: data.length,
+      pageCount: Math.ceil(data.length / pageSize),
     })
     return data.slice(start, end)
   }
@@ -61,7 +62,7 @@ export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagi
       else {
         if (
           (isBoolean(pagination) && !pagination)
-          || isBoolean(getPaginationInfo)
+          || isBoolean(unref(getPaginationInfo))
         ) {
           pageParams = {}
         }
@@ -75,10 +76,15 @@ export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagi
 
         const pageInfo = res.pagination || {}
         if (pageInfo) {
+          const currentPage = pageInfo[pageField] || page
+          const currentPageSize = pageInfo[sizeField] || pageInfo.page_size || pageSize
+          const total = pageInfo[itemCountField] || pageInfo[totalField] || 0
           setPagination({
-            [pageField]: pageInfo[pageField],
-            [totalField]: pageInfo[totalField] || 0,
-            [itemCountField]: pageInfo[itemCountField],
+            [pageField]: currentPage,
+            [sizeField]: currentPageSize,
+            [totalField]: total,
+            [itemCountField]: total,
+            pageCount: Math.ceil(total / currentPageSize),
           })
         }
       }

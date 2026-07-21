@@ -20,10 +20,13 @@ export function useSocket() {
       disconnect()
     }
 
-    const baseUrl = import.meta.env.VITE_API_BASE || ''
-    const url = baseUrl ? `${baseUrl.replace(/\/api$/, '')}` : 'http://localhost:3000'
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+    const url = baseUrl && !baseUrl.startsWith('/')
+      ? baseUrl.replace(/\/api\/?$/, '')
+      : ''
+    const socketUrl = url ? `${url}${namespace}` : namespace
 
-    const s = io(`${url}${namespace}`, {
+    const s = io(socketUrl, {
       auth: { token },
       transports: ['websocket'],
       reconnection: true,

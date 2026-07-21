@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { RoleApi } from '@/api/system'
 import { roleTypeOptions, sexOptions, statusOptions } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useUserSchema(methods: any = {}) {
   const schema = computed(() => ({
@@ -42,13 +43,42 @@ export function useUserSchema(methods: any = {}) {
               trigger: ['blur', 'input'],
             },
             {
-              min: 2,
+              min: 3,
               max: 16,
-              message: '用户名长度为2-16位',
+              message: '用户名长度为3-16位',
               trigger: ['blur', 'input'],
             },
           ],
           componentProps: { maxlength: 16, showCount: true },
+        },
+      },
+      {
+        key: 'password',
+        label: '密码',
+        defaultValue: undefined,
+        editForm: {
+          ifShow: () => methods.isCreate === true,
+          component: 'NInput',
+          rules: [
+            {
+              required: true,
+              message: '请输入密码',
+              trigger: ['blur', 'input'],
+            },
+            {
+              min: 6,
+              max: 20,
+              message: '密码长度为6-20位',
+              trigger: ['blur', 'input'],
+            },
+          ],
+          componentProps: {
+            type: 'password',
+            showPasswordOn: 'click',
+            maxlength: 20,
+            showCount: true,
+            placeholder: '请输入密码',
+          },
         },
       },
       {
@@ -98,6 +128,7 @@ export function useUserSchema(methods: any = {}) {
         },
         editForm: {
           key: 'roleIds',
+          ifShow: () => methods.isCreate !== true,
           component: 'ApiSelect',
           componentProps: {
             api: RoleApi.all,
@@ -183,6 +214,7 @@ export function useUserSchema(methods: any = {}) {
           },
         },
         editForm: {
+          ifShow: () => methods.isCreate !== true,
           component: 'NRadioGroup',
           componentProps: { options: statusOptions },
         },
@@ -244,40 +276,48 @@ export function useUserSchema(methods: any = {}) {
           width: 280,
           render: (row: any) => (
             <NSpace justify="center">
-              <NButton
-                type={row.status === 1 ? 'error' : 'primary'}
-                ghost
-                size="small"
-                onClick={() => methods.handleEnable(row)}
-              >
-                {row.status === 0 ? '启用' : '禁用'}
-              </NButton>
-              <NButton
-                type="primary"
-                ghost
-                size="small"
-                onClick={() => methods.handleEdit(row)}
-              >
-                编辑
-              </NButton>
-              <NButton
-                type="info"
-                ghost
-                size="small"
-                onClick={() => methods.handleAssignRole(row)}
-              >
-                分配角色
-              </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                {{
-                  trigger: () => (
-                    <NButton type="error" ghost size="small">
-                      删除
-                    </NButton>
-                  ),
-                  default: () => `是否确认删除用户 ${row.username}？`,
-                }}
-              </NPopconfirm>
+              {hasPermission('system:user:update') && (
+                <NButton
+                  type={row.status === 1 ? 'error' : 'primary'}
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleEnable(row)}
+                >
+                  {row.status === 0 ? '启用' : '禁用'}
+                </NButton>
+              )}
+              {hasPermission('system:user:update') && (
+                <NButton
+                  type="primary"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleEdit(row)}
+                >
+                  编辑
+                </NButton>
+              )}
+              {hasPermission('system:user:assign-role') && (
+                <NButton
+                  type="info"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleAssignRole(row)}
+                >
+                  分配角色
+                </NButton>
+              )}
+              {hasPermission('system:user:delete') && (
+                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
+                  {{
+                    trigger: () => (
+                      <NButton type="error" ghost size="small">
+                        删除
+                      </NButton>
+                    ),
+                    default: () => `是否确认删除用户 ${row.username}？`,
+                  }}
+                </NPopconfirm>
+              )}
             </NSpace>
           ),
         },
@@ -310,6 +350,7 @@ export function useUserSchema(methods: any = {}) {
   const editFormFields = [
     'id',
     'username',
+    'password',
     'name',
     'phone',
     'role',

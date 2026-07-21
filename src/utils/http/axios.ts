@@ -79,6 +79,8 @@ class HttpRequest {
         if (data.code !== 200 && data.code !== 0) {
           return Promise.reject(new Error(data.message))
         }
+        if (response.config.url?.includes('/auth/login'))
+          this.authFailing = false
         return data.data !== undefined ? (data.data as any) : data
       },
       async (error) => {
@@ -138,6 +140,7 @@ class HttpRequest {
         .then((res) => {
           const { accessToken, refreshToken: newRefreshToken } = res.data.data
           setToken({ accessToken, refreshToken: newRefreshToken })
+          this.authFailing = false
           return accessToken
         })
         .catch(async () => {

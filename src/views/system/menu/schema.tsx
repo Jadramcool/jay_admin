@@ -5,6 +5,7 @@ import { computed } from 'vue'
 import { MenuApi } from '@/api/system'
 import { menuTypeOptions } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useMenuSchema(methods: any = {}) {
   const schema = computed(() => ({
@@ -297,7 +298,7 @@ export function useMenuSchema(methods: any = {}) {
           width: 280,
           render: (row: any) => (
             <NSpace justify="center">
-              {row.type !== 'BUTTON' && (
+              {row.type !== 'BUTTON' && hasPermission('system:menu:create') && (
                 <NButton
                   type="info"
                   ghost
@@ -307,22 +308,26 @@ export function useMenuSchema(methods: any = {}) {
                   添加子菜单
                 </NButton>
               )}
-              <NButton
-                type="primary"
-                ghost
-                size="small"
-                onClick={() => methods.handleEdit(row)}
-              >
-                编辑
-              </NButton>
-              <NButton
-                type="error"
-                ghost
-                size="small"
-                onClick={() => methods.handleDelete(row)}
-              >
-                删除
-              </NButton>
+              {hasPermission('system:menu:update') && (
+                <NButton
+                  type="primary"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleEdit(row)}
+                >
+                  编辑
+                </NButton>
+              )}
+              {hasPermission('system:menu:delete') && (
+                <NButton
+                  type="error"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleDelete(row)}
+                >
+                  删除
+                </NButton>
+              )}
             </NSpace>
           ),
         },

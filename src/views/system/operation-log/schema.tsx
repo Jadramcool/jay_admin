@@ -3,6 +3,7 @@ import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { methodOptions, operationStatusOptions, operationTypeOptions } from '@/constants'
 import { columnsUtil, formSchemaUtil } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useOperationLogSchema(methods: any = {}) {
   const schema = computed(() => ({
@@ -201,16 +202,18 @@ export function useOperationLogSchema(methods: any = {}) {
               >
                 详情
               </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                {{
-                  trigger: () => (
-                    <NButton type="error" ghost size="small">
-                      删除
-                    </NButton>
-                  ),
-                  default: () => '确定要删除该日志吗？',
-                }}
-              </NPopconfirm>
+              {hasPermission('system:operation-log:delete') && (
+                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
+                  {{
+                    trigger: () => (
+                      <NButton type="error" ghost size="small">
+                        删除
+                      </NButton>
+                    ),
+                    default: () => '确定要删除该日志吗？',
+                  }}
+                </NPopconfirm>
+              )}
             </NSpace>
           ),
         },

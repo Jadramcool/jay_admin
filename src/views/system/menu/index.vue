@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { MenuApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
+import { hasPermission } from '@/utils/common/hasPermission'
 import MenuModal from './components/MenuModal.vue'
 import { useMenuSchema } from './schema'
 
@@ -68,7 +69,7 @@ function handleAdd() {
       :columns="columns"
       :request="loadData"
       :row-key="(row: any) => row.id"
-      :show-add-btn="true"
+      :show-add-btn="hasPermission('system:menu:create')"
       :pagination="true"
       @add="handleAdd"
     />

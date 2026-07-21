@@ -3,6 +3,7 @@ import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { noticeTypeOptions } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
 
 /**
  * 公告详情弹窗的 Descriptions 配置
@@ -395,25 +396,29 @@ export function useNoticeSchema(methods: any = {}) {
               {(() => {
                 const isPublished = row.status === 1
                 return (
-                  <NButton
-                    type={isPublished ? 'warning' : 'success'}
-                    ghost
-                    size="small"
-                    onClick={() => methods.handleToggleStatus(row)}
-                  >
-                    {isPublished ? '下刊' : '发布'}
-                  </NButton>
+                  hasPermission('notice:publish') && (
+                    <NButton
+                      type={isPublished ? 'warning' : 'success'}
+                      ghost
+                      size="small"
+                      onClick={() => methods.handleToggleStatus(row)}
+                    >
+                      {isPublished ? '下刊' : '发布'}
+                    </NButton>
+                  )
                 )
               })()}
-              <NButton
-                type={row.isPinned ? 'error' : 'primary'}
-                ghost
-                size="small"
-                onClick={() => methods.handleTogglePin(row)}
-              >
-                {row.isPinned ? '取消置顶' : '置顶'}
-              </NButton>
-              {row.status === 1 && (
+              {hasPermission('notice:update') && (
+                <NButton
+                  type={row.isPinned ? 'error' : 'primary'}
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleTogglePin(row)}
+                >
+                  {row.isPinned ? '取消置顶' : '置顶'}
+                </NButton>
+              )}
+              {row.status === 1 && hasPermission('notice:update') && (
                 <NButton
                   ghost
                   size="small"
@@ -422,24 +427,28 @@ export function useNoticeSchema(methods: any = {}) {
                   重推
                 </NButton>
               )}
-              <NButton
-                type="primary"
-                ghost
-                size="small"
-                onClick={() => methods.handleEdit(row)}
-              >
-                编辑
-              </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                {{
-                  trigger: () => (
-                    <NButton type="error" ghost size="small">
-                      删除
-                    </NButton>
-                  ),
-                  default: () => `确定删除公告「${row.title}」吗？`,
-                }}
-              </NPopconfirm>
+              {hasPermission('notice:update') && (
+                <NButton
+                  type="primary"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleEdit(row)}
+                >
+                  编辑
+                </NButton>
+              )}
+              {hasPermission('notice:delete') && (
+                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
+                  {{
+                    trigger: () => (
+                      <NButton type="error" ghost size="small">
+                        删除
+                      </NButton>
+                    ),
+                    default: () => `确定删除公告「${row.title}」吗？`,
+                  }}
+                </NPopconfirm>
+              )}
             </NSpace>
           ),
         },

@@ -11,7 +11,7 @@ const router = useRouter()
 const userId = route.params.id as string | undefined
 const isUpdate = ref(!!userId)
 
-const { editFormSchemas } = useUserSchema()
+const { editFormSchemas } = useUserSchema({ isCreate: !isUpdate.value })
 
 const [registerForm, { setFieldsValue }] = useForm({
   schemas: editFormSchemas,
@@ -36,12 +36,16 @@ onMounted(async () => {
 
 async function handleSubmit(values: any) {
   try {
+    const payload = { ...values }
+    if (isUpdate.value && !payload.password)
+      delete payload.password
+
     if (isUpdate.value) {
-      await UserManagerApi.update(values)
+      await UserManagerApi.update(payload)
       window.$message?.success?.('更新成功')
     }
     else {
-      await UserManagerApi.create(values)
+      await UserManagerApi.create(payload)
       window.$message?.success?.('创建成功')
     }
     goBack()

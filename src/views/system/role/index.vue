@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RoleApi } from '@/api/system'
+import { hasPermission } from '@/utils/common/hasPermission'
 import RoleMenuModal from './components/RoleMenuModal.vue'
 import RoleModal from './components/RoleModal.vue'
 import { useRoleSchema } from './schema'
@@ -62,7 +63,7 @@ function handleAdd() {
       :columns="columns"
       :request="loadData"
       :row-key="(row: any) => row.id"
-      :show-add-btn="true"
+      :show-add-btn="hasPermission('system:role:create')"
       @add="handleAdd"
     />
 

@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import { NButton, NPopconfirm, NSpace } from 'naive-ui'
 import { computed } from 'vue'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useRoleSchema(methods: any = {}) {
   const schema = computed(() => ({
@@ -13,7 +14,7 @@ export function useRoleSchema(methods: any = {}) {
         key: 'id',
         label: 'ID',
         form: { component: 'NInputNumber', componentProps: { showButton: false, precision: 0 } },
-        editForm: { componentProps: { disabled: true } },
+        editForm: { componentProps: { disabled: true }, ifShow: false },
       },
       {
         key: 'code',
@@ -57,18 +58,24 @@ export function useRoleSchema(methods: any = {}) {
           width: 240,
           render: (row: any) => (
             <NSpace justify="center">
-              <NButton type="primary" ghost size="small" onClick={() => methods.handleAuth(row)}>
-                分配菜单
-              </NButton>
-              <NButton type="primary" ghost size="small" onClick={() => methods.handleEdit(row)}>
-                编辑
-              </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                {{
-                  trigger: () => <NButton type="error" ghost size="small">删除</NButton>,
-                  default: () => `确定删除角色 ${row.name}？`,
-                }}
-              </NPopconfirm>
+              {hasPermission('system:role:assign-menu') && (
+                <NButton type="primary" ghost size="small" onClick={() => methods.handleAuth(row)}>
+                  分配菜单
+                </NButton>
+              )}
+              {hasPermission('system:role:update') && (
+                <NButton type="primary" ghost size="small" onClick={() => methods.handleEdit(row)}>
+                  编辑
+                </NButton>
+              )}
+              {hasPermission('system:role:delete') && (
+                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
+                  {{
+                    trigger: () => <NButton type="error" ghost size="small">删除</NButton>,
+                    default: () => `确定删除角色 ${row.name}？`,
+                  }}
+                </NPopconfirm>
+              )}
             </NSpace>
           ),
         },
@@ -79,7 +86,7 @@ export function useRoleSchema(methods: any = {}) {
 
   const tableFields = ['code', 'name', 'description', 'createdTime', 'operate']
   const formFields = ['code', 'name']
-  const editFormFields = ['code', 'name', 'description']
+  const editFormFields = ['id', 'code', 'name', 'description']
 
   const columns = computed(() => columnsUtil(schema.value, tableFields))
   const formSchemas = computed(() => formSchemaUtil(schema.value, formFields))

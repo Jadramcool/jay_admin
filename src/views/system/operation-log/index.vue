@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { OperationLogApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
+import { hasPermission } from '@/utils/common/hasPermission'
 import OperationLogDetailModal from './components/OperationLogDetailModal.vue'
 import { useOperationLogSchema } from './schema'
 
@@ -94,12 +95,18 @@ async function handleClearExpired() {
       :request="loadData"
       :row-key="(row: any) => row.id"
       :show-add-btn="false"
-      :show-batch-delete-btn="true"
+      :show-batch-delete-btn="hasPermission('system:operation-log:delete')"
       :scroll-x="1600"
       @batch-delete="handleBatchDelete"
     >
       <template #toolbar>
-        <n-button type="warning" ghost size="small" @click="handleClearExpired">
+        <n-button
+          v-if="hasPermission('system:operation-log:delete')"
+          type="warning"
+          ghost
+          size="small"
+          @click="handleClearExpired"
+        >
           清理过期日志
         </n-button>
       </template>

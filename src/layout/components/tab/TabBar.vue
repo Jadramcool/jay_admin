@@ -5,8 +5,9 @@ import type { RouteLocationNormalized } from 'vue-router'
 import { computed, nextTick, ref } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useRouter } from 'vue-router'
-import { useTabStore } from '@/store/modules'
+import { useAppStore, useTabStore } from '@/store/modules'
 
+const appStore = useAppStore()
 const tabStore = useTabStore()
 const router = useRouter()
 
@@ -238,7 +239,7 @@ function handleWheel(e: WheelEvent) {
             @contextmenu.prevent="handleContextMenu($event, tab)"
           >
             <JIcon
-              v-if="tab.meta?.icon"
+              v-if="tab.meta?.icon && appStore.showTabIcon"
               :icon="tab.meta.icon as string"
               :size="14"
               class="tab-icon"

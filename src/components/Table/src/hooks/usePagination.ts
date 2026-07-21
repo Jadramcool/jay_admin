@@ -10,8 +10,11 @@ export function usePagination(refProps: any) {
       return false
     }
 
-    const { totalField, itemCountField } = APISETTING
+    const { itemCountField } = APISETTING
     const config = unref(configRef)
+    const pageSize = config.pageSize || DEFAULTPAGESIZE
+    const itemCount = config[itemCountField] || 0
+    const pageCount = config.pageCount ?? Math.ceil(itemCount / pageSize)
     const pageSizes = config.pageSizes || PAGESIZES
     if (config?.pageSize && !pageSizes.includes(config.pageSize)) {
       const index = pageSizes.findIndex(
@@ -20,14 +23,14 @@ export function usePagination(refProps: any) {
       pageSizes.splice(index, 0, config.pageSize)
     }
     return {
-      pageSize: DEFAULTPAGESIZE,
+      pageSize,
       pageSizes,
       showSizePicker: true,
       showQuickJumper: true,
       ...(isBoolean(pagination) ? {} : pagination),
       ...config,
-      pageCount: config[totalField],
-      itemCount: config[itemCountField] || 0,
+      pageCount,
+      itemCount,
       prefix: (info: any) => `共${info.itemCount}条数据，共${info.pageCount}页`,
       onUpdatePage: () => {},
       onUpdatePageSize: () => {},

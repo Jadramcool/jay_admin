@@ -58,7 +58,7 @@ defineExpose({ openDrawer, closeDrawer })
     v-model:show="showDrawer"
     v-bind="getBindValue"
     :width="width"
-    :mask-closable="false"
+    :mask-closable="true"
     @after-leave="handleClose"
   >
     <n-drawer-content :title="title" :closable="true" :native-scrollbar="false">

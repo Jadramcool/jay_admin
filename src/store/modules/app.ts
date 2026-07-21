@@ -16,6 +16,7 @@ interface AppState {
   colorMode: App.ColorMode
   showLogo: boolean
   showTabs: boolean
+  showTabIcon: boolean
   showFooter: boolean
   showBreadcrumb: boolean
   loadFlag: boolean
@@ -33,6 +34,7 @@ export const useAppStore = defineStore('app', {
     colorMode: 'light',
     showLogo: true,
     showTabs: true,
+    showTabIcon: true,
     showFooter: true,
     showBreadcrumb: true,
     loadFlag: true,
@@ -133,8 +135,23 @@ export const useAppStore = defineStore('app', {
         })
       }, delay)
     },
+    resetSettings() {
+      this.collapsed = false
+      this.currentFont = defaultFont
+      this.primaryColor = '#18a058'
+      this.colorMode = 'light'
+      this.showLogo = true
+      this.showTabs = true
+      this.showTabIcon = true
+      this.showFooter = true
+      this.showBreadcrumb = true
+      this.transitionAnimation = 'fade-slide'
+      this.setPrimaryColor()
+      this.setFont(this.currentFont)
+      this.applyDarkClass()
+    },
   },
   persist: {
-    pick: ['collapsed', 'currentFont', 'primaryColor', 'colorMode', 'showLogo', 'showTabs', 'showFooter', 'showBreadcrumb', 'transitionAnimation'],
+    pick: ['collapsed', 'currentFont', 'primaryColor', 'colorMode', 'showLogo', 'showTabs', 'showTabIcon', 'showFooter', 'showBreadcrumb', 'transitionAnimation'],
   },
 })

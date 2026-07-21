@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { NoticeApi } from '@/api/notice'
 import { useModal } from '@/components/Modal'
+import { hasPermission } from '@/utils/common/hasPermission'
 import NoticeDetailModal from './components/NoticeDetailModal.vue'
 import NoticeReceiversModal from './components/NoticeReceiversModal.vue'
 import { useNoticeSchema } from './schema.tsx'
@@ -142,7 +143,8 @@ async function handleBatchDelete(keys: number[]) {
       :columns="columns"
       :request="loadData"
       :row-key="(row: any) => row.id"
-      :show-add-btn="true"
+      :show-add-btn="hasPermission('notice:create')"
+      :show-batch-delete-btn="hasPermission('notice:delete')"
       :scroll-x="1550"
       @add="handleAdd"
       @batch-delete="handleBatchDelete"

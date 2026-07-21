@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue'
 import { nextTick, ref } from 'vue'
 import { DepartmentApi } from '@/api/system'
+import { hasPermission } from '@/utils/common/hasPermission'
 import DepartmentModal from './components/DepartmentModal.vue'
 import { useMemberSchema } from './member-schema'
 import { useDepartmentSchema } from './schema'
@@ -188,7 +189,13 @@ onMounted(() => {
     <div class="dept-tree-panel">
       <div class="dept-tree-header">
         <span class="dept-tree-title text-base">部门结构</span>
-        <n-button size="small" circle type="primary" @click="handleAdd">
+        <n-button
+          v-if="hasPermission('system:department:create')"
+          size="small"
+          circle
+          type="primary"
+          @click="handleAdd"
+        >
           <template #icon>
             <Icon icon="mdi:plus" width="16" />
           </template>
@@ -237,20 +244,32 @@ onMounted(() => {
             </n-tag>
           </div>
           <n-space>
-            <n-button size="small" @click="handleEdit(selectedDept)">
+            <n-button
+              v-if="hasPermission('system:department:update')"
+              size="small"
+              @click="handleEdit(selectedDept)"
+            >
               编辑部门
             </n-button>
-            <n-button size="small" @click="handleAddChild(selectedDept)">
+            <n-button
+              v-if="hasPermission('system:department:create')"
+              size="small"
+              @click="handleAddChild(selectedDept)"
+            >
               添加子部门
             </n-button>
             <n-button
+              v-if="hasPermission('system:department:update')"
               size="small"
               :type="selectedDept.status === 1 ? 'warning' : 'success'"
               @click="handleToggleStatus(selectedDept)"
             >
               {{ selectedDept.status === 1 ? "禁用" : "启用" }}
             </n-button>
-            <n-popconfirm @positive-click="handleDelete(selectedDept)">
+            <n-popconfirm
+              v-if="hasPermission('system:department:delete')"
+              @positive-click="handleDelete(selectedDept)"
+            >
               <template #trigger>
                 <n-button size="small" type="error">
                   删除
