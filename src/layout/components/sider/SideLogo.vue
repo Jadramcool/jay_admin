@@ -6,7 +6,9 @@ const appStore = useAppStore()
 
 <template>
   <div v-if="appStore.showLogo" class="side-logo">
-    <img src="/vite.svg" alt="logo" class="logo">
+    <div class="logo" aria-hidden="true">
+      J
+    </div>
     <span v-show="appStore.collapsed ? false : true" key="title" class="title text-lg">JDM Admin</span>
   </div>
 </template>
@@ -22,13 +24,23 @@ const appStore = useAppStore()
   overflow: hidden;
 
   .logo {
-    width: 32px;
-    height: 32px;
+    display: grid;
+    width: 34px;
+    height: 34px;
     flex-shrink: 0;
+    place-items: center;
+    border-radius: 9px;
+    background: linear-gradient(145deg, var(--primary-color-hover), var(--primary-color-pressed));
+    box-shadow: 0 7px 18px rgba(var(--primary-color-rgb), 0.24);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
   }
 
   .title {
-    font-weight: 700;
+    color: var(--card-header-text);
+    font-weight: 750;
+    letter-spacing: -0.02em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

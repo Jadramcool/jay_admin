@@ -37,7 +37,7 @@ const keepAliveRoutes = computed(() => {
   <n-layout class="wh-full" has-sider>
     <n-layout-sider
       bordered
-      :width="240"
+      :width="224"
       :collapsed-width="64"
       :collapsed="appStore.collapsed"
       :native-scrollbar="false"
@@ -64,12 +64,13 @@ const keepAliveRoutes = computed(() => {
       <n-layout-content
         class="h-full flex-1 overflow-hidden"
         embedded
-        content-style="padding: 14px"
+        content-style="padding: 18px 20px"
       >
         <template v-if="appStore.loadFlag">
           <n-card
             v-if="route.meta?.withContentCard !== false"
-            content-style="overflow: auto; height: 100%;"
+            :bordered="false"
+            content-style="overflow: auto; height: 100%; padding: 18px;"
             class="content-card"
           >
             <router-view v-slot="{ Component: Comp, route: r }">
@@ -107,6 +108,8 @@ const keepAliveRoutes = computed(() => {
 <style lang="scss" scoped>
 .content-card {
   height: 100%;
+  border: 1px solid var(--layout-border-light);
+  box-shadow: var(--surface-shadow);
 }
 
 .layout-footer {

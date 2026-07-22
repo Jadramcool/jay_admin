@@ -17,7 +17,7 @@
 
 ## 编码风格与命名约定
 
-使用 TypeScript、Vue Composition API 和 `<script setup>` 编写单文件组件。遵循 `eslint.config.mjs` 中的 `@antfu/eslint-config`，不要额外引入独立格式化规则。Vue 组件使用 PascalCase，组合式函数命名为 `useXxx.ts`，状态模块按领域放在 `src/store/modules/`，接口文件按业务领域放在 `src/api/`。JS/TS 逻辑中优先使用箭头函数，例如 `const handleSubmit = async () => {}`；需要函数提升、构造函数或明确声明式 API 时再使用 `function`。优先使用别名：`@/` 指向 `src/`，`#/` 指向 `typings/`。
+使用 TypeScript、Vue Composition API 和 `<script setup>` 编写单文件组件。遵循 `eslint.config.mjs` 中的 `@antfu/eslint-config`，不要额外引入独立格式化规则。Vue 组件使用 PascalCase，组合式函数命名为 `useXxx.ts`，状态模块按领域放在 `src/store/modules/`，接口文件按业务领域放在 `src/api/`。TypeScript 代码中的函数应尽可能使用箭头函数，包括事件处理器、回调函数、工具函数和异步函数，例如 `const handleSubmit = async () => {}`。仅在需要函数提升、函数重载、构造函数、生成器或明确声明式公共 API 时使用 `function` 声明。优先使用别名：`@/` 指向 `src/`，`#/` 指向 `typings/`。
 
 ## 测试要求
 
@@ -32,3 +32,22 @@
 除非任务要求重新生成类型，否则不要手动编辑 `typings/auto-imports.d.ts` 和 `typings/components.d.ts`。维护 `src/views/system/` 中现有的 schema-driven CRUD 模式，并保持 `src/components/` 中公共组件 API 的兼容性。
 
 新增或修改表单、表格、Modal、抽屉时，优先采用现有公共组件：表单使用 `src/components/Form/` 下的 `BasicForm`、`FormQuery`、`FormEdit`，表格使用 `src/components/Table/` 下的 `BasicTable`，弹窗使用 `src/components/Modal/` 下的 `BasicModal`，抽屉使用 `src/components/Drawer/` 下的 `BasicDrawer`。只有公共组件无法覆盖需求时，才新增局部业务组件，并说明原因。
+
+### 公共组件文档规范
+
+`src/components/` 下供多个业务模块复用的公共组件必须提供固定使用说明。文档统一放在对应组件目录的 `README.md` 中；同一组件族（例如 Form、Table、Modal、Drawer）共用一份文档，并分别说明其公开组件。
+
+新增公共组件时必须同时新增文档；修改公共组件的 Props、Events、Slots、默认行为、暴露方法、组合式函数或使用约束时，必须在同一变更中同步更新文档。未写入文档的内部实现不得作为业务侧依赖的公开 API。
+
+公共组件文档固定包含以下内容：
+
+- 组件用途与适用场景。
+- 引入方式和最小可运行示例。
+- Props（类型、默认值、是否必填及说明）。
+- Events 与回调参数。
+- Slots 与作用域参数。
+- 暴露方法、配套组合式函数及其返回值。
+- 默认行为和关键交互语义，例如表单初始化、重置、提交和校验行为。
+- 完整业务示例、注意事项及不推荐用法。
+
+业务页面使用公共组件时，以对应 `README.md` 的示例和约定为准，不得绕过公开 API 操作组件内部状态。文档示例应使用项目既有别名、TypeScript、Composition API 和 `<script setup>`，并保持可直接复制使用。

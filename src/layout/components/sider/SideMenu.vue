@@ -52,7 +52,16 @@ function handleMenuSelect(key: string, item: any) {
 <style lang="scss" scoped>
 .side-menu {
   height: calc(100vh - 64px);
+  padding: 8px 10px 18px;
   overflow-y: auto;
   overflow-x: hidden;
+
+  :deep(.n-menu-item-content) {
+    margin-bottom: 3px;
+  }
+
+  :deep(.n-menu-item-content-header) {
+    font-weight: 500;
+  }
 }
 </style>

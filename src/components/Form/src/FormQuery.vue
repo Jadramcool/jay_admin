@@ -303,7 +303,7 @@ defineExpose(formAction)
 </script>
 
 <template>
-  <NForm v-bind="getBindValue" ref="formElRef" :model="formModel">
+  <NForm v-bind="getBindValue" ref="formElRef" :model="formModel" class="query-form">
     <NGrid v-bind="getGrid">
       <template v-for="schema in getSchema" :key="schema.field">
         <NGi v-if="getShow(schema)" v-bind="schema.giProps || getProps.giProps">

@@ -307,13 +307,13 @@ function handleWheel(e: WheelEvent) {
 
 /* ─── Wrapper ────────────────────────────────────────── */
 .tab-bar-wrapper {
-  height: 40px;
+  height: 42px;
   display: flex;
   align-items: center;
   overflow: hidden;
   position: relative;
   background: var(--layout-bg);
-  border-bottom: 1px solid var(--layout-border);
+  border-bottom: 1px solid var(--layout-border-light);
 
   /* ─── Scroll container ───────────────────────────────── */
   .tabs-scroll-container {
@@ -334,16 +334,16 @@ function handleWheel(e: WheelEvent) {
     position: relative;
     display: inline-flex;
     align-items: center;
-    height: 32px;
-    padding: 0 10px 0 14px;
-    margin: 4px 1px 0;
-    line-height: 32px;
-    border-radius: 6px 6px 0 0;
+    height: 30px;
+    padding: 0 10px 0 12px;
+    margin: 6px 2px;
+    line-height: 30px;
+    border-radius: 7px;
     color: var(--layout-text-secondary);
     cursor: pointer;
     user-select: none;
     flex-shrink: 0;
-    background: var(--layout-bg-secondary);
+    background: transparent;
 
     /* ── 边框：每个 tab 有完整边框 ── */
     border: 1px solid transparent;
@@ -367,14 +367,9 @@ function handleWheel(e: WheelEvent) {
     &.is-active {
       color: var(--primary-color, #18a058);
       font-weight: 500;
-      background: var(--layout-bg);
-      border-color: var(--layout-border);
-      border-bottom-color: var(--layout-bg);
-      margin-bottom: -1px;
-      box-shadow:
-        0 -1px 4px rgba(0, 0, 0, 0.06),
-        1px 0 3px rgba(0, 0, 0, 0.03),
-        -1px 0 3px rgba(0, 0, 0, 0.03);
+      background: var(--tab-active-bg);
+      border-color: var(--tab-active-border);
+      box-shadow: none;
       z-index: 1;
     }
 
@@ -384,8 +379,8 @@ function handleWheel(e: WheelEvent) {
       position: absolute;
       left: 6px;
       right: 6px;
-      bottom: -1px;
-      height: 2.5px;
+      bottom: 2px;
+      height: 2px;
       background: var(--primary-color, #18a058);
       border-radius: 3px 3px 0 0;
       z-index: 2;
@@ -536,7 +531,7 @@ function handleWheel(e: WheelEvent) {
   display: inline-flex;
   align-items: center;
   flex-wrap: nowrap;
-  height: 40px;
+  height: 42px;
   min-width: fit-content;
   padding: 0 6px;
 }

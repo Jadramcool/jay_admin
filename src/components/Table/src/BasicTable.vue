@@ -49,6 +49,9 @@ const { getLoading, setLoading } = useLoading(getProps)
 const { getPaginationInfo, setPagination } = usePagination(getProps)
 
 const pagination = computed(() => unref(getPaginationInfo))
+const useFixedTableLayout = computed(
+  () => props.paginationFixedBottom || props.flexHeight,
+)
 
 const { dataSourceRef, reload, handleLocalPagination, fullDataSourceRef }
   = useDataSource(getProps, {
@@ -159,7 +162,14 @@ defineExpose({
 </script>
 
 <template>
-  <NCard :bordered="false" size="small" class="table-wrapper">
+  <NCard
+    :bordered="false"
+    size="small"
+    class="table-wrapper"
+    :class="{ 'table-wrapper--fixed-pagination': props.paginationFixedBottom }"
+    content-style="padding: 0;"
+    header-style="padding-right: 0; padding-left: 0;"
+  >
     <template #header>
       <slot name="header">
         <p v-if="getProps.showToolbar" class="card-header">
@@ -190,7 +200,11 @@ defineExpose({
     <NDataTable
       v-bind="getTableValue"
       :bordered="false"
-      :class="{ 'header-no-wrap': getProps.headerNoWrap }"
+      :class="[
+        { 'header-no-wrap': getProps.headerNoWrap },
+        { 'data-table--fixed-pagination': props.paginationFixedBottom },
+      ]"
+      :flex-height="useFixedTableLayout"
       :render-expand-icon="renderExpandIcon"
       @update:page="updatePage"
       @update:page-size="updatePageSize"
@@ -209,4 +223,79 @@ defineExpose({
   </NCard>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.table-wrapper {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+
+  :deep(.n-card-header) {
+    min-height: 58px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  :deep(.n-card-header__main) {
+    display: flex;
+    align-items: center;
+  }
+
+  :deep(.n-card__content) {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  :deep(.n-data-table) {
+    flex: 1;
+    min-height: 0;
+  }
+
+  &--fixed-pagination {
+    :deep(.n-data-table) {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    :deep(.n-data-table-wrapper),
+    :deep(.n-data-table-base-table),
+    :deep(.n-data-table-base-table-body) {
+      min-height: 0;
+    }
+
+    :deep(.n-data-table-wrapper) {
+      overflow: hidden;
+    }
+
+    :deep(.n-data-table__pagination) {
+      flex-shrink: 0;
+      padding: 0 2px 2px;
+    }
+  }
+}
+
+.card-header {
+  position: relative;
+  padding-left: 12px;
+  color: var(--card-header-text);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 3px;
+    height: 15px;
+    border-radius: 3px;
+    background: var(--primary-color);
+    content: '';
+    transform: translateY(-50%);
+  }
+}
+</style>

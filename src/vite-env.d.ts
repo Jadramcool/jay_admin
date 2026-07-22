@@ -10,6 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_HOME_PATH: string
   readonly VITE_USE_HASH: string
   readonly VITE_API_BASE_URL: string
+  readonly VITE_WEBSOCKET_URL: string
   readonly VITE_PROXY: string
 }
 

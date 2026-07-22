@@ -3,7 +3,7 @@ import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { RoleApi } from '@/api/system'
 import { roleTypeOptions, sexOptions, statusOptions } from '@/constants'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, isPhone } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useUserSchema(methods: any = {}) {
@@ -104,11 +104,39 @@ export function useUserSchema(methods: any = {}) {
         form: {
           component: 'NInput',
           query: 'eq',
-          componentProps: { placeholder: '请输入手机号' },
+          componentProps: {
+            placeholder: '请输入手机号',
+            allowInput: (value: string) => !value || /^\d+$/.test(value),
+          },
+          rules: [
+            {
+              validator: (rule: any, value: any) => {
+                if (!value || isPhone(value))
+                  return true
+                return new Error('请输入正确的手机号')
+              },
+              trigger: 'blur',
+            },
+          ],
         },
         editForm: {
           component: 'NInput',
-          componentProps: { placeholder: '请输入手机号' },
+          componentProps: {
+            placeholder: '请输入手机号',
+            maxlength: 11,
+            showCount: true,
+            allowInput: (value: string) => !value || /^\d+$/.test(value),
+          },
+          rules: [
+            {
+              validator: (rule: any, value: any) => {
+                if (isPhone(value))
+                  return true
+                return new Error('请输入正确的手机号')
+              },
+              trigger: ['blur', 'input'],
+            },
+          ],
         },
         table: { width: 130, render: (row: any) => row.phone || '-' },
       },
@@ -120,6 +148,7 @@ export function useUserSchema(methods: any = {}) {
           component: 'ApiSelect',
           componentProps: {
             api: RoleApi.all,
+            filterable: true,
             multiple: false,
             placeholder: '请选择角色',
             labelField: 'name',
@@ -132,6 +161,7 @@ export function useUserSchema(methods: any = {}) {
           component: 'ApiSelect',
           componentProps: {
             api: RoleApi.all,
+            filterable: true,
             multiple: true,
             placeholder: '请选择角色',
             labelField: 'name',

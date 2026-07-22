@@ -24,6 +24,7 @@ declare module 'vue' {
     GlobalLoading: typeof import('./../src/components/common/GlobalLoading.vue')['default']
     IconPicker: typeof import('./../src/components/Form/src/components/IconPicker.vue')['default']
     JIcon: typeof import('./../src/components/common/JIcon.vue')['default']
+    JIconButton: typeof import('./../src/components/common/JIconButton.vue')['default']
     NaiveSetup: typeof import('./../src/components/application/NaiveSetup.vue')['default']
     NAlert: typeof import('naive-ui')['NAlert']
     NAvatar: typeof import('naive-ui')['NAvatar']

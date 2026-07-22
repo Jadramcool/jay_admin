@@ -12,7 +12,7 @@ const appStore = useAppStore()
 </script>
 
 <template>
-  <div class="h-48px flex-between px-16px">
+  <div class="app-header">
     <div class="flex items-center gap-12px">
       <MenuCollapse />
       <Breadcrumb v-if="appStore.showBreadcrumb" />
@@ -26,3 +26,13 @@ const appStore = useAppStore()
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 54px;
+  padding: 0 20px;
+}
+</style>

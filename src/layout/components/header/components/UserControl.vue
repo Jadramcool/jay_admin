@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DropdownOption } from 'naive-ui'
-import { Icon } from '@iconify/vue'
 import { useRouter } from 'vue-router'
+import { JIconButton } from '@/components'
 import { useAuthStore, useUserStore } from '@/store/modules'
 
 const userStore = useUserStore()
@@ -34,13 +34,8 @@ function handleSelect(key: string) {
 
 <template>
   <n-dropdown trigger="click" :options="menuOptions" @select="handleSelect">
-    <n-button quaternary size="small">
-      <template #icon>
-        <n-icon size="22">
-          <Icon icon="icon-park-outline:avatar" />
-        </n-icon>
-      </template>
+    <JIconButton icon="icon-park-outline:avatar" label="用户菜单" :size="22">
       <span>{{ userStore.userInfo?.name || userStore.userInfo?.username }}</span>
-    </n-button>
+    </JIconButton>
   </n-dropdown>
 </template>

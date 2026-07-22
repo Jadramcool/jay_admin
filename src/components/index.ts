@@ -1,4 +1,4 @@
-export { JIcon } from './common'
+export { JIcon, JIconButton } from './common'
 export { Description } from './Description'
 export { BasicDrawer, useDrawer, useDrawerInner } from './Drawer'
 export { BasicForm, FormEdit, FormQuery, useForm } from './Form'

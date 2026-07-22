@@ -1,6 +1,7 @@
 <script setup lang="ts" name="FormEdit">
 import type { GridProps } from 'naive-ui'
 import type { FormActionType, FormSchema } from './types'
+import cloneDeep from 'lodash-es/cloneDeep'
 import { isFunction } from '@/utils'
 import FormItem from './components/FormItem.vue'
 import { useBaseForm } from './hooks/useBaseForm'
@@ -75,6 +76,9 @@ const {
   getComponentInstance,
 } = useBaseForm(props)
 
+/** 启用默认重置按钮时，保存外部初始化完成后的表单快照 */
+const initialFormModel = shallowRef<Recordable | null>(null)
+
 // ---------- bind value — 剔除表单自有 props ----------
 
 const getBindValue = computed(() => {
@@ -116,6 +120,9 @@ async function setFieldsValue(values: Recordable): Promise<void> {
       formModel[key] = values[key]
     }
   })
+
+  if (unref(getProps).showResetButton)
+    initialFormModel.value = cloneDeep(toRaw(formModel))
 }
 
 function resetFields() {
@@ -124,9 +131,10 @@ function resetFields() {
     customReset()
     return
   }
-  const defaultModel = unref(defaultFormModel) || {}
+  const defaultModel
+    = unref(initialFormModel) ?? unref(defaultFormModel) ?? {}
   Object.keys(formModel).forEach((key) => {
-    formModel[key] = defaultModel[key] ?? null
+    formModel[key] = cloneDeep(defaultModel[key] ?? null)
   })
   clearValidate()
   emit('reset', toRaw(formModel))

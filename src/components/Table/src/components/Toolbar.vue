@@ -41,10 +41,7 @@ const handleAdd = () => emit('add')
 </script>
 
 <template>
-  <div
-    class="flex justify-end my-1"
-    style="display: flex; justify-content: flex-end; align-items: center; gap: 8px"
-  >
+  <div class="table-toolbar">
     <n-space>
       <slot />
       <n-button
@@ -126,3 +123,12 @@ const handleAdd = () => emit('add')
     </n-dropdown>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+</style>

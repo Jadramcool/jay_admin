@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownOption } from 'naive-ui'
-import { Icon } from '@iconify/vue'
+import { JIconButton } from '@/components'
 import { fontOptions } from '@/settings'
 import { useAppStore } from '@/store/modules'
 
@@ -20,12 +20,6 @@ function handleSelect(key: string) {
 
 <template>
   <n-dropdown trigger="hover" :options="options" @select="handleSelect">
-    <n-button quaternary size="small">
-      <template #icon>
-        <n-icon size="18">
-          <Icon icon="icon-park-outline:font-size-two" />
-        </n-icon>
-      </template>
-    </n-button>
+    <JIconButton icon="icon-park-outline:font-size-two" label="选择字体" />
   </n-dropdown>
 </template>

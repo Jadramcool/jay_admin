@@ -6,25 +6,20 @@ import { io } from 'socket.io-client'
  * 用于建立和维护 Socket.IO 长连接
  */
 export function useSocket() {
-  const socket = ref<Socket | null>(null)
-  const connected = ref(false)
+  const socket = shallowRef<Socket | null>(null)
+  const connected = shallowRef(false)
 
   /**
    * 建立 WebSocket 连接
    * @param token JWT token
-   * @param namespace 命名空间，默认 /notice
    */
-  function connect(token: string, namespace = '/notice') {
+  function connect(token: string) {
     // 如果已有连接，先断开
     if (socket.value) {
       disconnect()
     }
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-    const url = baseUrl && !baseUrl.startsWith('/')
-      ? baseUrl.replace(/\/api\/?$/, '')
-      : ''
-    const socketUrl = url ? `${url}${namespace}` : namespace
+    const socketUrl = import.meta.env.VITE_WEBSOCKET_URL || '/notice'
 
     const s = io(socketUrl, {
       auth: { token },

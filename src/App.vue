@@ -5,22 +5,21 @@ import Application from '@/components/application/Application.vue'
 import { useAppStore } from '@/store/modules'
 
 const appStore = useAppStore()
+appStore.syncColorMode()
 
 // Drive Naive UI's built-in theme from the resolved dark state so all Naive
 // components switch in lockstep with the custom components.
 const theme = computed(() => (appStore.isDark ? darkTheme : null))
 
 onMounted(() => {
-  appStore.setPrimaryColor()
   appStore.setFont(appStore.currentFont)
-  appStore.applyDarkClass()
 })
 
-// In 'auto' mode the OS preference can change at runtime; keep the <html> class
-// (and thus the CSS variables) in sync whenever the resolved state flips.
-// Use the transition-wrapped path so it animates consistently with manual toggles.
-watch(() => appStore.isDark, () => {
-  appStore.applyDarkClassWithTransition()
+// Auto mode follows OS preference through the same atomic transition path used
+// by the manual switch, keeping Naive UI and global CSS on one visual timeline.
+watch(() => appStore.systemPrefersDark, () => {
+  if (appStore.colorMode === 'auto')
+    appStore.syncColorMode(true)
 })
 </script>
 

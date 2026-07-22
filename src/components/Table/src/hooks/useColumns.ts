@@ -1,10 +1,18 @@
 import type { DataTableBaseColumn } from 'naive-ui'
-import { shallowRef } from 'vue'
+import { ref } from 'vue'
 
 const tableColumnTypes = ['selection', 'expand']
 
 const SELECTION_KEY = '__selection__'
 const EXPAND_KEY = '__expand__'
+
+function getColumnCheckKey(column: DataTableBaseColumn) {
+  if (column.type === 'selection')
+    return SELECTION_KEY
+  if (column.type === 'expand')
+    return EXPAND_KEY
+  return column.key
+}
 
 export function useColumns(refProps: any) {
   const columns = computed(() => unref(refProps).columns)
@@ -34,7 +42,7 @@ export function useColumns(refProps: any) {
     }, [])
   }
 
-  const columnChecks = shallowRef<NaiveUI.TableColumnCheck[]>(
+  const columnChecks = ref<NaiveUI.TableColumnCheck[]>(
     getColumnChecks(unref(columns)),
   )
 
@@ -52,7 +60,7 @@ export function useColumns(refProps: any) {
           .filter((column: NaiveUI.TableColumnCheck) => column.checked)
           .map((item) => {
             const index = unref(columns).findIndex(
-              (column: DataTableBaseColumn) => column.key === item.key,
+              (column: DataTableBaseColumn) => getColumnCheckKey(column) === item.key,
             )
             return index !== -1 ? unref(columns)[index] : null
           })

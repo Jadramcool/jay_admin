@@ -57,6 +57,10 @@ export const basicProps = {
     type: Boolean,
     default: true,
   },
+  paginationFixedBottom: {
+    type: Boolean,
+    default: true,
+  },
   size: {
     type: String as PropType<'small' | 'medium' | 'large'>,
     default: TABLELAYOUT.size,

@@ -1,3 +1,5 @@
+@use './assets/styles/font';
+
 * {
   margin: 0;
   padding: 0;
@@ -14,55 +16,96 @@ body,
 
 // Light-mode layout surface colors (default)
 :root {
+  color-scheme: light;
   --layout-bg: #fff;
-  --layout-bg-secondary: rgb(248, 248, 250);
-  --layout-bg-hover: rgb(244, 244, 247);
-  --layout-border: rgb(217, 217, 224);
-  --layout-border-light: rgb(235, 235, 240);
-  --layout-text-secondary: #999;
-  --layout-text-hover: #666;
-  --layout-separator: rgb(225, 225, 232);
+  --layout-bg-secondary: #f5f6f8;
+  --layout-bg-hover: #f1f3f6;
+  --layout-border: #dfe3e8;
+  --layout-border-light: #e8ebef;
+  --layout-text-secondary: #7a818c;
+  --layout-text-hover: #252a32;
+  --layout-separator: #e4e7eb;
 
   --card-bg: #fff;
-  --card-border: #e5e7eb;
-  --card-header-text: #1f2937;
-  --card-sub-text: #9ca3af;
-  --card-tag-bg: #f3f4f6;
-  --card-tag-text: #9ca3af;
-  --card-divider: #f0f0f0;
-  --card-toggle-text: #6b7280;
-  --card-empty-text: #c0c4cc;
+  --card-border: #e1e5ea;
+  --card-header-text: #1f2329;
+  --card-sub-text: #7a818c;
+  --card-tag-bg: #f1f3f6;
+  --card-tag-text: #656c76;
+  --card-divider: #e9ecf0;
+  --card-toggle-text: #656c76;
+  --card-empty-text: #a6acb5;
   --role-tag-bg: #f0f9ff;
   --role-tag-text: #0284c7;
-  --card-hover-bg: #f8fbff;
-  --card-selected-bg: #f6fffa;
+  --card-hover-bg: #f6f8fa;
+  --card-selected-bg: #f0f3f7;
+
+  --surface-soft: #f7f8fa;
+  --surface-shadow: 0 10px 32px rgba(24, 31, 42, 0.065);
+  --surface-shadow-hover: 0 14px 38px rgba(24, 31, 42, 0.095);
+  --control-border: #d8dde4;
+  --focus-ring: 0 0 0 3px rgba(var(--primary-color-rgb), 0.12);
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --tab-active-bg: rgba(var(--primary-color-rgb), 0.09);
+  --tab-active-border: rgba(var(--primary-color-rgb), 0.12);
 }
 
 // Dark-mode surface colors.
 // Toggled by the `dark` class on <html> (see app store applyDarkClass).
 html.dark {
-  --layout-bg: rgb(24, 24, 28);
-  --layout-bg-secondary: rgb(36, 36, 40);
-  --layout-bg-hover: rgb(44, 44, 52);
-  --layout-border: rgb(56, 56, 64);
-  --layout-border-light: rgb(44, 44, 52);
-  --layout-text-secondary: rgb(168, 168, 176);
-  --layout-text-hover: rgb(224, 224, 230);
-  --layout-separator: rgb(48, 48, 56);
+  color-scheme: dark;
+  --layout-bg: #18181c;
+  --layout-bg-secondary: #101014;
+  --layout-bg-hover: #27272c;
+  --layout-border: #34343a;
+  --layout-border-light: #29292e;
+  --layout-text-secondary: #a1a1aa;
+  --layout-text-hover: #f0f0f2;
+  --layout-separator: #2c2c31;
 
-  --card-bg: rgb(24, 24, 28);
-  --card-border: rgb(44, 44, 52);
-  --card-header-text: rgb(229, 234, 243);
-  --card-sub-text: rgb(158, 158, 168);
-  --card-tag-bg: rgb(44, 44, 52);
-  --card-tag-text: rgb(158, 158, 168);
-  --card-divider: rgb(40, 40, 48);
-  --card-toggle-text: rgb(158, 158, 168);
-  --card-empty-text: rgb(112, 112, 120);
-  --role-tag-bg: rgb(16, 44, 64);
-  --role-tag-text: rgb(96, 165, 250);
-  --card-hover-bg: rgb(28, 36, 44);
-  --card-selected-bg: rgb(28, 40, 36);
+  --card-bg: #18181c;
+  --card-border: #303036;
+  --card-header-text: #e8e8eb;
+  --card-sub-text: #a1a1aa;
+  --card-tag-bg: #29292e;
+  --card-tag-text: #a8a8b0;
+  --card-divider: #29292e;
+  --card-toggle-text: #a1a1aa;
+  --card-empty-text: #71717a;
+  --role-tag-bg: #17273a;
+  --role-tag-text: #74a9e8;
+  --card-hover-bg: #222227;
+  --card-selected-bg: #27272d;
+  --surface-soft: #202024;
+  --surface-shadow: 0 12px 36px rgba(0, 0, 0, 0.28);
+  --surface-shadow-hover: 0 16px 44px rgba(0, 0, 0, 0.38);
+  --control-border: #3b3b43;
+  --focus-ring: 0 0 0 3px rgba(var(--primary-color-rgb), 0.18);
+  --tab-active-bg: #2a2a30;
+  --tab-active-border: #3a3a41;
+}
+
+body {
+  background: var(--layout-bg-secondary);
+  color: var(--card-header-text);
+  font-family: var(--font-family);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(var(--primary-color-rgb), 0.2);
 }
 
 ::-webkit-scrollbar {
@@ -85,15 +128,52 @@ html.dark ::-webkit-scrollbar-thumb {
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  height: 100%;
   width: 100%;
+  height: 100%;
+  mix-blend-mode: normal;
 }
 
 ::view-transition-group(root) {
-  animation-duration: 0.25s;
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+::view-transition-old(root) {
+  animation: theme-fade-out 0.24s ease-out both;
+}
+
+::view-transition-new(root) {
+  animation: theme-fade-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+// The View Transition owns the visual interpolation. Disabling nested color
+// transitions prevents Naive UI and custom surfaces from changing in waves.
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-duration: 0s !important;
+}
+
+@keyframes theme-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none !important;
@@ -104,8 +184,152 @@ html.dark ::-webkit-scrollbar-thumb {
 .system-page {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   height: 100%;
+  min-height: 0;
+}
+
+// Shared query surface for schema-driven CRUD pages.
+.system-page > .query-form,
+.query-form {
+  flex-shrink: 0;
+  padding: 18px 18px 2px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+
+  .n-form-item {
+    margin-bottom: 16px;
+  }
+
+  // Query forms manage their own compact row spacing. Edit forms retain
+  // Naive UI's feedback area, which provides the expected vertical rhythm.
+  .n-form-item-feedback-wrapper:empty {
+    min-height: 0;
+  }
+
+  .n-form-item-label {
+    color: var(--card-header-text);
+    font-weight: 550;
+  }
+
+  .n-button--primary-type:not(.n-button--text-type) {
+    box-shadow: 0 5px 13px rgba(var(--primary-color-rgb), 0.18);
+  }
+}
+
+// Naive UI global finish layer. These overrides are deliberately centralized.
+.n-button {
+  letter-spacing: 0.01em;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease,
+    background-color 0.18s ease;
+
+  &:not(.n-button--disabled):active {
+    transform: translateY(1px);
+  }
+
+  &.n-button--primary-type:not(.n-button--text-type, .n-button--ghost) {
+    box-shadow: 0 5px 14px rgba(var(--primary-color-rgb), 0.2);
+  }
+}
+
+.n-input,
+.n-base-selection {
+  transition:
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.n-input.n-input--focus,
+.n-base-selection.n-base-selection--active {
+  box-shadow: var(--focus-ring);
+}
+
+html.dark .n-input,
+html.dark .n-base-selection {
+  // Keep a visible resting boundary between controls and dark form surfaces.
+  --n-border: 1px solid var(--control-border) !important;
+}
+
+.n-card {
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.n-modal,
+.n-drawer,
+.n-popover,
+.n-dropdown-menu {
+  border: 1px solid var(--card-border);
+  box-shadow: var(--surface-shadow-hover);
+}
+
+.n-modal,
+.n-popover,
+.n-dropdown-menu {
+  border-radius: var(--radius-md);
+}
+
+.n-tag {
+  border-radius: 5px;
+  font-weight: 500;
+}
+
+.n-data-table {
+  // Keep pagination outside the data boundary. The data-table root also owns
+  // pagination, so drawing a border here visually traps the footer.
+  border: 0;
+  border-radius: 0;
+
+  .n-data-table-wrapper {
+    overflow: hidden;
+    border: 1px solid var(--layout-border-light);
+    border-radius: var(--radius-md);
+  }
+
+  .n-data-table-th {
+    letter-spacing: 0.015em;
+  }
+
+  .n-data-table-tr {
+    transition: background-color 0.16s ease;
+  }
+}
+
+.n-pagination {
+  padding-top: 2px;
+}
+
+.n-layout-header,
+.n-layout-sider {
+  background: var(--layout-bg);
+}
+
+.n-layout-header {
+  border-bottom-color: var(--layout-border-light) !important;
+}
+
+.n-layout-sider {
+  border-right-color: var(--layout-border-light) !important;
+  box-shadow: 5px 0 24px rgba(31, 58, 43, 0.025);
+}
+
+.n-breadcrumb {
+  font-size: 13px;
+}
+
+@media (max-width: 1024px) {
+  .system-page {
+    gap: 12px;
+  }
+
+  .query-form {
+    padding: 14px 14px 0;
+  }
 }
 
 // Department tree node (rendered via h() — needs global styles)

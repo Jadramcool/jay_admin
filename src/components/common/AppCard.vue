@@ -100,7 +100,8 @@ const hasContent = computed<boolean>(() => {
 
 <style lang="scss" scoped>
 .app-card {
-  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
 
   &--collapsed {
     :deep(.n-card__content) {
@@ -158,16 +159,16 @@ const hasContent = computed<boolean>(() => {
   }
 
   &--shadow-light {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--surface-shadow);
     html.dark & {
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--surface-shadow);
     }
   }
 
   &--shadow-medium {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--surface-shadow-hover);
     html.dark & {
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      box-shadow: var(--surface-shadow-hover);
     }
   }
 
