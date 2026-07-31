@@ -27,7 +27,11 @@ export function useUserSchema(methods: any = {}) {
         key: 'username',
         label: '用户名',
         defaultValue: undefined,
-        table: { width: 120, fixed: 'left' },
+        table: {
+          width: 120,
+          ellipsis: { tooltip: true },
+          fixed: 'left',
+        },
         form: {
           component: 'NInput',
           // query: "eq",
@@ -95,7 +99,11 @@ export function useUserSchema(methods: any = {}) {
           component: 'NInput',
           componentProps: { placeholder: '请输入姓名' },
         },
-        table: { width: 100, render: (row: any) => row.name || '-' },
+        table: {
+          width: 110,
+          ellipsis: { tooltip: true },
+          render: (row: any) => row.name || '-',
+        },
       },
       {
         key: 'phone',
@@ -306,6 +314,16 @@ export function useUserSchema(methods: any = {}) {
           width: 280,
           render: (row: any) => (
             <NSpace justify="center">
+              {hasPermission('system:user:assign-role') && (
+                <NButton
+                  type="primary"
+                  ghost
+                  size="small"
+                  onClick={() => methods.handleAssignRole(row)}
+                >
+                  分配角色
+                </NButton>
+              )}
               {hasPermission('system:user:update') && (
                 <NButton
                   type={row.status === 1 ? 'error' : 'primary'}
@@ -318,22 +336,12 @@ export function useUserSchema(methods: any = {}) {
               )}
               {hasPermission('system:user:update') && (
                 <NButton
-                  type="primary"
+                  type="info"
                   ghost
                   size="small"
                   onClick={() => methods.handleEdit(row)}
                 >
                   编辑
-                </NButton>
-              )}
-              {hasPermission('system:user:assign-role') && (
-                <NButton
-                  type="info"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleAssignRole(row)}
-                >
-                  分配角色
                 </NButton>
               )}
               {hasPermission('system:user:delete') && (

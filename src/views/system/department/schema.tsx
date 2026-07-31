@@ -4,7 +4,15 @@ import { computed } from 'vue'
 import { DepartmentApi } from '@/api/system'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
 
-export function useDepartmentSchema(methods: any = {}) {
+interface DepartmentSchemaMethods {
+  getEditingDepartmentId?: () => number | null
+  handleDelete?: (department: System.Department) => void
+  handleEdit?: (department: System.Department) => void
+  handleToggleStatus?: (department: System.Department) => void
+  parentTreeApi?: (params?: Record<string, unknown>) => Promise<System.Department[]>
+}
+
+export function useDepartmentSchema(methods: DepartmentSchemaMethods = {}) {
   const schema = computed(() => ({
     properties: [
       {
@@ -24,8 +32,11 @@ export function useDepartmentSchema(methods: any = {}) {
         editForm: {
           component: 'ApiTreeSelect',
           componentProps: {
-            api: DepartmentApi.tree,
-            placeholder: '请选择父级部门',
+            api: methods.parentTreeApi ?? DepartmentApi.tree,
+            params: {
+              editingDepartmentId: methods.getEditingDepartmentId?.() ?? null,
+            },
+            placeholder: '请选择父级部门…',
             labelField: 'name',
             keyField: 'id',
             clearable: true,
@@ -44,8 +55,10 @@ export function useDepartmentSchema(methods: any = {}) {
         editForm: {
           rules: [
             { required: true, message: '请输入部门名称', trigger: 'blur' },
+            { max: 50, message: '部门名称不能超过 50 个字符', trigger: ['input', 'blur'] },
+            { pattern: /\S/, message: '部门名称不能只包含空格', trigger: ['input', 'blur'] },
           ],
-          componentProps: { placeholder: '请输入部门名称' },
+          componentProps: { maxlength: 50, placeholder: '请输入部门名称…', showCount: true },
         },
       },
       {
@@ -59,8 +72,13 @@ export function useDepartmentSchema(methods: any = {}) {
         editForm: {
           rules: [
             { required: true, message: '请输入部门编码', trigger: 'blur' },
+            {
+              pattern: /^[A-Z][A-Z0-9_]{1,49}$/,
+              message: '请使用 2–50 位大写字母、数字或下划线，且以字母开头',
+              trigger: ['input', 'blur'],
+            },
           ],
-          componentProps: { placeholder: '例如: DEPT_IT' },
+          componentProps: { maxlength: 50, placeholder: '例如：DEPT_IT…', showCount: true },
         },
       },
       {
@@ -89,7 +107,12 @@ export function useDepartmentSchema(methods: any = {}) {
         defaultValue: undefined,
         editForm: {
           component: 'NInput',
-          componentProps: { type: 'textarea', placeholder: '请输入描述' },
+          componentProps: {
+            type: 'textarea',
+            maxlength: 200,
+            placeholder: '请输入描述…',
+            showCount: true,
+          },
         },
         table: { render: (row: any) => row.description || '-' },
       },
@@ -109,7 +132,7 @@ export function useDepartmentSchema(methods: any = {}) {
         },
         editForm: {
           component: 'NRadioGroup',
-          defaultValue: 0,
+          defaultValue: 1,
           componentProps: {
             options: [
               { label: '启用', value: 1 },
@@ -151,19 +174,19 @@ export function useDepartmentSchema(methods: any = {}) {
                 type={row.status === 1 ? 'warning' : 'success'}
                 ghost
                 size="small"
-                onClick={() => methods.handleToggleStatus(row)}
+                onClick={() => methods.handleToggleStatus?.(row)}
               >
                 {row.status === 1 ? '禁用' : '启用'}
               </NButton>
               <NButton
-                type="primary"
+                type="info"
                 ghost
                 size="small"
-                onClick={() => methods.handleEdit(row)}
+                onClick={() => methods.handleEdit?.(row)}
               >
                 编辑
               </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
+              <NPopconfirm onPositiveClick={() => methods.handleDelete?.(row)}>
                 {{
                   trigger: () => (
                     <NButton type="error" ghost size="small">
@@ -197,7 +220,7 @@ export function useDepartmentSchema(methods: any = {}) {
     'parentId',
     'name',
     'code',
-    // 'sortOrder',
+    'sortOrder',
     'description',
     'status',
   ]

@@ -76,7 +76,9 @@ declare namespace System {
     sortOrder?: number
     status: 0 | 1
     managerId?: number
-    parentId?: number
+    parentId?: number | null
+    directChildCount?: number
+    memberCount?: number
     children?: Department[]
     createdTime: string
     updatedTime: string

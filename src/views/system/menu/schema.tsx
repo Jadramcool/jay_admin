@@ -26,6 +26,7 @@ export function useMenuSchema(methods: any = {}) {
         },
         table: {
           align: 'left',
+          width: 90,
           render: (row: any) => {
             const map: Record<string, { label: string, color: string }> = {
               DIRECTORY: { label: '目录', color: 'info' },
@@ -49,7 +50,12 @@ export function useMenuSchema(methods: any = {}) {
         key: 'name',
         label: '名称',
         defaultValue: undefined,
-        table: { align: 'left' },
+        table: {
+          align: 'left',
+          width: 220,
+          ellipsis: { tooltip: true },
+          fixed: 'left',
+        },
         form: {
           component: 'NInput',
           componentProps: { placeholder: '菜单名称' },
@@ -70,6 +76,8 @@ export function useMenuSchema(methods: any = {}) {
           componentProps: { placeholder: '例如: system:user:list' },
         },
         table: {
+          width: 190,
+          ellipsis: { tooltip: true },
           render: (row: any) => row.permission || '-',
         },
       },
@@ -85,6 +93,10 @@ export function useMenuSchema(methods: any = {}) {
           rules: [{ required: true, message: '请输入路由标识', trigger: 'blur' }],
           componentProps: { placeholder: '例如: UserList' },
         },
+        table: {
+          width: 150,
+          ellipsis: { tooltip: true },
+        },
       },
       {
         key: 'icon',
@@ -92,6 +104,7 @@ export function useMenuSchema(methods: any = {}) {
         ifShow: ({ values }: any) => values.type !== 'BUTTON',
         editForm: { component: 'IconPicker' },
         table: {
+          width: 70,
           render: (row: any) => (row.icon ? <Icon icon={row.icon} /> : '-'),
         },
       },
@@ -105,6 +118,10 @@ export function useMenuSchema(methods: any = {}) {
             { required: true, message: '请输入路由路径', trigger: 'blur' },
           ],
           componentProps: { placeholder: '/system/user' },
+        },
+        table: {
+          width: 190,
+          ellipsis: { tooltip: true },
         },
       },
       {
@@ -200,6 +217,7 @@ export function useMenuSchema(methods: any = {}) {
           component: 'NInputNumber',
           componentProps: { min: 0, precision: 0 },
         },
+        table: { width: 80 },
       },
       {
         key: 'show',
@@ -208,6 +226,7 @@ export function useMenuSchema(methods: any = {}) {
         ifShow: ({ values }: any) => values.type !== 'BUTTON',
         editForm: { component: 'NSwitch' },
         table: {
+          width: 80,
           render: (row: any) => {
             const color = row.show ? 'success' : 'warning'
             return (
@@ -284,6 +303,7 @@ export function useMenuSchema(methods: any = {}) {
         key: 'createdTime',
         label: '创建时间',
         table: {
+          width: 170,
           render: (row: any) =>
             row.createdTime
               ? dayjs(row.createdTime).format('YYYY-MM-DD HH:mm')
@@ -300,7 +320,7 @@ export function useMenuSchema(methods: any = {}) {
             <NSpace justify="center">
               {row.type !== 'BUTTON' && hasPermission('system:menu:create') && (
                 <NButton
-                  type="info"
+                  type="primary"
                   ghost
                   size="small"
                   onClick={() => methods.handleAddChild(row)}
@@ -310,7 +330,7 @@ export function useMenuSchema(methods: any = {}) {
               )}
               {hasPermission('system:menu:update') && (
                 <NButton
-                  type="primary"
+                  type="info"
                   ghost
                   size="small"
                   onClick={() => methods.handleEdit(row)}

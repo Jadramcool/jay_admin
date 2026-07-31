@@ -17,11 +17,17 @@
 
 ## 编码风格与命名约定
 
-使用 TypeScript、Vue Composition API 和 `<script setup>` 编写单文件组件。遵循 `eslint.config.mjs` 中的 `@antfu/eslint-config`，不要额外引入独立格式化规则。Vue 组件使用 PascalCase，组合式函数命名为 `useXxx.ts`，状态模块按领域放在 `src/store/modules/`，接口文件按业务领域放在 `src/api/`。TypeScript 代码中的函数应尽可能使用箭头函数，包括事件处理器、回调函数、工具函数和异步函数，例如 `const handleSubmit = async () => {}`。仅在需要函数提升、函数重载、构造函数、生成器或明确声明式公共 API 时使用 `function` 声明。优先使用别名：`@/` 指向 `src/`，`#/` 指向 `typings/`。
+使用 TypeScript、Vue Composition API 和 `<script setup>` 编写单文件组件。遵循 `eslint.config.mjs` 中的 `@antfu/eslint-config`，不要额外引入独立格式化规则。Vue 组件使用 PascalCase，组合式函数命名为 `useXxx.ts`，状态模块按领域放在 `src/store/modules/`，接口文件按业务领域放在 `src/api/`。优先使用别名：`@/` 指向 `src/`，`#/` 指向 `typings/`。
 
 ## 测试要求
 
 当前项目主要依赖静态校验，未配置前端测试运行器。提交前至少运行 `pnpm typecheck` 和 `pnpm lint`。涉及 UI 的变更需要在浏览器中手动验证受影响页面；布局或交互变化应在 PR 中附截图。
+
+## 代码完成后的格式化与校验
+
+AI 新增或修改代码后，必须先对本次涉及的代码文件执行 ESLint 自动修复，再进行静态校验。优先使用 `pnpm eslint <文件路径...> --fix` 仅处理本次修改的文件；修改范围较大且确认不会影响无关文件时，可执行 `pnpm lint:fix`。
+
+自动修复完成后，必须依次运行 `pnpm typecheck` 和 `pnpm lint`。不得为了通过格式化或校验而修改与当前任务无关的文件。如果命令因环境限制或仓库原有问题无法通过，必须区分本次变更与原有问题，并在最终回复中明确说明。未执行自动格式化和静态校验时，不得将代码任务标记为完成；确实无法执行时，必须说明原因。
 
 ## 提交与 Pull Request 规范
 

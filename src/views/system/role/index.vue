@@ -3,6 +3,7 @@ import { RoleApi } from '@/api/system'
 import { hasPermission } from '@/utils/common/hasPermission'
 import RoleMenuModal from './components/RoleMenuModal.vue'
 import RoleModal from './components/RoleModal.vue'
+import { isSystemAdminRole } from './roleRules'
 import { useRoleSchema } from './schema'
 
 const tableRef = ref<any>(null)
@@ -10,10 +11,14 @@ const [registerModal, { openModal }] = useModal()
 const [registerMenuModal, { openModal: openMenuModal }] = useModal()
 
 const schemaMethods = {
-  handleEdit(row: any) {
+  handleEdit(row: System.Role) {
+    if (!ensureRoleEditable(row))
+      return
     openModal({ record: row, isUpdate: true })
   },
-  handleDelete(row: any) {
+  handleDelete(row: System.Role) {
+    if (!ensureRoleEditable(row))
+      return
     window.$dialog?.warning({
       title: '提示',
       content: `确定要删除角色「${row.name}」吗？`,
@@ -26,9 +31,19 @@ const schemaMethods = {
       },
     })
   },
-  handleAuth(row: any) {
+  handleAuth(row: System.Role) {
+    if (!ensureRoleEditable(row))
+      return
     openMenuModal({ record: row })
   },
+}
+
+function ensureRoleEditable(row: System.Role) {
+  if (!isSystemAdminRole(row))
+    return true
+
+  window.$message?.warning?.('系统管理员为内置角色，不可编辑')
+  return false
 }
 
 const { columns, formSchemas } = useRoleSchema(schemaMethods)
@@ -64,6 +79,7 @@ function handleAdd() {
       :request="loadData"
       :row-key="(row: any) => row.id"
       :show-add-btn="hasPermission('system:role:create')"
+      :scroll-x="1080"
       @add="handleAdd"
     />
 

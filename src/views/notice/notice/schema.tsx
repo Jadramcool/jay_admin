@@ -373,17 +373,26 @@ export function useNoticeSchema(methods: any = {}) {
       {
         key: 'code',
         label: '编码',
-        table: { width: 120 },
+        table: {
+          width: 180,
+          ellipsis: { tooltip: true },
+        },
       },
       {
         key: 'name',
         label: '名称',
-        table: { width: 120 },
+        table: {
+          width: 200,
+          ellipsis: { tooltip: true },
+        },
       },
       {
         key: 'username',
         label: '用户名',
-        table: { width: 120 },
+        table: {
+          width: 180,
+          ellipsis: { tooltip: true },
+        },
       },
       {
         key: 'operate',
@@ -429,7 +438,7 @@ export function useNoticeSchema(methods: any = {}) {
               )}
               {hasPermission('notice:update') && (
                 <NButton
-                  type="primary"
+                  type="info"
                   ghost
                   size="small"
                   onClick={() => methods.handleEdit(row)}

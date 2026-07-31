@@ -145,7 +145,7 @@ async function handleBatchDelete(keys: number[]) {
       :row-key="(row: any) => row.id"
       :show-add-btn="hasPermission('notice:create')"
       :show-batch-delete-btn="hasPermission('notice:delete')"
-      :scroll-x="1550"
+      :scroll-x="1360"
       @add="handleAdd"
       @batch-delete="handleBatchDelete"
     />

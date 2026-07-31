@@ -84,7 +84,7 @@ function handleAdd() {
       :request="loadData"
       :row-key="(row: any) => row.id"
       :show-add-btn="hasPermission('system:user:create')"
-      :scroll-x="1550"
+      :scroll-x="1470"
       @add="handleAdd"
     />
     <UserRoleModal @register="registerRoleModal" @success="reload" />

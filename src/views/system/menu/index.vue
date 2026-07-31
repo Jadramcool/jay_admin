@@ -71,6 +71,7 @@ function handleAdd() {
       :row-key="(row: any) => row.id"
       :show-add-btn="hasPermission('system:menu:create')"
       :pagination="true"
+      :scroll-x="1550"
       @add="handleAdd"
     />
 

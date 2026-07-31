@@ -14,6 +14,7 @@ const props = defineProps({
   labelField: { type: String, default: 'name' },
   keyField: { type: String, default: 'id' },
   childrenField: { type: String, default: 'children' },
+  disabledField: { type: String, default: 'disabled' },
   immediate: { type: Boolean, default: true },
   multiple: { type: Boolean, default: false },
 })
@@ -30,6 +31,7 @@ const getBindValue = computed(() => {
     labelField,
     keyField,
     childrenField,
+    disabledField,
     immediate,
     value,
     multiple,
@@ -60,6 +62,7 @@ function formatTree(data: any[]): any[] {
   return data.map(item => ({
     key: item[props.keyField],
     label: item[props.labelField],
+    disabled: Boolean(item[props.disabledField]),
     children:
       item[props.childrenField]
       && Array.isArray(item[props.childrenField])

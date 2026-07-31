@@ -96,7 +96,7 @@ async function handleClearExpired() {
       :row-key="(row: any) => row.id"
       :show-add-btn="false"
       :show-batch-delete-btn="hasPermission('system:operation-log:delete')"
-      :scroll-x="1600"
+      :scroll-x="1500"
       @batch-delete="handleBatchDelete"
     >
       <template #toolbar>

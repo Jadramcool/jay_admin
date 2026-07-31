@@ -71,17 +71,24 @@ function showUserDetail(row: any) {
 }
 
 const columns = [
-  { title: '用户名', key: 'username', width: 120 },
+  {
+    title: '用户名',
+    key: 'username',
+    width: 140,
+    ellipsis: { tooltip: true },
+  },
   {
     title: '姓名',
     key: 'name',
-    width: 100,
+    width: 120,
+    ellipsis: { tooltip: true },
     render: (row: any) => row.name || '-',
   },
   {
     title: '部门',
     key: 'departmentName',
-    width: 120,
+    width: 160,
+    ellipsis: { tooltip: true },
     render: (row: any) => row.departmentName || '-',
   },
   {
@@ -188,7 +195,7 @@ const columns = [
       :columns="columns"
       :request="loadReceivers"
       :show-toolbar="false"
-      :scroll-x="1100"
+      :scroll-x="1240"
       :row-key="(row: any) => row.userId"
     />
 

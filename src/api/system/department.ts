@@ -1,5 +1,23 @@
 import request from '@/utils/http/axios'
 
+export interface DepartmentCreateParams {
+  name: string
+  code: string
+  parentId?: number | null
+  sortOrder?: number
+  description?: string
+  status: 0 | 1
+}
+
+export interface DepartmentUpdateParams extends DepartmentCreateParams {
+  id: number
+}
+
+export interface DepartmentMemberParams extends Api.PageParams {
+  includeChildren?: boolean
+  keyword?: string
+}
+
 enum API {
   list = '/system/department/list',
   tree = '/system/department/tree',
@@ -21,10 +39,11 @@ export const DepartmentApi = {
 
   detail: (id: number) => request.get<System.Department>({ url: `${API.detail}/${id}` }),
 
-  create: (data: Partial<System.Department>) => request.post({ url: API.create, data }),
+  create: (data: DepartmentCreateParams) =>
+    request.post<System.Department>({ url: API.create, data }),
 
-  update: ({ id, ...data }: Partial<System.Department>) =>
-    request.put({ url: `${API.update}/${id}`, data }),
+  update: ({ id, ...data }: DepartmentUpdateParams) =>
+    request.put<System.Department>({ url: `${API.update}/${id}`, data }),
 
   delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
 
@@ -32,6 +51,6 @@ export const DepartmentApi = {
 
   disable: (id: number) => request.put({ url: `${API.disable}/${id}` }),
 
-  members: (id: number, params?: Api.PageParams & { includeChildren?: boolean }) =>
+  members: (id: number, params?: DepartmentMemberParams) =>
     request.get<Api.PaginatedList<System.User>>({ url: `${API.members}/${id}`, params }),
 }
