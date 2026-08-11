@@ -6,7 +6,7 @@ import { io } from 'socket.io-client'
  * 用于建立和维护 Socket.IO 长连接
  */
 export function useSocket() {
-  const socket = shallowRef<Socket | null>(null)
+  const socket = shallowRef<Socket<Api.ServerToClientEvents, Api.ClientToServerEvents> | null>(null)
   const connected = shallowRef(false)
 
   /**
@@ -27,7 +27,7 @@ export function useSocket() {
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 3000,
-    })
+    }) as Socket<Api.ServerToClientEvents, Api.ClientToServerEvents>
 
     s.on('connect', () => {
       console.warn('[WebSocket] 已连接')
@@ -40,7 +40,8 @@ export function useSocket() {
     })
 
     s.on('connect_error', (err) => {
-      console.error('[WebSocket] 连接错误:', err.message)
+      if (import.meta.env.DEV)
+        console.error('[WebSocket] 连接错误:', err.message)
       connected.value = false
     })
 
@@ -50,14 +51,20 @@ export function useSocket() {
   /**
    * 监听事件
    */
-  function on(event: string, handler: (...args: any[]) => void) {
+  function on(
+    event: 'newNotice',
+    handler: Api.ServerToClientEvents['newNotice'],
+  ) {
     socket.value?.on(event, handler)
   }
 
   /**
    * 移除事件监听
    */
-  function off(event: string, handler?: (...args: any[]) => void) {
+  function off(
+    event: 'newNotice',
+    handler?: Api.ServerToClientEvents['newNotice'],
+  ) {
     if (handler) {
       socket.value?.off(event, handler)
     }
@@ -81,7 +88,10 @@ export function useSocket() {
   /**
    * 发送事件
    */
-  function emit(event: string, ...args: any[]) {
+  function emit<EventName extends keyof Api.ClientToServerEvents>(
+    event: EventName,
+    ...args: Parameters<Api.ClientToServerEvents[EventName]>
+  ) {
     socket.value?.emit(event, ...args)
   }
 

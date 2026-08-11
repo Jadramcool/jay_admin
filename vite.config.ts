@@ -74,8 +74,15 @@ export default defineConfig((env: ConfigEnv) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules'))
-              return 'vendor'
+            if (!id.includes('node_modules'))
+              return undefined
+
+            const normalizedId = id.replaceAll('\\', '/')
+            if (/\/(?:echarts|zrender)\//.test(normalizedId))
+              return 'charts'
+            if (/\/(?:@wangeditor|slate|snabbdom)\//.test(normalizedId))
+              return 'editor'
+            return undefined
           },
           chunkFileNames: 'assets/js/[name]-[hash].js',
           entryFileNames: 'assets/js/[name]-[hash].js',

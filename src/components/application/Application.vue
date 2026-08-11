@@ -6,7 +6,6 @@ declare global {
     $notification: ReturnType<typeof useNotification>
     $loadingBar: ReturnType<typeof useLoadingBar>
     $bus: any
-    __stores: any
   }
 }
 </script>

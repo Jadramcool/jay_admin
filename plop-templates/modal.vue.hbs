@@ -1,0 +1,72 @@
+<script setup lang="ts">
+import { reactive, ref } from 'vue'
+import { {{pascalCase name}}Api } from '@/api/{{kebabCase name}}'
+import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+
+const emit = defineEmits<{
+  success: []
+  register: [instance: any, uuid: number]
+}>()
+
+const isEdit = ref(false)
+const submitting = ref(false)
+const formRef = ref<any>(null)
+
+const formData = reactive({
+  id: 0,
+  name: '',
+})
+
+const [registerModal, { closeModal }] = useModalInner((data?: System.{{pascalCase name}}) => {
+  formData.id = data?.id ?? 0
+  formData.name = data?.name ?? ''
+  isEdit.value = Boolean(data?.id)
+})
+
+const rules = {
+  name: [{ required: true, message: '请输入名称', trigger: ['blur', 'input'] }],
+}
+
+async function handleSubmit() {
+  try {
+    await formRef.value?.validate()
+  }
+  catch {
+    return
+  }
+  submitting.value = true
+  try {
+    if (isEdit.value) {
+      await {{pascalCase name}}Api.update({ ...formData })
+    }
+    else {
+      await {{pascalCase name}}Api.create({ ...formData })
+    }
+    window.$message?.success?.(isEdit.value ? '更新成功' : '创建成功')
+    closeModal()
+    emit('success')
+  }
+  catch {
+    /* handled by interceptor */
+  }
+  finally {
+    submitting.value = false
+  }
+}
+</script>
+
+<template>
+  <BasicModal
+    :title="isEdit ? '编辑{{titleCase name}}' : '新增{{titleCase name}}'"
+    :ok-text="submitting ? '提交中...' : '确定'"
+    :mask-closable="false"
+    @register="registerModal"
+    @ok="handleSubmit"
+  >
+    <n-form ref="formRef" :model="formData" :rules="rules" label-placement="left" :label-width="90">
+      <n-form-item label="名称" path="name">
+        <n-input v-model:value="formData.name" placeholder="请输入名称" maxlength="50" show-count />
+      </n-form-item>
+    </n-form>
+  </BasicModal>
+</template>

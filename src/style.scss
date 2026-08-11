@@ -190,13 +190,15 @@ html.theme-transitioning *::after {
 }
 
 // Shared query surface for schema-driven CRUD pages.
+// 扁平化设计:无阴影,靠极淡边框与色差组织层次。表单为白色色块,
+// 与表格之间留白分割,三者(表单/表格/页面背景)扁平而清晰。
 .system-page > .query-form,
 .query-form {
   flex-shrink: 0;
   padding: 18px 18px 2px;
-  border: 1px solid var(--card-border);
+  border: 1px solid var(--layout-border-light);
   border-radius: var(--radius-md);
-  background: var(--surface-soft);
+  background: var(--card-bg);
 
   .n-form-item {
     margin-bottom: 16px;
@@ -213,9 +215,20 @@ html.theme-transitioning *::after {
     font-weight: 550;
   }
 
+  // 扁平化:主按钮去除投影,仅靠色彩表达层级
   .n-button--primary-type:not(.n-button--text-type) {
-    box-shadow: 0 5px 13px rgba(var(--primary-color-rgb), 0.18);
+    box-shadow: none;
   }
+}
+
+// 扁平化:表格卡片去除阴影,以纯色块呈现,与页面背景靠色差区分
+.system-page .table-wrapper {
+  box-shadow: none;
+}
+
+// 扁平化:system-page 下表格内部 wrapper 保留极淡边框,界定数据区域
+.system-page .n-data-table .n-data-table-wrapper {
+  border: 1px solid var(--layout-border-light);
 }
 
 // Naive UI global finish layer. These overrides are deliberately centralized.

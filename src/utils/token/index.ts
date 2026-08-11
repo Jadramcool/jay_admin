@@ -10,6 +10,39 @@ const TOKEN_KEY = import.meta.env.VITE_APP_TOKEN_KEY || 'JDM_TOKEN'
 /** refreshToken 存储键 */
 const REFRESH_TOKEN_KEY = 'JDM_REFRESH_TOKEN'
 
+export const TOKEN_STORAGE_KEYS = {
+  accessToken: TOKEN_KEY,
+  refreshToken: REFRESH_TOKEN_KEY,
+} as const
+
+export type TokenStorageChange = 'session-cleared' | 'session-updated'
+
+export function resolveTokenStorageChange(
+  event: Pick<StorageEvent, 'key' | 'newValue'>,
+): TokenStorageChange | null {
+  if (event.key === REFRESH_TOKEN_KEY) {
+    return event.newValue === null ? 'session-cleared' : 'session-updated'
+  }
+  if (event.key === TOKEN_KEY && event.newValue !== null)
+    return 'session-updated'
+  return null
+}
+
+export function subscribeTokenStorage(
+  listener: (change: TokenStorageChange) => void,
+): () => void {
+  if (typeof window === 'undefined')
+    return () => {}
+
+  const handleStorage = (event: StorageEvent) => {
+    const change = resolveTokenStorageChange(event)
+    if (change)
+      listener(change)
+  }
+  window.addEventListener('storage', handleStorage)
+  return () => window.removeEventListener('storage', handleStorage)
+}
+
 /**
  * 获取当前登录用户的 accessToken
  * @returns token 字符串，未登录时返回 null

@@ -38,6 +38,7 @@ declare global {
   const defineComponent: typeof import('vue')['defineComponent']
   const defineStore: typeof import('pinia')['defineStore']
   const descriptionSchemaUtil: typeof import('../src/utils/common/index')['descriptionSchemaUtil']
+  const downloadBlob: typeof import('../src/utils/download')['downloadBlob']
   const eagerComputed: typeof import('@vueuse/core')['eagerComputed']
   const editFormSchemaUtil: typeof import('../src/utils/common/index')['editFormSchemaUtil']
   const effectScope: typeof import('vue')['effectScope']

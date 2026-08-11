@@ -29,19 +29,15 @@ const [register] = useModalInner(async (data) => {
 
 async function loadReceivers(params: any) {
   if (!noticeId.value)
-    return { list: [], pagination: { total: 0 } }
+    return { items: [], total: 0, page: 1, pageSize: 20 }
   const filterParam
     = statusFilter.value === 'all' ? undefined : statusFilter.value
-  const data = await NoticeApi.getReceivers(
+  return NoticeApi.getReceivers(
     noticeId.value,
     filterParam,
     params.page,
     params.pageSize,
   )
-  return {
-    list: (data as any)?.list || [],
-    pagination: (data as any)?.pagination || { total: 0 },
-  }
 }
 
 function filterByStatus(status: StatusFilter) {

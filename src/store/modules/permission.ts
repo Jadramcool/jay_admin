@@ -3,8 +3,15 @@ import type { RouteRecordRaw } from 'vue-router'
 import { hyphenate } from '@vueuse/core'
 import cloneDeep from 'lodash-es/cloneDeep'
 import { defineStore } from 'pinia'
+import {
+  createSupplementalPageRoutes,
+  resolveRouteComponent,
+} from '@/router/dynamic-route'
 
-export const routeComponents = import.meta.glob('/src/views/**/*.vue')
+export const routeComponents = import.meta.glob([
+  '/src/views/**/*.vue',
+  '!/src/views/**/components/**/*.vue',
+])
 
 function parseExtraData(item: System.Menu) {
   if (!item.extraData)
@@ -81,7 +88,13 @@ export const usePermissionStore = defineStore('permission', {
         .map(item => this.generateRoute(item))
         .sort((a, b) => a.order - b.order)
 
-      const accessRoutes = arrayToTree(formatSortMenus)
+      const accessRoutes = arrayToTree(formatSortMenus) as unknown as RouteRecordRaw[]
+      accessRoutes.push(
+        ...createSupplementalPageRoutes(
+          this.buttonPermissionKeys,
+          routeComponents,
+        ),
+      )
       const homePath = import.meta.env.VITE_HOME_PATH || '/home'
 
       this.accessRoutes = {
@@ -116,7 +129,9 @@ export const usePermissionStore = defineStore('permission', {
         name: item.code,
         path: iframe?.path ?? item.path,
         redirect: item.redirect,
-        component: iframe ? undefined : routeComponents[item.component!],
+        component: iframe
+          ? undefined
+          : resolveRouteComponent(item.component, routeComponents),
         pid: item.pid ?? null,
         order: item.order ?? 0,
         meta: {

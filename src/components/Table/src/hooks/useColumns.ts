@@ -67,7 +67,8 @@ export function useColumns(refProps: any) {
           .filter(column => column !== null) as DataTableBaseColumn[]
       }
       catch (error) {
-        console.error('Error updating columnsRef:', error)
+        if (import.meta.env.DEV)
+          console.error('Error updating columnsRef:', error)
       }
     },
     { deep: true },

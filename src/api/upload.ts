@@ -6,5 +6,5 @@ enum API {
 
 export const UploadApi = {
   upload: (data: FormData) =>
-    request.post<{ url: string }>({ url: API.upload, data }),
+    request.upload<Api.UploadResult>({ url: API.upload, data }),
 }

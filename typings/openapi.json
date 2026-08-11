@@ -1,0 +1,4644 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "PrismaController_checkHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "健康检查",
+        "tags": [
+          "健康检查"
+        ]
+      }
+    },
+    "/health/database": {
+      "get": {
+        "operationId": "PrismaController_checkDatabase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "数据库健康检查",
+        "tags": [
+          "健康检查"
+        ]
+      }
+    },
+    "/auth/captcha": {
+      "get": {
+        "operationId": "AuthController_getCaptcha",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "返回 captchaId 与 base64 图片"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取登录验证码",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功"
+          },
+          "401": {
+            "description": "用户名或密码错误"
+          },
+          "429": {
+            "description": "登录失败次数过多"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "用户登录",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "注册成功"
+          },
+          "409": {
+            "description": "用户名已存在"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "用户注册",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "刷新成功"
+          },
+          "401": {
+            "description": "Token已过期"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "刷新Token",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "登出成功"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "用户登出",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/user/info": {
+      "get": {
+        "operationId": "AuthController_getUserInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取当前用户信息",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/user/menu": {
+      "get": {
+        "operationId": "AuthController_getUserMenu",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取当前用户菜单",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/user/update": {
+      "put": {
+        "operationId": "AuthController_updateUser",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新当前用户信息",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/user/checkPassword": {
+      "post": {
+        "operationId": "AuthController_checkPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "验证密码",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/auth/user/updatePassword": {
+      "post": {
+        "operationId": "AuthController_updatePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "修改密码",
+        "tags": [
+          "认证模块"
+        ]
+      }
+    },
+    "/system/session/list": {
+      "get": {
+        "operationId": "SessionController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "在线会话列表(分页)",
+        "tags": [
+          "在线用户"
+        ]
+      }
+    },
+    "/system/session/stats": {
+      "get": {
+        "operationId": "SessionController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "在线会话统计",
+        "tags": [
+          "在线用户"
+        ]
+      }
+    },
+    "/system/session/kick/{id}": {
+      "post": {
+        "operationId": "SessionController_kick",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "强制下线指定会话",
+        "tags": [
+          "在线用户"
+        ]
+      }
+    },
+    "/system/session/kick-user/{userId}": {
+      "post": {
+        "operationId": "SessionController_kickByUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "强制下线用户全部会话",
+        "tags": [
+          "在线用户"
+        ]
+      }
+    },
+    "/system/user/list": {
+      "get": {
+        "operationId": "UserController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取用户列表",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/detail/{id}": {
+      "get": {
+        "operationId": "UserController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取用户详情",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/create": {
+      "post": {
+        "operationId": "UserController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建用户",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/update": {
+      "put": {
+        "operationId": "UserController_update",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新用户",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/delete/{id}": {
+      "put": {
+        "operationId": "UserController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除用户",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/batchDelete": {
+      "put": {
+        "operationId": "UserController_batchRemove",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除用户",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/status/{id}": {
+      "put": {
+        "operationId": "UserController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用/禁用用户",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/roles/{id}": {
+      "post": {
+        "operationId": "UserController_assignRoles",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "分配用户角色",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/reset-password/{id}": {
+      "post": {
+        "operationId": "UserController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "重置用户密码",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/export": {
+      "get": {
+        "operationId": "UserController_exportUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "导出用户列表(Excel)",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/import/template": {
+      "get": {
+        "operationId": "UserController_downloadImportTemplate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "下载用户导入模板",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/user/import": {
+      "post": {
+        "operationId": "UserController_importUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "导入用户(Excel)",
+        "tags": [
+          "用户管理"
+        ]
+      }
+    },
+    "/system/role/list": {
+      "get": {
+        "operationId": "RoleController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "角色编码",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "角色名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "required": false,
+            "in": "query",
+            "description": "是否包含已删除角色",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取角色列表（分页）",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/all": {
+      "get": {
+        "operationId": "RoleController_findAllSimple",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取所有角色（不分页）",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/{id}": {
+      "get": {
+        "operationId": "RoleController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取角色详情（含菜单权限）",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/create": {
+      "post": {
+        "operationId": "RoleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建角色",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/update": {
+      "put": {
+        "operationId": "RoleController_update",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新角色",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/delete/{id}": {
+      "delete": {
+        "operationId": "RoleController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除角色",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/role/update/menu": {
+      "post": {
+        "operationId": "RoleController_assignMenus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "分配角色菜单权限",
+        "tags": [
+          "角色管理"
+        ]
+      }
+    },
+    "/system/menu/list": {
+      "get": {
+        "operationId": "MenuController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "菜单名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "路由标识",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "permission",
+            "required": false,
+            "in": "query",
+            "description": "权限标识",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "菜单类型",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DIRECTORY",
+                "MENU",
+                "BUTTON"
+              ]
+            }
+          },
+          {
+            "name": "pid",
+            "required": false,
+            "in": "query",
+            "description": "父菜单ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "show",
+            "required": false,
+            "in": "query",
+            "description": "是否显示",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "enable",
+            "required": false,
+            "in": "query",
+            "description": "是否启用",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取菜单列表",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/onlineMenus": {
+      "get": {
+        "operationId": "MenuController_findOnlineMenus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取在线菜单（无需登录）",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/tree": {
+      "get": {
+        "operationId": "MenuController_findTree",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取菜单树",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/create": {
+      "post": {
+        "operationId": "MenuController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMenuDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建菜单",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/update": {
+      "put": {
+        "operationId": "MenuController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMenuDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新菜单",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/delete/{id}": {
+      "delete": {
+        "operationId": "MenuController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除菜单",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/menu/batchDelete": {
+      "delete": {
+        "operationId": "MenuController_batchRemove",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除菜单",
+        "tags": [
+          "菜单管理"
+        ]
+      }
+    },
+    "/system/department/list": {
+      "get": {
+        "operationId": "DepartmentController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "部门名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "部门编码",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "部门状态",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "parentId",
+            "required": false,
+            "in": "query",
+            "description": "父部门ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "includeDeleted",
+            "required": false,
+            "in": "query",
+            "description": "是否包含已删除部门",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取部门列表",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/tree": {
+      "get": {
+        "operationId": "DepartmentController_findTree",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取部门树",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/search": {
+      "get": {
+        "operationId": "DepartmentController_search",
+        "parameters": [
+          {
+            "name": "keyword",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "搜索部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/stats": {
+      "get": {
+        "operationId": "DepartmentController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取部门统计信息",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/stats/{id}": {
+      "get": {
+        "operationId": "DepartmentController_getStatsById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取指定部门统计信息",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/detail/{id}": {
+      "get": {
+        "operationId": "DepartmentController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取部门详情",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/members": {
+      "get": {
+        "operationId": "DepartmentController_getMembers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "departmentId",
+            "required": true,
+            "in": "query",
+            "description": "部门 ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "includeChildren",
+            "required": false,
+            "in": "query",
+            "description": "是否包含子部门成员",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "用户名或姓名关键字",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取部门成员列表",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/create": {
+      "post": {
+        "operationId": "DepartmentController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDepartmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/update/{id}": {
+      "put": {
+        "operationId": "DepartmentController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDepartmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/delete/{id}": {
+      "delete": {
+        "operationId": "DepartmentController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/assign-user": {
+      "post": {
+        "operationId": "DepartmentController_assignUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "分配用户到部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/batch-assign-users": {
+      "post": {
+        "operationId": "DepartmentController_batchAssignUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量分配用户到部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/remove-user": {
+      "delete": {
+        "operationId": "DepartmentController_removeUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "从部门移除用户",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/assign-role": {
+      "post": {
+        "operationId": "DepartmentController_assignRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "分配角色到部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/remove-role": {
+      "delete": {
+        "operationId": "DepartmentController_removeRole",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "从部门移除角色",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/enable/{id}": {
+      "put": {
+        "operationId": "DepartmentController_enable",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/department/disable/{id}": {
+      "put": {
+        "operationId": "DepartmentController_disable",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "停用部门",
+        "tags": [
+          "部门管理"
+        ]
+      }
+    },
+    "/system/config/list": {
+      "get": {
+        "operationId": "SysConfigController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "配置名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "required": false,
+            "in": "query",
+            "description": "配置键",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "配置类型",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRING",
+                "NUMBER",
+                "BOOLEAN",
+                "JSON",
+                "ARRAY",
+                "FILE",
+                "EMAIL",
+                "URL",
+                "PASSWORD"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "配置分类",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isPublic",
+            "required": false,
+            "in": "query",
+            "description": "是否公开配置",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isSystem",
+            "required": false,
+            "in": "query",
+            "description": "是否系统配置",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取系统配置列表",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/detail/{id}": {
+      "get": {
+        "operationId": "SysConfigController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取系统配置详情",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/key/{key}": {
+      "get": {
+        "operationId": "SysConfigController_findByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "根据键获取系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/category/{category}": {
+      "get": {
+        "operationId": "SysConfigController_findByCategory",
+        "parameters": [
+          {
+            "name": "category",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "根据分类获取系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/public": {
+      "get": {
+        "operationId": "SysConfigController_findPublic",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取公开配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/create": {
+      "post": {
+        "operationId": "SysConfigController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSysConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/update": {
+      "put": {
+        "operationId": "SysConfigController_update",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/delete/{id}": {
+      "delete": {
+        "operationId": "SysConfigController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/batchDelete": {
+      "put": {
+        "operationId": "SysConfigController_batchRemove",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/status/{id}": {
+      "put": {
+        "operationId": "SysConfigController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用/禁用系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/validate-password": {
+      "post": {
+        "operationId": "SysConfigController_validatePassword",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "校验密码",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/operation-log/list": {
+      "get": {
+        "operationId": "OperationLogController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取操作日志列表",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/operation-log/detail/{id}": {
+      "get": {
+        "operationId": "OperationLogController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取操作日志详情",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/operation-log/stats": {
+      "get": {
+        "operationId": "OperationLogController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取操作日志统计",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/operation-log/delete/{id}": {
+      "delete": {
+        "operationId": "OperationLogController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除操作日志",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/operation-log/batch-delete": {
+      "post": {
+        "operationId": "OperationLogController_batchRemove",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除操作日志",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/operation-log/clear-expired": {
+      "post": {
+        "operationId": "OperationLogController_clearExpired",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "清理过期日志",
+        "tags": [
+          "操作日志"
+        ]
+      }
+    },
+    "/system/dict/type/list": {
+      "get": {
+        "operationId": "DictController_findTypes",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "类型编码(模糊)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "类型名称(模糊)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "状态",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取字典类型列表(分页)",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/type/all": {
+      "get": {
+        "operationId": "DictController_findAllTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取全部字典类型(下拉)",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/type/create": {
+      "post": {
+        "operationId": "DictController_createType",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDictTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建字典类型",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/type/update": {
+      "put": {
+        "operationId": "DictController_updateType",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDictTypeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新字典类型",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/type/delete/{id}": {
+      "delete": {
+        "operationId": "DictController_removeType",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除字典类型(级联软删字典项)",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/type/status/{id}": {
+      "put": {
+        "operationId": "DictController_updateTypeStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用/禁用字典类型",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/item/list": {
+      "get": {
+        "operationId": "DictController_findItems",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "typeId",
+            "required": false,
+            "in": "query",
+            "description": "字典类型ID",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "typeCode",
+            "required": false,
+            "in": "query",
+            "description": "字典类型编码",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "项编码或文本(模糊)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "状态",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取字典项列表(分页)",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/items/{code}": {
+      "get": {
+        "operationId": "DictController_itemsByCode",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "按类型编码获取启用字典项(下拉)",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/item/create": {
+      "post": {
+        "operationId": "DictController_createItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDictItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建字典项",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/item/update": {
+      "put": {
+        "operationId": "DictController_updateItem",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDictItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新字典项",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/item/delete/{id}": {
+      "delete": {
+        "operationId": "DictController_removeItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除字典项",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/system/dict/item/status/{id}": {
+      "put": {
+        "operationId": "DictController_updateItemStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用/禁用字典项",
+        "tags": [
+          "数据字典"
+        ]
+      }
+    },
+    "/notice/list": {
+      "get": {
+        "operationId": "NoticeController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "title",
+            "required": false,
+            "in": "query",
+            "description": "公告标题（模糊搜索）",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "公告类型",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NOTICE",
+                "INFO",
+                "ACTIVITY"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "状态 0-草稿 1-发布",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取公告列表（分页）",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/user/unread": {
+      "get": {
+        "operationId": "NoticeController_findUnreadByUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取当前用户未读公告列表",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/user/read/{id}": {
+      "put": {
+        "operationId": "NoticeController_markAsRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "标记公告为已读",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/{id}/receivers": {
+      "get": {
+        "operationId": "NoticeController_findReceivers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "readStatus",
+            "required": false,
+            "in": "query",
+            "description": "阅读状态",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "read",
+                "unread"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取公告接收人列表",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/{id}": {
+      "get": {
+        "operationId": "NoticeController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取公告详情",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/create": {
+      "post": {
+        "operationId": "NoticeController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNoticeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建公告",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/update": {
+      "put": {
+        "operationId": "NoticeController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNoticeWithIdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新公告",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/status/{id}": {
+      "put": {
+        "operationId": "NoticeController_toggleStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "切换公告发布状态",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/pin/{id}": {
+      "put": {
+        "operationId": "NoticeController_togglePin",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "切换公告置顶状态",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/resend/{id}": {
+      "post": {
+        "operationId": "NoticeController_resend",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "重新推送公告至未读用户",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/delete/{id}": {
+      "put": {
+        "operationId": "NoticeController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除公告",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/notice/batchDelete": {
+      "put": {
+        "operationId": "NoticeController_batchRemove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchRemoveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除公告",
+        "tags": [
+          "公告管理"
+        ]
+      }
+    },
+    "/upload": {
+      "post": {
+        "operationId": "UploadController_uploadFile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "单文件上传",
+        "tags": [
+          "文件上传"
+        ]
+      }
+    },
+    "/upload/batch": {
+      "post": {
+        "operationId": "UploadController_uploadFiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量文件上传",
+        "tags": [
+          "文件上传"
+        ]
+      }
+    },
+    "/public/sort": {
+      "post": {
+        "operationId": "PublicController_sort",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SortDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "拖拽排序",
+        "tags": [
+          "公共接口"
+        ]
+      }
+    },
+    "/public/resetSort": {
+      "post": {
+        "operationId": "PublicController_resetSort",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetSortDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "重置排序",
+        "tags": [
+          "公共接口"
+        ]
+      }
+    },
+    "/dashboard/stats": {
+      "get": {
+        "operationId": "DashboardController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取仪表盘统计数据",
+        "tags": [
+          "仪表盘"
+        ]
+      }
+    },
+    "/dashboard/trends": {
+      "get": {
+        "operationId": "DashboardController_getTrends",
+        "parameters": [
+          {
+            "name": "days",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 7,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取趋势数据",
+        "tags": [
+          "仪表盘"
+        ]
+      }
+    },
+    "/dashboard/system-info": {
+      "get": {
+        "operationId": "DashboardController_getSystemInfo",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取系统信息",
+        "tags": [
+          "仪表盘"
+        ]
+      }
+    },
+    "/dashboard/activities": {
+      "get": {
+        "operationId": "DashboardController_getActivities",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": 8,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取最近动态",
+        "tags": [
+          "仪表盘"
+        ]
+      }
+    },
+    "/todo/list": {
+      "get": {
+        "operationId": "TodoController_findAll",
+        "parameters": [
+          {
+            "name": "onlyUndone",
+            "required": false,
+            "in": "query",
+            "description": "是否只查未完成",
+            "schema": {
+              "default": false,
+              "type": "number"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "description": "标题关键字",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取我的待办列表(平铺,前端转树)",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/todo/stats": {
+      "get": {
+        "operationId": "TodoController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "待办统计",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/todo/create": {
+      "post": {
+        "operationId": "TodoController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTodoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建待办",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/todo/update": {
+      "put": {
+        "operationId": "TodoController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTodoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新待办",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/todo/toggle/{id}": {
+      "put": {
+        "operationId": "TodoController_toggle",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "完成/取消完成",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/todo/delete/{id}": {
+      "delete": {
+        "operationId": "TodoController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除待办(级联子任务)",
+        "tags": [
+          "待办事项"
+        ]
+      }
+    },
+    "/metrics/events": {
+      "post": {
+        "operationId": "MetricsController_report",
+        "parameters": [
+          {
+            "name": "user-agent",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClientEventsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量上报前端事件",
+        "tags": [
+          "前端监控"
+        ]
+      },
+      "get": {
+        "operationId": "MetricsController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "事件类型",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "error",
+                "pageview"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "分类",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "查询前端事件(分页)",
+        "tags": [
+          "前端监控"
+        ]
+      }
+    },
+    "/metrics/stats": {
+      "get": {
+        "operationId": "MetricsController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "事件统计",
+        "tags": [
+          "前端监控"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "JDM Server API",
+    "description": "企业级管理系统 API 文档",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT token",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "admin"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "123456"
+          },
+          "captcha": {
+            "type": "string",
+            "description": "验证码",
+            "example": "abcd"
+          },
+          "captchaId": {
+            "type": "string",
+            "description": "验证码ID"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "user123"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "123456"
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": "确认密码",
+            "example": "123456"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号",
+            "example": "13800138000"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "example": "user@example.com"
+          }
+        },
+        "required": [
+          "username",
+          "password",
+          "confirmPassword"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "刷新令牌",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "真实姓名"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "sex": {
+            "type": "string",
+            "description": "性别",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER"
+            ]
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像 URL"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "生日"
+          },
+          "city": {
+            "type": "string",
+            "description": "城市"
+          },
+          "address": {
+            "type": "string",
+            "description": "地址"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "详细地址"
+          },
+          "position": {
+            "type": "string",
+            "description": "职位"
+          }
+        }
+      },
+      "CheckPasswordDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "待验证的密码",
+            "example": "123456"
+          }
+        },
+        "required": [
+          "password"
+        ]
+      },
+      "UpdatePasswordDto": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "description": "原密码",
+            "example": "123456"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "新密码",
+            "example": "newpassword123"
+          }
+        },
+        "required": [
+          "oldPassword",
+          "newPassword"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名",
+            "example": "testuser"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码",
+            "example": "123456.."
+          },
+          "name": {
+            "type": "string",
+            "description": "真实姓名"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "sex": {
+            "type": "string",
+            "description": "性别",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER"
+            ]
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像URL"
+          },
+          "birthday": {
+            "format": "date-time",
+            "type": "string",
+            "description": "生日"
+          },
+          "city": {
+            "type": "string",
+            "description": "城市"
+          },
+          "address": {
+            "type": "string",
+            "description": "地址"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "详细地址"
+          },
+          "departmentId": {
+            "type": "number",
+            "description": "部门ID"
+          },
+          "joinedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "入职时间"
+          },
+          "position": {
+            "type": "string",
+            "description": "职位"
+          },
+          "roleType": {
+            "type": "string",
+            "description": "角色类型",
+            "example": "user"
+          },
+          "roleIds": {
+            "description": "角色ID列表",
+            "example": [
+              1,
+              2
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "角色编码",
+            "example": "admin"
+          },
+          "name": {
+            "type": "string",
+            "description": "角色名称",
+            "example": "管理员"
+          },
+          "description": {
+            "type": "string",
+            "description": "角色描述"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "CreateMenuDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "菜单名称"
+          },
+          "code": {
+            "type": "string",
+            "description": "路由标识",
+            "example": "UserList"
+          },
+          "permission": {
+            "type": "string",
+            "description": "权限标识",
+            "example": "system:user:list"
+          },
+          "type": {
+            "type": "string",
+            "description": "菜单类型",
+            "enum": [
+              "DIRECTORY",
+              "MENU",
+              "BUTTON"
+            ]
+          },
+          "pid": {
+            "type": "number",
+            "description": "父菜单ID"
+          },
+          "path": {
+            "type": "string",
+            "description": "路由路径"
+          },
+          "redirect": {
+            "type": "string",
+            "description": "重定向路径"
+          },
+          "icon": {
+            "type": "string",
+            "description": "图标"
+          },
+          "component": {
+            "type": "string",
+            "description": "组件路径"
+          },
+          "layout": {
+            "type": "string",
+            "description": "布局类型",
+            "default": "normal"
+          },
+          "keepAlive": {
+            "type": "boolean",
+            "description": "是否缓存页面",
+            "default": false
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP方法（按钮权限使用）"
+          },
+          "description": {
+            "type": "string",
+            "description": "描述"
+          },
+          "show": {
+            "type": "boolean",
+            "description": "是否显示",
+            "default": true
+          },
+          "enable": {
+            "type": "boolean",
+            "description": "是否启用",
+            "default": true
+          },
+          "order": {
+            "type": "number",
+            "description": "排序",
+            "default": 0
+          },
+          "isFrame": {
+            "type": "boolean",
+            "description": "是否外部链接",
+            "default": false
+          },
+          "frameSrc": {
+            "type": "string",
+            "description": "外部链接地址"
+          },
+          "target": {
+            "type": "string",
+            "description": "打开方式",
+            "default": "_self"
+          },
+          "affix": {
+            "type": "boolean",
+            "description": "是否固定标签页",
+            "default": false
+          },
+          "alwaysShow": {
+            "type": "boolean",
+            "description": "目录是否始终显示"
+          },
+          "badge": {
+            "type": "string",
+            "description": "徽标内容"
+          },
+          "badgeType": {
+            "type": "string",
+            "description": "徽标类型"
+          },
+          "needLogin": {
+            "type": "boolean",
+            "description": "是否需要登录",
+            "default": true
+          },
+          "extraData": {
+            "type": "object",
+            "description": "额外数据（JSON 对象）"
+          }
+        },
+        "required": [
+          "name",
+          "code",
+          "type"
+        ]
+      },
+      "UpdateMenuDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "菜单ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "菜单名称"
+          },
+          "code": {
+            "type": "string",
+            "description": "路由标识"
+          },
+          "permission": {
+            "type": "string",
+            "description": "权限标识"
+          },
+          "type": {
+            "type": "string",
+            "description": "菜单类型",
+            "enum": [
+              "DIRECTORY",
+              "MENU",
+              "BUTTON"
+            ]
+          },
+          "pid": {
+            "type": "number",
+            "description": "父菜单ID"
+          },
+          "path": {
+            "type": "string",
+            "description": "路由路径"
+          },
+          "redirect": {
+            "type": "string",
+            "description": "重定向路径"
+          },
+          "icon": {
+            "type": "string",
+            "description": "图标"
+          },
+          "component": {
+            "type": "string",
+            "description": "组件路径"
+          },
+          "layout": {
+            "type": "string",
+            "description": "布局类型"
+          },
+          "keepAlive": {
+            "type": "boolean",
+            "description": "是否缓存页面"
+          },
+          "method": {
+            "type": "string",
+            "description": "HTTP方法"
+          },
+          "description": {
+            "type": "string",
+            "description": "描述"
+          },
+          "show": {
+            "type": "boolean",
+            "description": "是否显示"
+          },
+          "enable": {
+            "type": "boolean",
+            "description": "是否启用"
+          },
+          "order": {
+            "type": "number",
+            "description": "排序"
+          },
+          "isFrame": {
+            "type": "boolean",
+            "description": "是否外部链接"
+          },
+          "frameSrc": {
+            "type": "string",
+            "description": "外部链接地址"
+          },
+          "target": {
+            "type": "string",
+            "description": "打开方式"
+          },
+          "affix": {
+            "type": "boolean",
+            "description": "是否固定标签页"
+          },
+          "alwaysShow": {
+            "type": "boolean",
+            "description": "目录是否始终显示"
+          },
+          "badge": {
+            "type": "string",
+            "description": "徽标内容"
+          },
+          "badgeType": {
+            "type": "string",
+            "description": "徽标类型"
+          },
+          "needLogin": {
+            "type": "boolean",
+            "description": "是否需要登录"
+          },
+          "extraData": {
+            "type": "object",
+            "description": "额外数据（JSON 对象）"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateDepartmentDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "部门名称"
+          },
+          "code": {
+            "type": "string",
+            "description": "部门编码"
+          },
+          "description": {
+            "type": "string",
+            "description": "部门描述"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序",
+            "default": 0
+          },
+          "status": {
+            "type": "number",
+            "description": "部门状态 0-禁用 1-启用",
+            "default": 1
+          },
+          "managerId": {
+            "type": "number",
+            "description": "部门经理ID"
+          },
+          "parentId": {
+            "type": "number",
+            "description": "父部门ID"
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ]
+      },
+      "UpdateDepartmentDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "部门名称"
+          },
+          "code": {
+            "type": "string",
+            "description": "部门编码"
+          },
+          "description": {
+            "type": "string",
+            "description": "部门描述"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序"
+          },
+          "status": {
+            "type": "number",
+            "description": "部门状态 0-禁用 1-启用"
+          },
+          "managerId": {
+            "type": "number",
+            "description": "部门经理ID"
+          },
+          "parentId": {
+            "type": "number",
+            "description": "父部门ID"
+          }
+        }
+      },
+      "CreateSysConfigDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "配置名称"
+          },
+          "key": {
+            "type": "string",
+            "description": "配置键"
+          },
+          "value": {
+            "type": "string",
+            "description": "配置值"
+          },
+          "type": {
+            "type": "string",
+            "description": "配置类型",
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BOOLEAN",
+              "JSON",
+              "ARRAY",
+              "FILE",
+              "EMAIL",
+              "URL",
+              "PASSWORD"
+            ],
+            "default": "STRING"
+          },
+          "description": {
+            "type": "string",
+            "description": "配置描述"
+          },
+          "category": {
+            "type": "string",
+            "description": "配置分类",
+            "default": "SYSTEM"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "是否公开配置",
+            "default": false
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "是否系统配置",
+            "default": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序",
+            "default": 0
+          }
+        },
+        "required": [
+          "name",
+          "key",
+          "value"
+        ]
+      },
+      "CreateDictTypeDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "字典类型编码",
+            "example": "sex"
+          },
+          "name": {
+            "type": "string",
+            "description": "字典类型名称",
+            "example": "性别"
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-禁用 1-启用",
+            "default": 1
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "UpdateDictTypeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "字典类型ID"
+          },
+          "code": {
+            "type": "string",
+            "description": "字典类型编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "字典类型名称"
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-禁用 1-启用"
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateDictItemDto": {
+        "type": "object",
+        "properties": {
+          "typeId": {
+            "type": "number",
+            "description": "所属字典类型ID"
+          },
+          "code": {
+            "type": "string",
+            "description": "字典项编码(值)",
+            "example": "MALE"
+          },
+          "label": {
+            "type": "string",
+            "description": "显示文本",
+            "example": "男"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序",
+            "default": 0
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-禁用 1-启用",
+            "default": 1
+          }
+        },
+        "required": [
+          "typeId",
+          "code",
+          "label"
+        ]
+      },
+      "UpdateDictItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "字典项ID"
+          },
+          "code": {
+            "type": "string",
+            "description": "字典项编码"
+          },
+          "label": {
+            "type": "string",
+            "description": "显示文本"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序"
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-禁用 1-启用"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "CreateNoticeDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "公告标题",
+            "example": "系统升级通知"
+          },
+          "content": {
+            "type": "string",
+            "description": "公告内容（富文本HTML）"
+          },
+          "type": {
+            "type": "string",
+            "description": "公告类型",
+            "enum": [
+              "NOTICE",
+              "INFO",
+              "ACTIVITY"
+            ],
+            "example": "NOTICE"
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-草稿 1-发布",
+            "default": 0
+          },
+          "isPinned": {
+            "type": "boolean",
+            "description": "是否置顶",
+            "default": false
+          },
+          "isMandatory": {
+            "type": "boolean",
+            "description": "是否强制阅读",
+            "default": false
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "发布范围类型",
+            "default": "ALL",
+            "enum": [
+              "ALL",
+              "ROLE",
+              "DEPARTMENT",
+              "USER"
+            ]
+          },
+          "scopeTargets": {
+            "description": "发布范围目标ID列表（scopeType不为ALL时必填）",
+            "example": [
+              {
+                "targetType": "ROLE",
+                "targetId": 1
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "title",
+          "type"
+        ]
+      },
+      "UpdateNoticeWithIdDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "公告标题"
+          },
+          "content": {
+            "type": "string",
+            "description": "公告内容（富文本HTML）"
+          },
+          "type": {
+            "type": "string",
+            "description": "公告类型",
+            "enum": [
+              "NOTICE",
+              "INFO",
+              "ACTIVITY"
+            ]
+          },
+          "status": {
+            "type": "number",
+            "description": "状态 0-草稿 1-发布"
+          },
+          "isPinned": {
+            "type": "boolean",
+            "description": "是否置顶"
+          },
+          "isMandatory": {
+            "type": "boolean",
+            "description": "是否强制阅读"
+          },
+          "scopeType": {
+            "type": "string",
+            "description": "发布范围类型",
+            "enum": [
+              "ALL",
+              "ROLE",
+              "DEPARTMENT",
+              "USER"
+            ]
+          },
+          "scopeTargets": {
+            "description": "发布范围目标ID列表",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number",
+            "description": "公告ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "BatchRemoveDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "公告ID列表",
+            "example": [
+              1,
+              2,
+              3
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "SortDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "ResetSortDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateTodoDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "待办标题",
+            "example": "完成周报"
+          },
+          "content": {
+            "type": "string",
+            "description": "待办内容"
+          },
+          "pid": {
+            "type": "number",
+            "description": "父待办ID(子任务)"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序"
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateTodoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "待办ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "待办标题"
+          },
+          "content": {
+            "type": "string",
+            "description": "待办内容"
+          },
+          "pid": {
+            "type": "number",
+            "description": "父待办ID(子任务)"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "ClientEventDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "事件类型",
+            "enum": [
+              "error",
+              "pageview"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "description": "分类",
+            "example": "JS_ERROR"
+          },
+          "message": {
+            "type": "string",
+            "description": "错误消息"
+          },
+          "stack": {
+            "type": "string",
+            "description": "错误堆栈(截断后)"
+          },
+          "url": {
+            "type": "string",
+            "description": "页面 URL"
+          },
+          "route": {
+            "type": "string",
+            "description": "路由路径"
+          },
+          "extra": {
+            "type": "object",
+            "description": "附加信息"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "ReportClientEventsDto": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "description": "事件列表",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClientEventDto"
+            }
+          }
+        },
+        "required": [
+          "events"
+        ]
+      }
+    }
+  }
+}

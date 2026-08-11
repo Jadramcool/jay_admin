@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { IDomEditor, IEditorConfig } from '@wangeditor/editor'
 import { createEditor, i18nChangeLanguage } from '@wangeditor/editor'
+import { sanitizeHtml } from '@/utils/security/sanitizeHtml'
 
 defineOptions({ name: 'WangEditorPreview' })
 
@@ -34,7 +35,7 @@ onMounted(() => {
     mode: 'default',
   })
   if (props.modelValue) {
-    editor.setHtml(props.modelValue)
+    editor.setHtml(sanitizeHtml(props.modelValue))
   }
 })
 
@@ -43,7 +44,7 @@ watch(
   (val) => {
     if (editor && val) {
       if (val !== editor.getHtml()) {
-        editor.setHtml(val || '')
+        editor.setHtml(sanitizeHtml(val || ''))
       }
     }
   },

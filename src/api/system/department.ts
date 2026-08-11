@@ -6,7 +6,7 @@ export interface DepartmentCreateParams {
   parentId?: number | null
   sortOrder?: number
   description?: string
-  status: 0 | 1
+  status: System.BinaryStatus
 }
 
 export interface DepartmentUpdateParams extends DepartmentCreateParams {
@@ -33,7 +33,7 @@ enum API {
 
 export const DepartmentApi = {
   list: (params?: Api.PageParams) =>
-    request.get<Api.PaginatedList<System.Department>>({ url: API.list, params }),
+    request.get<Api.PaginatedData<System.Department>>({ url: API.list, params }),
 
   tree: () => request.get<System.Department[]>({ url: API.tree }),
 
@@ -45,12 +45,15 @@ export const DepartmentApi = {
   update: ({ id, ...data }: DepartmentUpdateParams) =>
     request.put<System.Department>({ url: `${API.update}/${id}`, data }),
 
-  delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
+  delete: (id: number) => request.delete<null>({ url: `${API.delete}/${id}` }),
 
-  enable: (id: number) => request.put({ url: `${API.enable}/${id}` }),
+  enable: (id: number) => request.put<null>({ url: `${API.enable}/${id}` }),
 
-  disable: (id: number) => request.put({ url: `${API.disable}/${id}` }),
+  disable: (id: number) => request.put<null>({ url: `${API.disable}/${id}` }),
 
   members: (id: number, params?: DepartmentMemberParams) =>
-    request.get<Api.PaginatedList<System.User>>({ url: `${API.members}/${id}`, params }),
+    request.get<Api.PaginatedData<System.User>>({
+      url: API.members,
+      params: { ...params, departmentId: id },
+    }),
 }

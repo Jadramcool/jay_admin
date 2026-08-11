@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 import { UserManagerApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
 import { hasPermission } from '@/utils/common/hasPermission'
+import { downloadBlob } from '@/utils/download'
+import UserImportModal from './components/UserImportModal.vue'
 import UserResetPwdModal from './components/UserResetPwdModal.vue'
 import UserRoleModal from './components/UserRoleModal.vue'
 import { useUserSchema } from './schema'
@@ -10,6 +13,7 @@ import { useUserSchema } from './schema'
 const tableRef = ref<any>(null)
 const [registerRoleModal, { openModal: openRoleModal }] = useModal()
 const [registerPwdModal, { openModal: openPwdModal }] = useModal()
+const [registerImportModal, { openModal: openImportModal }] = useModal()
 const router = useRouter()
 
 const schemaMethods = {
@@ -65,6 +69,18 @@ async function loadData(params: any) {
   return UserManagerApi.list({ ...params, ...filters })
 }
 
+/** 导出用户列表(按当前筛选条件全量) */
+async function handleExport() {
+  try {
+    const filters = getFieldsValue()
+    const blob = await UserManagerApi.exportExcel(filters)
+    downloadBlob(blob, `用户列表_${dayjs().format('YYYYMMDD_HHmmss')}.xlsx`)
+  }
+  catch {
+    /* handled by interceptor */
+  }
+}
+
 function reload() {
   tableRef.value?.reload()
 }
@@ -86,8 +102,24 @@ function handleAdd() {
       :show-add-btn="hasPermission('system:user:create')"
       :scroll-x="1470"
       @add="handleAdd"
-    />
+    >
+      <template #toolbar>
+        <n-button v-if="hasPermission('system:user:list')" size="small" @click="handleExport">
+          导出
+        </n-button>
+        <n-button
+          v-if="hasPermission('system:user:create')"
+          size="small"
+          type="primary"
+          ghost
+          @click="openImportModal()"
+        >
+          导入
+        </n-button>
+      </template>
+    </BasicTable>
     <UserRoleModal @register="registerRoleModal" @success="reload" />
     <UserResetPwdModal @register="registerPwdModal" />
+    <UserImportModal @register="registerImportModal" @success="reload" />
   </div>
 </template>

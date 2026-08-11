@@ -2,9 +2,13 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { setupDirectives } from './directives'
 import router, { setupRouterGuards } from './router'
+import { registerLoginNavigator } from './router/auth-navigation'
 import pinia from './store'
+import { initMonitor } from './utils/monitor'
+import { setupAuthSessionSync } from './utils/token/session-sync'
 
 import 'uno.css'
+import './assets/styles/transition.scss'
 import './style.scss'
 import '@wangeditor/editor/dist/css/style.css'
 
@@ -13,12 +17,14 @@ async function bootstrap() {
 
   app.use(pinia)
 
-  // Store references for cross-module use (must be before router guard registration)
-  const { useUserStore, usePermissionStore, useTabStore } = await import('@/store/modules')
-  window.__stores = { useUserStore, usePermissionStore, useTabStore }
+  registerLoginNavigator(() => router.replace('/login'))
+  setupAuthSessionSync(router)
 
   // Register guards BEFORE router install so the initial navigation is protected
   setupRouterGuards(router)
+
+  // 错误监控与埋点(幂等;上报失败走 localStorage 缓冲)
+  initMonitor(app, router)
 
   app.use(router)
 

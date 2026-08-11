@@ -1,35 +1,36 @@
-import axios from 'axios'
-import { APISETTING } from '../const'
-
-interface TableProps {
-  request?: (params: any) => Promise<any>
-  pagination?: boolean | Record<string, any>
-  filters?: Record<string, any>
-  localPagination?: boolean
-  autoLoad?: boolean
-}
+import type { PaginationProps } from 'naive-ui'
+import type { TableProps, TableRequestParams } from '../types'
+import { isApiError } from '@/utils/http/api-error'
+import { APISETTING, DEFAULTPAGESIZE } from '../const'
+import {
+  expectArrayData,
+  expectPaginatedData,
+} from '../pagination-contract'
 
 interface PaginationHooks {
-  getPaginationInfo: ComputedRef<any>
-  setPagination: (info: Record<string, any>) => void
+  getPaginationInfo: ComputedRef<false | PaginationProps>
+  setPagination: (info: Partial<PaginationProps>) => void
   setLoading: (status: boolean) => void
 }
 
-export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagination, setLoading }: PaginationHooks) {
-  const fullDataSourceRef = ref<any[]>([])
-  const dataSourceRef = ref<any[]>([])
+export function useDataSource<T = unknown>(
+  propsRef: TableProps<T>,
+  { getPaginationInfo, setPagination, setLoading }: PaginationHooks,
+) {
+  const fullDataSourceRef = shallowRef<T[]>([])
+  const dataSourceRef = shallowRef<T[]>([])
+  const sortState: Pick<Api.PageParams, 'sortField' | 'sortOrder'> = {}
 
-  const { pageField, sizeField, totalField, itemCountField }
-    = APISETTING
+  const { itemCountField, pageField, sizeField, totalField } = APISETTING
 
-  const handleLocalPagination = (data: any[]) => {
+  function handleLocalPagination(data: T[]): T[] {
     const pagination = unref(getPaginationInfo)
     if (!pagination)
       return data
 
-    const { page = 1, pageSize = 10 } = pagination
+    const page = pagination.page ?? 1
+    const pageSize = pagination.pageSize ?? DEFAULTPAGESIZE
     const start = (page - 1) * pageSize
-    const end = start + pageSize
 
     setPagination({
       [pageField]: page,
@@ -37,62 +38,64 @@ export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagi
       [itemCountField]: data.length,
       pageCount: Math.ceil(data.length / pageSize),
     })
-    return data.slice(start, end)
+    return data.slice(start, start + pageSize)
   }
 
-  async function fetch(opt: any) {
+  function updateSortState(options: Partial<Api.PageParams>): void {
+    if ('sortField' in options)
+      sortState.sortField = options.sortField
+    if ('sortOrder' in options)
+      sortState.sortOrder = options.sortOrder
+  }
+
+  async function fetch(options: Partial<Api.PageParams> = {}): Promise<void> {
     try {
       setLoading(true)
-      const { request, pagination, filters, localPagination } = unref(propsRef)
+      const { filters, localPagination, pagination, request } = unref(propsRef)
       if (!request)
         return
 
-      let pageParams: any = {}
-      const { page = 1, pageSize = 10 } = unref(getPaginationInfo)
+      updateSortState(options)
+      const filterParams = toRaw(filters ?? {})
+      const paginationInfo = unref(getPaginationInfo)
+      const usesPagination = paginationInfo !== false && pagination !== false
 
-      if (localPagination === true) {
-        const params = {
-          pagination: { page: 1, pageSize: 999 },
-          ...toRaw(filters),
-        }
-        const res: any = await request(params)
-        fullDataSourceRef.value = res?.list || res || []
+      if (localPagination) {
+        const result = await request({ ...filterParams })
+        fullDataSourceRef.value = expectArrayData(result)
         dataSourceRef.value = handleLocalPagination(fullDataSourceRef.value)
+        return
       }
-      else {
-        if (
-          (isBoolean(pagination) && !pagination)
-          || isBoolean(unref(getPaginationInfo))
-        ) {
-          pageParams = {}
-        }
-        else {
-          pageParams[pageField] = (opt && opt[pageField]) || page
-          pageParams[sizeField] = pageSize
-        }
-        const params = { ...toRaw(filters || {}), ...pageParams }
-        const res: any = await request(params)
-        dataSourceRef.value = res?.list || res || []
 
-        const pageInfo = res.pagination || {}
-        if (pageInfo) {
-          const currentPage = pageInfo[pageField] || page
-          const currentPageSize = pageInfo[sizeField] || pageInfo.page_size || pageSize
-          const total = pageInfo[itemCountField] || pageInfo[totalField] || 0
-          setPagination({
-            [pageField]: currentPage,
-            [sizeField]: currentPageSize,
-            [totalField]: total,
-            [itemCountField]: total,
-            pageCount: Math.ceil(total / currentPageSize),
-          })
-        }
+      if (!usesPagination) {
+        const result = await request({ ...filterParams, ...sortState })
+        dataSourceRef.value = expectArrayData(result)
+        return
       }
+
+      const page = options.page ?? paginationInfo.page ?? 1
+      const pageSize = options.pageSize
+        ?? paginationInfo.pageSize
+        ?? DEFAULTPAGESIZE
+      const params: TableRequestParams = {
+        ...filterParams,
+        ...sortState,
+        page,
+        pageSize,
+      }
+      const result = expectPaginatedData(await request(params))
+      dataSourceRef.value = result.items
+      setPagination({
+        [pageField]: result.page,
+        [sizeField]: result.pageSize,
+        [totalField]: result.total,
+        [itemCountField]: result.total,
+        pageCount: Math.ceil(result.total / result.pageSize),
+      })
     }
-    catch (e) {
-      if (!axios.isCancel(e)) {
-        console.error(e)
-      }
+    catch (error) {
+      if ((!isApiError(error) || error.kind !== 'cancelled') && import.meta.env.DEV)
+        console.error(error)
     }
     finally {
       setLoading(false)
@@ -100,19 +103,18 @@ export function useDataSource(propsRef: TableProps, { getPaginationInfo, setPagi
   }
 
   onMounted(() => {
-    if (unref(propsRef).autoLoad) {
-      setTimeout(fetch, 16, {})
-    }
+    if (unref(propsRef).autoLoad)
+      setTimeout(fetch, 16)
   })
 
-  async function reload(opt: any = {}) {
-    await fetch(opt)
+  async function reload(options: Partial<Api.PageParams> = {}): Promise<void> {
+    await fetch(options)
   }
 
   return {
     dataSourceRef,
     fullDataSourceRef,
-    reload,
     handleLocalPagination,
+    reload,
   }
 }

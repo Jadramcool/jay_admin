@@ -47,8 +47,7 @@ const [register, { getFieldsValue }] = useForm({
 async function loadData(params: any) {
   const filters = getFieldsValue()
   const res = await MenuApi.list({ ...params, ...filters })
-  const list = Array.isArray(res) ? res : (res?.list ?? [])
-  return arrayToTree(list)
+  return { ...res, items: arrayToTree(res.items) }
 }
 
 function reload() {

@@ -16,7 +16,7 @@ const { columns } = useMemberSchema()
 
 async function loadMembers(params: Api.PageParams) {
   if (!props.departmentId)
-    return { list: [], pagination: { page: 1, pageSize: 10, total: 0 } }
+    return { items: [], total: 0, page: 1, pageSize: 20 }
   return DepartmentApi.members(props.departmentId, {
     ...params,
     includeChildren: props.includeChildren,

@@ -1,0 +1,22 @@
+import request from '@/utils/http/axios'
+
+enum API {
+  list = '/{{kebabCase name}}/list',
+  create = '/{{kebabCase name}}/create',
+  update = '/{{kebabCase name}}/update',
+  remove = '/{{kebabCase name}}/delete',
+}
+
+export const {{pascalCase name}}Api = {
+  list: (params?: Api.PageParams) =>
+    request.get<Api.PaginatedData<System.{{pascalCase name}}>>({ url: API.list, params }),
+
+  create: (data: Partial<System.{{pascalCase name}}>) =>
+    request.post<null>({ url: API.create, data }),
+
+  update: (data: Partial<System.{{pascalCase name}}> & { id: number }) =>
+    request.put<null>({ url: API.update, data }),
+
+  delete: (id: number) =>
+    request.delete<null>({ url: `${API.remove}/${id}` }),
+}

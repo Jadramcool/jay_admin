@@ -1,0 +1,98 @@
+<script setup lang="ts">
+import { NButton, NTag } from 'naive-ui'
+import { h, ref } from 'vue'
+import { {{pascalCase name}}Api } from '@/api/{{kebabCase name}}'
+import { useForm, useModal } from '@/components/index.ts'
+import {{pascalCase name}}Modal from './components/{{pascalCase name}}Modal.vue'
+
+const tableRef = ref<any>(null)
+const [registerModal, { openModal }] = useModal()
+
+const [register, { getFieldsValue }] = useForm({
+  gridProps: { cols: '1 s:1 m:2 l:3 xl:4' },
+  schemas: [],
+  submitOnReset: true,
+  tableRef,
+})
+
+async function loadData(params: any) {
+  const filters = getFieldsValue()
+  return {{pascalCase name}}Api.list({ ...params, ...filters })
+}
+
+function reload() {
+  tableRef.value?.reload()
+}
+
+function handleAdd() {
+  openModal()
+}
+
+function handleEdit(row: System.{{pascalCase name}}) {
+  openModal(row)
+}
+
+async function handleDelete(row: System.{{pascalCase name}}) {
+  window.$dialog?.warning({
+    title: '提示',
+    content: `确定要删除该记录吗？`,
+    positiveText: '确定',
+    negativeText: '取消',
+    onPositiveClick: async () => {
+      try {
+        await {{pascalCase name}}Api.delete(row.id)
+        window.$message?.success?.('删除成功')
+        reload()
+      }
+      catch {
+        /* handled by interceptor */
+      }
+    },
+  })
+}
+
+const columns = [
+  { title: 'ID', key: 'id', width: 80 },
+  {
+    title: '状态',
+    key: 'status',
+    width: 80,
+    render: (row: System.{{pascalCase name}}) =>
+      h(NTag, { type: row.status === 1 ? 'success' : 'default', bordered: false, size: 'small' }, {
+        default: () => (row.status === 1 ? '启用' : '禁用'),
+      }),
+  },
+  { title: '创建时间', key: 'createdTime', width: 170 },
+  {
+    title: '操作',
+    key: 'actions',
+    width: 160,
+    render: (row: System.{{pascalCase name}}) =>
+      h('div', { style: 'display: flex; gap: 8px' }, [
+        h(NButton, { size: 'small', type: 'primary', quaternary: true, onClick: () => handleEdit(row) }, { default: () => '编辑' }),
+        h(NButton, { size: 'small', type: 'error', quaternary: true, onClick: () => handleDelete(row) }, { default: () => '删除' }),
+      ]),
+  },
+]
+</script>
+
+<template>
+  <div class="system-page">
+    <FormQuery @register="register" @submit="reload" />
+    <BasicTable
+      ref="tableRef"
+      title="{{titleCase name}}"
+      :columns="columns"
+      :request="loadData"
+      @add="handleAdd"
+    >
+      <template #toolbar>
+        <NButton size="small" @click="reload">
+          刷新
+        </NButton>
+      </template>
+    </BasicTable>
+
+    <{{pascalCase name}}Modal @register="registerModal" @success="reload" />
+  </div>
+</template>

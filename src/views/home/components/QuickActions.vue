@@ -4,21 +4,17 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const quickLinks = [
-  { label: '用户管理', route: '/system/user', color: '#18a058', desc: '管理系统用户' },
+  { label: '用户管理', route: '/system/user/list', color: '#18a058', desc: '管理系统用户' },
   { label: '角色管理', route: '/system/role', color: '#2080f0', desc: '配置角色权限' },
   { label: '菜单管理', route: '/system/menu', color: '#f0a020', desc: '维护导航路由' },
   { label: '部门管理', route: '/system/department', color: '#7c3aed', desc: '组织架构管理' },
-  { label: '操作日志', route: '/system/operation-log', color: '#d03050', desc: '审计安全追溯' },
-  { label: '通知管理', route: '/notice', color: '#ec4899', desc: '发布系统通知' },
+  { label: '操作日志', route: '/system/op-log', color: '#d03050', desc: '审计安全追溯' },
+  { label: '通知管理', route: '/notice/notice', color: '#ec4899', desc: '发布系统通知' },
   { label: '个人中心', route: '/user-center', color: '#0ec7b0', desc: '编辑个人资料' },
-  { label: '系统设置', route: '/settings', color: '#909090', desc: '系统配置选项' },
+  { label: '系统配置', route: '/system/config', color: '#909090', desc: '维护运行参数' },
 ]
 
 function go(route: string) {
-  if (route === '/settings') {
-    window.dispatchEvent(new CustomEvent('toggle-settings'))
-    return
-  }
   router.push(route)
 }
 </script>

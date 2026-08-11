@@ -1,4 +1,5 @@
 import type { PropType } from 'vue'
+import type { TableRequest } from './types'
 import { NDataTable } from 'naive-ui'
 import { TABLELAYOUT } from './const'
 
@@ -14,11 +15,11 @@ export const basicProps = {
     required: true,
   },
   request: {
-    type: Function as PropType<(...arg: any[]) => Promise<any>>,
+    type: Function as PropType<TableRequest<unknown>>,
     default: null,
   },
   filters: {
-    type: Object,
+    type: Object as PropType<Record<string, unknown>>,
     default: () => ({}),
   },
   rowKey: {

@@ -138,7 +138,8 @@ export function useUserSchema(methods: any = {}) {
           rules: [
             {
               validator: (rule: any, value: any) => {
-                if (isPhone(value))
+                // 手机号非必填:空值直接通过,非空才校验格式
+                if (!value || isPhone(value))
                   return true
                 return new Error('请输入正确的手机号')
               },

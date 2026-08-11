@@ -33,8 +33,8 @@ declare namespace Dashboard {
     username: string
     action: string
     module: string
-    operationType: string
+    operationType: System.OperationType
     time: string
-    status: string
+    status: System.OperationStatus
   }
 }

@@ -1,29 +1,50 @@
 import type {
   AxiosInstance,
-  AxiosRequestConfig,
   AxiosRequestHeaders,
   AxiosResponse,
-  InternalAxiosRequestConfig,
 } from 'axios'
-import type { ResponseModel } from './types'
+import type { InternalRequestConfig } from './internal-types'
+import type {
+  ArrayBufferRequestConfig,
+  BlobRequestConfig,
+  JsonRequestConfig,
+  RequestConfig,
+  ResponseModel,
+  UploadRequestConfig,
+} from './types'
 import axios from 'axios'
 import qs from 'qs'
+import { navigateToLogin } from '@/router/auth-navigation'
+import { useAuthStore } from '@/store/modules/auth'
 import {
   getRefreshToken,
   getToken,
   removeToken,
   setToken,
 } from '@/utils/token'
+import { ApiError, createApiError, normalizeApiError } from './api-error'
+import { logAuthLifecycle } from './auth-audit'
 import { errorHandler } from './error-handler'
+import { shouldShowGlobalError } from './error-policy'
+import {
+  isErrorResponse,
+  unwrapResponseData,
+} from './response-transform'
+import { TokenRefreshCoordinator } from './token-refresh-coordinator'
 
 const env = import.meta.env
 
+/**
+ * HTTP 客户端：注入 Bearer Token、按请求键取消重复请求、统一解包响应包络，
+ * 401 时经协调器单飞刷新令牌并重放原请求，会话失效则统一兜底登出。
+ */
 class HttpRequest {
   private service: AxiosInstance
   private pendingMap = new Map<string, AbortController>()
-  private refreshTokenPromise: Promise<any> | null = null
-  private authFailing = false
+  private refreshCoordinator = new TokenRefreshCoordinator()
+  private authFailurePromise: Promise<void> | null = null
 
+  /** 创建 axios 实例并注册请求/响应拦截器。 */
   constructor() {
     this.service = axios.create({
       baseURL: env.VITE_API_BASE_URL,
@@ -35,178 +56,259 @@ class HttpRequest {
     this.setupInterceptors()
   }
 
-  private getRequestKey(config: AxiosRequestConfig): string {
+  /**
+   * 由 method/url/params/data 生成请求唯一键，用于相同请求的去重；
+   * FormData 经 JSON 序列化会失真，据此生成的去重键可能不可靠。
+   */
+  private getRequestKey(config: RequestConfig): string {
     return `${config.method}:${config.url}:${JSON.stringify(config.params)}:${JSON.stringify(config.data)}`
   }
 
-  private addPending(config: InternalAxiosRequestConfig): void {
+  /** 将请求登记进 pendingMap 并中断此前相同的在途请求；skipDuplicate 时跳过。 */
+  private addPending(config: InternalRequestConfig): void {
+    if (config.skipDuplicate)
+      return
+
     const key = this.getRequestKey(config)
-    if (this.pendingMap.has(key)) {
-      this.pendingMap.get(key)!.abort()
-    }
+    this.pendingMap.get(key)?.abort()
+
     const controller = new AbortController()
     config.signal = controller.signal
     this.pendingMap.set(key, controller)
   }
 
-  private removePending(config: AxiosRequestConfig): void {
-    const key = this.getRequestKey(config)
-    this.pendingMap.delete(key)
+  /** 请求落定后从 pendingMap 移除对应登记。 */
+  private removePending(config?: RequestConfig): void {
+    if (!config || config.skipDuplicate)
+      return
+    this.pendingMap.delete(this.getRequestKey(config))
   }
 
+  /**
+   * 注册请求/响应拦截器：请求侧注入 Token（skipAuth 除外）、FormData 去掉 Content-Type 并登记去重；
+   * 响应侧解包包络、登录成功后重置刷新会话，401 且未跳过自动刷新时走令牌刷新重放，否则按策略提示后抛出。
+   */
   private setupInterceptors(): void {
     this.service.interceptors.request.use(
-      (config: InternalAxiosRequestConfig) => {
+      (rawConfig) => {
+        const config = rawConfig as InternalRequestConfig
         const token = getToken()
-        if (token) {
+        if (token && !config.skipAuth) {
           (config.headers ??= {} as AxiosRequestHeaders).Authorization
             = `Bearer ${token}`
         }
-        // FormData 请求删除 Content-Type，让浏览器自动设置 multipart boundary
         if (config.data instanceof FormData) {
           delete config.headers['Content-Type']
         }
         this.addPending(config)
         return config
       },
-      error => Promise.reject(error),
+      error => Promise.reject(normalizeApiError(error)),
     )
 
     this.service.interceptors.response.use(
-      (response: AxiosResponse<ResponseModel>) => {
-        this.removePending(response.config)
+      (response: AxiosResponse<unknown>): AxiosResponse => {
+        const config = response.config as InternalRequestConfig
+        this.removePending(config)
         const { data } = response
-        if (data.code !== 200 && data.code !== 0) {
-          return Promise.reject(new Error(data.message))
+
+        try {
+          const result = unwrapResponseData(data)
+          if (config.url?.includes('/auth/login')) {
+            this.refreshCoordinator.reset()
+            this.authFailurePromise = null
+          }
+          return result as AxiosResponse
         }
-        if (response.config.url?.includes('/auth/login'))
-          this.authFailing = false
-        return data.data !== undefined ? (data.data as any) : data
+        catch (error) {
+          const apiError = normalizeApiError(error)
+          if (shouldShowGlobalError(apiError, config.silentFail))
+            errorHandler(apiError)
+          throw apiError
+        }
       },
       async (error) => {
-        this.removePending(error.config || {})
-        if (axios.isCancel(error))
-          return Promise.reject(error)
+        const config = error.config as InternalRequestConfig | undefined
+        this.removePending(config)
+        const apiError = normalizeApiError(error)
 
-        // 已由 handleAuthFailure 处理过（清 token + 弹"登录已过期"），不再重复
-        if (error._authHandled)
-          return Promise.reject(error)
+        if (apiError.kind === 'cancelled')
+          return Promise.reject(apiError)
 
-        const { response } = error
-
-        // 401 → token 刷新或鉴权失败处理（登录接口除外）
-        if (response?.status === 401) {
-          // 登录接口的 401 是密码错误，不走 token 刷新
-          if (response.config?.url?.includes('/auth/login')) {
-            errorHandler(error)
-            return Promise.reject(error)
-          }
-          const ret = await this.handleRefreshToken(error.config)
-          return ret
+        if (
+          apiError.status === 401
+          && !config?.skipAuthRefresh
+          && !config?.url?.includes('/auth/login')
+        ) {
+          return this.handleRefreshToken(config)
         }
 
-        // 标记了静默失败 → 不弹 toast，直接 reject
-        if ((error.config as any)?.silentFail) {
-          return Promise.reject(error)
-        }
-
-        // 其余所有错误：默认用后端返回的 message 弹 toast
-        errorHandler(error)
-        return Promise.reject(error)
+        if (shouldShowGlobalError(apiError, config?.silentFail))
+          errorHandler(apiError)
+        return Promise.reject(apiError)
       },
     )
   }
 
-  private async handleRefreshToken(config: any): Promise<any> {
-    if (config._retry) {
-      await this.handleAuthFailure()
-      const err = new Error('Token refresh loop detected');
-      (err as any)._authHandled = true
-      return Promise.reject(err)
+  /** 调用刷新接口换取新令牌对并写入存储，返回新的 access token；失败抛出归一化的 ApiError。 */
+  private async refreshAccessToken(refreshToken: string): Promise<string> {
+    try {
+      const response = await axios.post<ResponseModel<Api.RefreshResult>>(
+        `${env.VITE_API_BASE_URL}/auth/refresh`,
+        { refreshToken },
+      )
+      if (isErrorResponse(response.data))
+        throw createApiError(response.data)
+
+      const result = response.data.data
+      setToken({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken || refreshToken,
+      })
+      useAuthStore().syncToken()
+      return result.accessToken
+    }
+    catch (error) {
+      throw normalizeApiError(error)
+    }
+  }
+
+  /**
+   * 401 恢复编排：阻止同一请求重复重放，经协调器合并并发刷新，成功后重打 Authorization 头
+   * 并重放原请求，返回重放后的请求 Promise；刷新失败则触发会话失效兜底。
+   */
+  private async handleRefreshToken(
+    config?: InternalRequestConfig,
+  ): Promise<unknown> {
+    if (!config) {
+      const apiError = new ApiError({ code: 40102, status: 401 })
+      errorHandler(apiError)
+      return Promise.reject(apiError)
+    }
+
+    if (config._retry || config._replayCount === 1) {
+      await this.handleAuthFailure('replayed-request-unauthorized')
+      return Promise.reject(new ApiError({ code: 40102, status: 401 }))
     }
     config._retry = true
+    config._replayCount = 1
 
-    if (!this.refreshTokenPromise && !this.authFailing) {
-      const refreshToken = getRefreshToken()
-      if (!refreshToken) {
-        this.handleAuthFailure()
-        const err = new Error('No refresh token');
-        (err as any)._authHandled = true
-        return Promise.reject(err)
+    const refreshToken = getRefreshToken()
+    if (!refreshToken) {
+      await this.handleAuthFailure('missing-refresh-token')
+      return Promise.reject(new ApiError({ code: 40102, status: 401 }))
+    }
+
+    const current = this.refreshCoordinator.snapshot
+    logAuthLifecycle(
+      current.state === 'refreshing' ? 'refresh-joined' : 'refresh-started',
+      {
+        attempt: current.state === 'refreshing' ? current.attempt : current.attempt + 1,
+        path: config.url,
+        replayCount: config._replayCount,
+        state: current.state,
+      },
+    )
+
+    try {
+      const token = await this.refreshCoordinator.run(() =>
+        this.refreshAccessToken(refreshToken),
+      )
+      if (!token) {
+        throw new ApiError({ code: 40102, status: 401 })
       }
 
-      this.refreshTokenPromise = axios
-        .post(`${env.VITE_API_BASE_URL}/auth/refresh`, { refreshToken })
-        .then((res) => {
-          const { accessToken, refreshToken: newRefreshToken } = res.data.data
-          setToken({ accessToken, refreshToken: newRefreshToken })
-          this.authFailing = false
-          return accessToken
-        })
-        .catch(async () => {
-          await this.handleAuthFailure()
-          return null
-        })
-    }
-
-    const token = await this.refreshTokenPromise
-    this.refreshTokenPromise = null
-    if (token) {
-      (config.headers ??= {} as AxiosRequestHeaders).Authorization
-        = `Bearer ${token}`
+      const snapshot = this.refreshCoordinator.snapshot
+      logAuthLifecycle('refresh-succeeded', {
+        attempt: snapshot.attempt,
+        path: config.url,
+        state: snapshot.state,
+      })
+      const headers = (config.headers ??= {} as AxiosRequestHeaders)
+      headers.Authorization = `Bearer ${token}`
+      logAuthLifecycle('request-replayed', {
+        path: config.url,
+        replayCount: config._replayCount,
+      })
       return this.service(config)
     }
-    const err = new Error('Refresh failed');
-    (err as any)._authHandled = true
-    return Promise.reject(err)
+    catch (error) {
+      const apiError = normalizeApiError(error)
+      const snapshot = this.refreshCoordinator.snapshot
+      logAuthLifecycle('refresh-failed', {
+        attempt: snapshot.attempt,
+        path: config.url,
+        reason: apiError.kind,
+        state: snapshot.state,
+      })
+      await this.handleAuthFailure('refresh-failed')
+      return Promise.reject(apiError)
+    }
   }
 
-  private async handleAuthFailure(): Promise<void> {
-    if (this.authFailing)
-      return
-    this.authFailing = true
+  /** 单飞处理会话失效：合并并发 401 失败，清除登录态、提示登录过期并延迟跳转登录页。 */
+  private handleAuthFailure(reason: string): Promise<void> {
+    if (this.authFailurePromise)
+      return this.authFailurePromise
 
-    try {
-      const { useAuthStore } = await import('@/store/modules/auth')
-      const authStore = useAuthStore()
-      authStore.resetLoginState()
-    }
-    catch {
-      removeToken()
-    }
+    this.authFailurePromise = (async () => {
+      try {
+        useAuthStore().resetLoginState(reason)
+      }
+      catch {
+        removeToken()
+        logAuthLifecycle('auth-cleared', { reason })
+      }
 
-    window.$message?.error?.('登录已过期，请重新登录')
+      window.$message?.error?.('登录状态已失效，请重新登录')
 
-    // Soft redirect via router; fallback to hard redirect if router not available
-    try {
-      const { default: router } = await import('@/router')
-      setTimeout(() => router.push('/login'), 200)
-    }
-    catch {
       setTimeout(() => {
-        window.location.href = '/#/login'
-      }, 1500)
-    }
+        void navigateToLogin()
+      }, 200)
+    })()
+
+    return this.authFailurePromise
   }
 
-  get<T = any>(config: AxiosRequestConfig): Promise<T> {
-    return this.service({ ...config, method: 'GET' })
+  /** GET 请求，返回解包后的业务数据。 */
+  get<T = unknown, P = unknown>(config: JsonRequestConfig<never, P>): Promise<T> {
+    return this.service({ ...config, method: 'GET' }) as Promise<T>
   }
 
-  post<T = any>(config: AxiosRequestConfig): Promise<T> {
-    return this.service({ ...config, method: 'POST' })
+  /** POST 请求，返回解包后的业务数据。 */
+  post<T = unknown, D = unknown, P = unknown>(config: JsonRequestConfig<D, P>): Promise<T> {
+    return this.service({ ...config, method: 'POST' }) as Promise<T>
   }
 
-  put<T = any>(config: AxiosRequestConfig): Promise<T> {
-    return this.service({ ...config, method: 'PUT' })
+  /** PUT 请求，返回解包后的业务数据。 */
+  put<T = unknown, D = unknown, P = unknown>(config: JsonRequestConfig<D, P>): Promise<T> {
+    return this.service({ ...config, method: 'PUT' }) as Promise<T>
   }
 
-  delete<T = any>(config: AxiosRequestConfig): Promise<T> {
-    return this.service({ ...config, method: 'DELETE' })
+  /** DELETE 请求，返回解包后的业务数据。 */
+  delete<T = unknown, D = unknown, P = unknown>(config: JsonRequestConfig<D, P>): Promise<T> {
+    return this.service({ ...config, method: 'DELETE' }) as Promise<T>
   }
 
-  request<T = any>(config: AxiosRequestConfig): Promise<T> {
-    return this.service(config)
+  /** 以 FormData 发起 multipart 上传请求。 */
+  upload<T = unknown, P = unknown>(config: UploadRequestConfig<P>): Promise<T> {
+    return this.service({ ...config, method: 'POST' }) as Promise<T>
+  }
+
+  /** GET 下载请求，按 responseType 返回 Blob 或 ArrayBuffer。 */
+  download<P = unknown>(config: BlobRequestConfig<P>): Promise<Blob>
+  download<P = unknown>(config: ArrayBufferRequestConfig<P>): Promise<ArrayBuffer>
+  download<P = unknown>(config: BlobRequestConfig<P> | ArrayBufferRequestConfig<P>): Promise<Blob | ArrayBuffer> {
+    return this.service({
+      ...config,
+      method: 'GET',
+      responseType: config.responseType ?? 'blob',
+    }) as Promise<Blob | ArrayBuffer>
+  }
+
+  /** 最底层的通用透传入口，适用于需要自定义配置的请求。 */
+  request<T = unknown, D = unknown, P = unknown>(config: RequestConfig<D, P>): Promise<T> {
+    return this.service(config) as Promise<T>
   }
 }
 

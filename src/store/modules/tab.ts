@@ -6,6 +6,12 @@ interface TabState {
   activeTab: string
 }
 
+export function isErrorTab(route: RouteLocationNormalized): boolean {
+  return route.name === 'NotFound'
+    || route.path === '/404'
+    || route.meta?.title === '404'
+}
+
 export const useTabStore = defineStore('tab', {
   state: (): TabState => ({
     tabs: [],
@@ -17,7 +23,9 @@ export const useTabStore = defineStore('tab', {
   },
   actions: {
     addTab(route: RouteLocationNormalized) {
-      if (['/login', '/403', '/404'].includes(route.path))
+      this.tabs = this.tabs.filter(tab => !isErrorTab(tab))
+
+      if (['/login', '/403'].includes(route.path) || isErrorTab(route))
         return
       const exists = this.tabs.some(tab => tab.path === route.path)
       if (!exists) {

@@ -98,7 +98,7 @@ export function createPermissionGuard(router: Router) {
 
       // 用户信息已加载 → 检查路由是否存在
       finishInitialLoad()
-      if (router.getRoutes().some((r: any) => r.name === to.name))
+      if (to.name && to.name !== 'NotFound' && router.hasRoute(to.name))
         return true
 
       // 路由不存在 → 是否因为没有 accessRoutes？
@@ -107,10 +107,15 @@ export function createPermissionGuard(router: Router) {
         return { path: '/login' }
       }
 
-      return { name: '404', query: { path: to.fullPath } }
+      return {
+        path: '/404',
+        query: { path: to.fullPath },
+        replace: true,
+      }
     }
     catch (error) {
-      console.error('路由守卫异常:', error)
+      if (import.meta.env.DEV)
+        console.error('路由守卫异常:', error)
       finishInitialLoad()
       return { path: '/login' }
     }

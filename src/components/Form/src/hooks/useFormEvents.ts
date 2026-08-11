@@ -56,7 +56,7 @@ export function useFormEvents({
   ): Promise<any> | undefined {
     return (unref(formElRef) as any)?.validate(
       (errors: any) => {
-        if (errors)
+        if (errors && import.meta.env.DEV)
           console.error(errors)
       },
       (rule: any) => {
@@ -97,7 +97,8 @@ export function useFormEvents({
     }
     catch (error: any) {
       loadingSub.value = false
-      console.error(error)
+      if (import.meta.env.DEV)
+        console.error(error)
       return false
     }
   }

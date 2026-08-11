@@ -1,4 +1,5 @@
 <script setup lang="ts" name="BasicTable">
+import type { DataTableSortState } from 'naive-ui'
 import type { VNodeChild } from 'vue'
 import { NCard, NDataTable, NEmpty } from 'naive-ui'
 import { computed, h, ref, unref, watch } from 'vue'
@@ -74,17 +75,17 @@ const getTableValue: any = computed(() => ({
   expandedRowKeys: unref(expandedRowKeys),
 }))
 
-function updatePage(page: any) {
+function updatePage(page: number) {
   setPagination({ page })
   if (!unref(getProps).localPagination) {
-    reload(page)
+    reload({ page })
   }
   else {
     dataSourceRef.value = handleLocalPagination(fullDataSourceRef.value)
   }
 }
 
-function updatePageSize(size: any) {
+function updatePageSize(size: number) {
   setPagination({ page: 1, pageSize: size })
   if (!unref(getProps).localPagination) {
     reload({})
@@ -92,6 +93,20 @@ function updatePageSize(size: any) {
   else {
     dataSourceRef.value = handleLocalPagination(fullDataSourceRef.value)
   }
+}
+
+function updateSorter(sorter: DataTableSortState | DataTableSortState[] | null) {
+  const currentSorter = Array.isArray(sorter) ? sorter[0] : sorter
+  setPagination({ page: 1 })
+  void reload({
+    page: 1,
+    sortField: currentSorter?.order ? String(currentSorter.columnKey) : undefined,
+    sortOrder: currentSorter?.order === 'descend'
+      ? 'desc'
+      : currentSorter?.order === 'ascend'
+        ? 'asc'
+        : undefined,
+  })
 }
 
 async function handleRefresh() {
@@ -208,6 +223,7 @@ defineExpose({
       :render-expand-icon="renderExpandIcon"
       @update:page="updatePage"
       @update:page-size="updatePageSize"
+      @update:sorter="updateSorter"
       @update:checked-row-keys="handleCheckChange"
       @update:expanded-row-keys="handleExpandedChange"
     >

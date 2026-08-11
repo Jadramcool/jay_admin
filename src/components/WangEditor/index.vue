@@ -2,6 +2,7 @@
 import type { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor'
 import { createEditor, createToolbar, i18nChangeLanguage } from '@wangeditor/editor'
 import { debounce } from 'lodash-es'
+import { sanitizeHtml } from '@/utils/security/sanitizeHtml'
 
 defineOptions({ name: 'WangEditor' })
 
@@ -38,7 +39,7 @@ const editorConfig: Partial<IEditorConfig> = {
   MENU_CONF: {},
   onChange: debounce(() => {
     if (editor) {
-      emit('update:modelValue', editor.getHtml())
+      emit('update:modelValue', sanitizeHtml(editor.getHtml()))
     }
   }, 150),
 }
@@ -62,13 +63,13 @@ onMounted(() => {
   })
 
   if (props.modelValue) {
-    editor.setHtml(props.modelValue)
+    editor.setHtml(sanitizeHtml(props.modelValue))
   }
 })
 
 watch(() => props.modelValue, (val) => {
   if (editor && val != null && val !== editor.getHtml()) {
-    editor.setHtml(val || '')
+    editor.setHtml(sanitizeHtml(val || ''))
   }
 })
 

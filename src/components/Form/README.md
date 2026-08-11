@@ -28,7 +28,7 @@ const schemas = [
 
 const [registerForm] = useForm({ schemas })
 
-const handleSubmit = (values: Record<string, unknown>) => {
+function handleSubmit(values: Record<string, unknown>) {
   console.log(values)
 }
 </script>
@@ -40,21 +40,21 @@ const handleSubmit = (values: Record<string, unknown>) => {
 
 ## Schema
 
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `field` | `string` | 是 | 表单字段名，也是校验和命令式赋值的键 |
-| `label` | `string` | 否 | 标签文字 |
-| `defaultValue` | `unknown` | 否 | 初始默认值；查询表单重置时恢复此值 |
-| `component` | `ComponentType` | 否 | 渲染组件类型 |
-| `componentProps` | `Recordable \| (context) => Recordable` | 否 | 组件属性；函数参数包含 `schema`、`formModel` |
-| `componentSlots` | `Recordable` | 否 | 传给字段组件的插槽配置 |
-| `slot` | `string` | 否 | `FormEdit` 自定义字段插槽名称 |
-| `rules` | `FormItemRule[]` | 否 | Naive UI 校验规则 |
-| `giProps` | `GridItemProps` | 否 | 当前字段的 `NGi` 配置 |
-| `ifShow` | `boolean \| ({ values, schema }) => boolean` | 否 | 是否显示字段 |
-| `isFull` | `boolean` | 否 | 当前字段组件是否撑满 |
-| `suffix` | `string` | 否 | 字段尾部内容 |
-| `query` | `'in' \| 'not_in'` | 否 | 查询提交时转换为 `field__in` 或 `field__not_in` |
+| 字段             | 类型                                         | 必填 | 说明                                            |
+| ---------------- | -------------------------------------------- | ---- | ----------------------------------------------- |
+| `field`          | `string`                                     | 是   | 表单字段名，也是校验和命令式赋值的键            |
+| `label`          | `string`                                     | 否   | 标签文字                                        |
+| `defaultValue`   | `unknown`                                    | 否   | 初始默认值；查询表单重置时恢复此值              |
+| `component`      | `ComponentType`                              | 否   | 渲染组件类型                                    |
+| `componentProps` | `Recordable \| (context) => Recordable`      | 否   | 组件属性；函数参数包含 `schema`、`formModel`    |
+| `componentSlots` | `Recordable`                                 | 否   | 传给字段组件的插槽配置                          |
+| `slot`           | `string`                                     | 否   | `FormEdit` 自定义字段插槽名称                   |
+| `rules`          | `FormItemRule[]`                             | 否   | Naive UI 校验规则                               |
+| `giProps`        | `GridItemProps`                              | 否   | 当前字段的 `NGi` 配置                           |
+| `ifShow`         | `boolean \| ({ values, schema }) => boolean` | 否   | 是否显示字段                                    |
+| `isFull`         | `boolean`                                    | 否   | 当前字段组件是否撑满                            |
+| `suffix`         | `string`                                     | 否   | 字段尾部内容                                    |
+| `query`          | `'in' \| 'not_in'`                           | 否   | 查询提交时转换为 `field__in` 或 `field__not_in` |
 
 当前注册的 `component` 包括：`NInput`、`NInputNumber`、`NSelect`、`NCheckbox`、`NCheckboxGroup`、`NRadioGroup`、`NSwitch`、`NDatePicker`、`NTimePicker`、`NTreeSelect`、`NCascader`、`NTransfer`、`ApiSelect`、`ApiTreeSelect`、`ApiTree`、`IconPicker`、`RadioButtonGroup`。
 
@@ -64,45 +64,45 @@ const handleSubmit = (values: Record<string, unknown>) => {
 
 三个表单均会把未消费的表单属性透传给 Naive UI `NForm`。下表列出公共封装属性。
 
-| Prop | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `schemas` | `FormSchema[]` | `[]` | 字段配置 |
-| `gridProps` | `GridProps` | 组件相关 | `NGrid` 配置 |
-| `giProps` | `GridItemProps` | `null` | 字段默认 `NGi` 配置；`FormQuery` 支持 |
-| `labelWidth` | `number \| string` | `'auto'` | 标签宽度 |
-| `labelAlign` | `string` | `'right'` | 标签对齐方式 |
-| `labelPlacement` | `string` | `'left'` | 标签位置 |
-| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` | 表单尺寸 |
-| `layout` | `string` | 查询为 `'inline'`，编辑为 `'horizontal'` | 布局模式 |
-| `isFull` | `boolean` | `true` | 字段组件是否默认撑满 |
-| `showActionButtonGroup` | `boolean` | `true` | 是否显示操作按钮组 |
-| `showSubmitButton` | `boolean` | `true` | 是否显示提交按钮 |
-| `showResetButton` | `boolean` | 查询为 `true`，编辑为 `false` | 是否显示重置按钮 |
-| `submitButtonText` | `string` | 查询为 `'查询'`，编辑为 `'保存'` | 提交按钮文字 |
-| `resetButtonText` | `string` | `'重置'` | 重置按钮文字 |
-| `submitFunc` | `() => Promise<void>` | `null` | 完全接管默认提交行为 |
-| `resetFunc` | `() => Promise<void>` | `null` | `FormQuery`/`FormEdit` 中完全接管默认重置行为；`BasicForm` 当前仅保留兼容属性 |
+| Prop                    | 类型                             | 默认值                                   | 说明                                                                          |
+| ----------------------- | -------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------- |
+| `schemas`               | `FormSchema[]`                   | `[]`                                     | 字段配置                                                                      |
+| `gridProps`             | `GridProps`                      | 组件相关                                 | `NGrid` 配置                                                                  |
+| `giProps`               | `GridItemProps`                  | `null`                                   | 字段默认 `NGi` 配置；`FormQuery` 支持                                         |
+| `labelWidth`            | `number \| string`               | `'auto'`                                 | 标签宽度                                                                      |
+| `labelAlign`            | `string`                         | `'right'`                                | 标签对齐方式                                                                  |
+| `labelPlacement`        | `string`                         | `'left'`                                 | 标签位置                                                                      |
+| `size`                  | `'small' \| 'medium' \| 'large'` | `'medium'`                               | 表单尺寸                                                                      |
+| `layout`                | `string`                         | 查询为 `'inline'`，编辑为 `'horizontal'` | 布局模式                                                                      |
+| `isFull`                | `boolean`                        | `true`                                   | 字段组件是否默认撑满                                                          |
+| `showActionButtonGroup` | `boolean`                        | `true`                                   | 是否显示操作按钮组                                                            |
+| `showSubmitButton`      | `boolean`                        | `true`                                   | 是否显示提交按钮                                                              |
+| `showResetButton`       | `boolean`                        | 查询为 `true`，编辑为 `false`            | 是否显示重置按钮                                                              |
+| `submitButtonText`      | `string`                         | 查询为 `'查询'`，编辑为 `'保存'`         | 提交按钮文字                                                                  |
+| `resetButtonText`       | `string`                         | `'重置'`                                 | 重置按钮文字                                                                  |
+| `submitFunc`            | `() => Promise<void>`            | `null`                                   | 完全接管默认提交行为                                                          |
+| `resetFunc`             | `() => Promise<void>`            | `null`                                   | `FormQuery`/`FormEdit` 中完全接管默认重置行为；`BasicForm` 当前仅保留兼容属性 |
 
 `FormQuery`/`BasicForm` 还支持：
 
-| Prop | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `submitOnReset` | `boolean` | `true` | 重置后是否触发 `submit` |
-| `resetPageOnReset` | `boolean` | `true` | 重置时是否将关联表格恢复到第一页并刷新 |
-| `tableRef` | `object` | `null` | 关联的 `BasicTable` 实例 |
-| `showAdvancedButton` | `boolean` | `true` | 超过三个字段时是否显示展开/收起 |
-| `submitButtonOptions` | `Recordable` | `null` | 提交按钮附加属性 |
-| `resetButtonOptions` | `Recordable` | `null` | 重置按钮附加属性 |
+| Prop                  | 类型         | 默认值 | 说明                                   |
+| --------------------- | ------------ | ------ | -------------------------------------- |
+| `submitOnReset`       | `boolean`    | `true` | 重置后是否触发 `submit`                |
+| `resetPageOnReset`    | `boolean`    | `true` | 重置时是否将关联表格恢复到第一页并刷新 |
+| `tableRef`            | `object`     | `null` | 关联的 `BasicTable` 实例               |
+| `showAdvancedButton`  | `boolean`    | `true` | 超过三个字段时是否显示展开/收起        |
+| `submitButtonOptions` | `Recordable` | `null` | 提交按钮附加属性                       |
+| `resetButtonOptions`  | `Recordable` | `null` | 重置按钮附加属性                       |
 
 `FormEdit` 还支持 `loadingSub: boolean`，默认 `false`，用于控制提交按钮加载状态。
 
 ## Events
 
-| Event | 参数 | 说明 |
-| --- | --- | --- |
-| `register` | `FormActionType` | 组件挂载后注册公开方法；通常直接绑定 `useForm` 返回的 `register` |
-| `submit` | `values: Recordable` | 默认校验通过后触发 |
-| `reset` | `values: Recordable` | 默认重置完成后触发 |
+| Event      | 参数                 | 说明                                                             |
+| ---------- | -------------------- | ---------------------------------------------------------------- |
+| `register` | `FormActionType`     | 组件挂载后注册公开方法；通常直接绑定 `useForm` 返回的 `register` |
+| `submit`   | `values: Recordable` | 默认校验通过后触发                                               |
+| `reset`    | `values: Recordable` | 默认重置完成后触发                                               |
 
 使用 `submitFunc`，或在 `FormQuery`/`FormEdit` 使用 `resetFunc` 时，自定义函数会接管对应默认流程，组件不会继续执行默认 emit、校验或重置逻辑。`BasicForm` 当前不会调用 `resetFunc`，新页面应优先使用 `FormQuery` 或 `FormEdit`。
 
@@ -120,10 +120,10 @@ const handleSubmit = (values: Record<string, unknown>) => {
 
 插槽参数：
 
-| 参数 | 说明 |
-| --- | --- |
-| `model` | 当前响应式表单模型 |
-| `field` | 当前字段名 |
+| 参数     | 说明                |
+| -------- | ------------------- |
+| `model`  | 当前响应式表单模型  |
+| `field`  | 当前字段名          |
 | `schema` | 当前字段完整 schema |
 
 `BasicForm` 和 `FormQuery` 当前不提供字段级外部插槽，请通过 `component`、`componentProps` 或现有自定义字段组件实现。
@@ -139,18 +139,18 @@ await formMethods.validate()
 await formMethods.resetFields()
 ```
 
-| 方法 | 签名 | 说明 |
-| --- | --- | --- |
-| `setProps` | `(props) => Promise<void>` | 动态合并表单属性 |
-| `getFieldsValue` | `<T>() => T` | 获取当前值；查询表单会过滤空值并处理查询后缀 |
-| `setFieldsValue` | `(values) => Promise<void>` | 只设置 schema 中存在的字段 |
-| `resetFields` | `() => Promise<void>` | 执行组件默认重置 |
-| `clearValidate` | `(name?) => Promise<void>` | 清除校验状态；当前实现会清除整个表单 |
-| `validate` | `() => Promise<unknown>` | 校验整个表单 |
-| `validateFields` | `(name: string \| string[]) => Promise<unknown>` | 校验指定字段 |
-| `updateSchema` | `(schema \| schema[]) => Promise<void>` | 按 `field` 合并更新 schema |
-| `submit` | `() => Promise<unknown>` | 主动触发提交流程 |
-| `getComponentInstance` | `(field) => unknown` | 获取字段组件实例；仅组件暴露对象提供，`useForm` 暂未代理 |
+| 方法                   | 签名                                             | 说明                                                     |
+| ---------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| `setProps`             | `(props) => Promise<void>`                       | 动态合并表单属性                                         |
+| `getFieldsValue`       | `<T>() => T`                                     | 获取当前值；查询表单会过滤空值并处理查询后缀             |
+| `setFieldsValue`       | `(values) => Promise<void>`                      | 只设置 schema 中存在的字段                               |
+| `resetFields`          | `() => Promise<void>`                            | 执行组件默认重置                                         |
+| `clearValidate`        | `(name?) => Promise<void>`                       | 清除校验状态；当前实现会清除整个表单                     |
+| `validate`             | `() => Promise<unknown>`                         | 校验整个表单                                             |
+| `validateFields`       | `(name: string \| string[]) => Promise<unknown>` | 校验指定字段                                             |
+| `updateSchema`         | `(schema \| schema[]) => Promise<void>`          | 按 `field` 合并更新 schema                               |
+| `submit`               | `() => Promise<unknown>`                         | 主动触发提交流程                                         |
+| `getComponentInstance` | `(field) => unknown`                             | 获取字段组件实例；仅组件暴露对象提供，`useForm` 暂未代理 |
 
 ## 默认行为和关键交互
 
@@ -200,7 +200,7 @@ onMounted(async () => {
   await setFieldsValue(detail)
 })
 
-const handleSubmit = async (values: Record<string, unknown>) => {
+async function handleSubmit(values: Record<string, unknown>) {
   await Promise.resolve(values)
 }
 </script>

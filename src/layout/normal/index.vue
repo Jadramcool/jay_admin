@@ -1,16 +1,26 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import { computed, provide, ref } from 'vue'
 import Footer from '@/layout/components/footer/index.vue'
 import Header from '@/layout/components/header/index.vue'
 import SideLogo from '@/layout/components/sider/SideLogo.vue'
 import SideMenu from '@/layout/components/sider/SideMenu.vue'
 import TabBar from '@/layout/components/tab/TabBar.vue'
-import { useAppStore, usePermissionStore } from '@/store/modules'
+import { useAppStore, usePermissionStore, useUserStore } from '@/store/modules'
 import SettingsDrawer from '@/views/settings/index.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
 const permissionStore = usePermissionStore()
+const userStore = useUserStore()
+
+/** 全局水印:当前用户 + 日期(登录后生效) */
+const watermarkText = computed(() => {
+  const name = userStore.userInfo?.name || userStore.userInfo?.username
+  if (!name)
+    return ''
+  return [`${name}`, dayjs().format('YYYY-MM-DD')]
+})
 
 const settingsRef = ref<any>(null)
 
@@ -34,7 +44,7 @@ const keepAliveRoutes = computed(() => {
 </script>
 
 <template>
-  <n-layout class="wh-full" has-sider>
+  <n-layout v-watermark="watermarkText" class="wh-full" has-sider>
     <n-layout-sider
       bordered
       :width="224"

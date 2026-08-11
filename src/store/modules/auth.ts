@@ -1,5 +1,9 @@
 import { defineStore } from 'pinia'
-import { getToken, removeRefreshToken, removeToken, setToken as saveToken } from '@/utils/token'
+import { logAuthLifecycle } from '@/utils/http/auth-audit'
+import { getToken, removeToken, setToken as saveToken } from '@/utils/token'
+import { usePermissionStore } from './permission'
+import { useTabStore } from './tab'
+import { useUserStore } from './user'
 
 interface AuthState {
   token: string | undefined
@@ -10,29 +14,24 @@ export const useAuthStore = defineStore('auth', {
     token: getToken() || undefined,
   }),
   actions: {
+    syncToken() {
+      this.token = getToken() || undefined
+    },
     setToken(data: { accessToken: string, refreshToken: string }) {
       saveToken(data)
-      this.token = data.accessToken
+      this.syncToken()
+      logAuthLifecycle('session-established')
     },
     resetToken() {
-      this.token = undefined
       removeToken()
-      removeRefreshToken()
+      this.syncToken()
     },
-    resetLoginState() {
+    resetLoginState(reason = 'manual') {
       this.resetToken()
-      // Dynamic imports avoid circular dependencies between stores
-      import('@/store/modules').then(({ useUserStore, usePermissionStore, useTabStore }) => {
-        useUserStore?.().$reset()
-        usePermissionStore?.().$reset()
-        useTabStore?.().$reset()
-      }).catch(() => {
-        // Fallback: window.__stores for compatibility
-        const stores = window.__stores || {}
-        stores.useUserStore?.().$reset()
-        stores.usePermissionStore?.().$reset()
-        stores.useTabStore?.().$reset()
-      })
+      useUserStore().$reset()
+      usePermissionStore().$reset()
+      useTabStore().$reset()
+      logAuthLifecycle('auth-cleared', { reason })
     },
     async logout() {
       try {
@@ -42,11 +41,8 @@ export const useAuthStore = defineStore('auth', {
       catch {
         // ignore logout API error
       }
-      this.resetLoginState()
+      this.resetLoginState('logout')
       window.location.href = '/#/login'
     },
-  },
-  persist: {
-    pick: ['token'],
   },
 })

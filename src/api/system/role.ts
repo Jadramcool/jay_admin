@@ -11,17 +11,20 @@ enum API {
 }
 
 export const RoleApi = {
-  list: (params?: Api.PageParams) => request.get<Api.PaginatedList<System.Role>>({ url: API.list, params }),
+  list: (params?: Api.PageParams) => request.get<Api.PaginatedData<System.Role>>({ url: API.list, params }),
 
   all: () => request.get<System.Role[]>({ url: API.all }),
 
   detail: (id: number) => request.get<{ menus: System.Menu[] }>({ url: `${API.detail}/${id}` }),
 
-  create: (data: Partial<System.Role>) => request.post({ url: API.create, data }),
+  users: (id: number, params?: Api.PageParams) =>
+    request.get<Api.PaginatedData<System.User>>({ url: `${API.detail}/users/${id}`, params }),
 
-  update: (data: Partial<System.Role>) => request.put({ url: API.update, data }),
+  create: (data: Partial<System.Role>) => request.post<null>({ url: API.create, data }),
 
-  delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
+  update: (data: Partial<System.Role>) => request.put<null>({ url: API.update, data }),
 
-  assignMenu: (roleId: number, menuIds: number[]) => request.post({ url: API.roleMenu, data: { roleId, menuIds } }),
+  delete: (id: number) => request.delete<null>({ url: `${API.delete}/${id}` }),
+
+  assignMenu: (roleId: number, menuIds: number[]) => request.post<null>({ url: API.roleMenu, data: { roleId, menuIds } }),
 }

@@ -24,9 +24,9 @@ export default (_env: ConfigEnv, _viteEnv: Record<string, string>): PluginOption
       dts: 'typings/auto-imports.d.ts',
       dirs: [
         'src/utils',
-        'src/components/Form/src/hooks',
-        'src/components/Modal/src/hooks',
-        'src/components/Drawer/src/hooks',
+        'src/components/Form/src/hooks/use*.ts',
+        'src/components/Modal/src/hooks/use*.ts',
+        'src/components/Drawer/src/hooks/use*.ts',
       ],
     }),
     Components({

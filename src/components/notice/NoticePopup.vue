@@ -3,6 +3,7 @@ import { h } from 'vue'
 import { NoticeApi } from '@/api/notice'
 import { useSocket } from '@/composables/useSocket'
 import { useUserStore } from '@/store/modules'
+import { htmlToPlainText, sanitizeHtml } from '@/utils/security/sanitizeHtml'
 import storage from '@/utils/storage'
 import { getToken } from '@/utils/token'
 
@@ -42,15 +43,8 @@ function isRead(id: number): boolean {
 /**
  * 展示一条公告
  */
-function showNotice(notice: {
-  noticeId: number
-  id: number
-  title: string
-  content?: string
-  type: string
-  isMandatory: boolean
-}) {
-  const id = notice.noticeId || notice.id
+function showNotice(notice: Api.NoticePushEvent) {
+  const id = notice.noticeId
   // 如果本地已标记已读，说明是重推 → 清除缓存以重新展示
   if (isRead(id)) {
     const set = getReadSet()
@@ -65,7 +59,7 @@ function showNotice(notice: {
       content: () =>
         h('div', {
           class: 'notice-mandatory-content',
-          innerHTML: normalizeHtml(notice.content || ''),
+          innerHTML: sanitizeHtml(notice.content || ''),
         }),
       maskClosable: false,
       closable: false,
@@ -86,26 +80,10 @@ function showNotice(notice: {
   }
 }
 
-/**
- * 限制内容长度
- */
-/**
- * 修复 HTML 属性大小写问题（colSpan → colspan 等）
- */
-function normalizeHtml(html: string): string {
-  return html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
-    .replace(/colSpan\b/g, 'colspan')
-    .replace(/rowSpan\b/g, 'rowspan')
-    .replace(/\bwidth="auto"/g, 'style="width:auto"')
-}
-
 function truncateContent(content: string | undefined, maxLen: number): string {
   if (!content)
     return ''
-  // 去除 HTML 标签
-  const text = content.replace(/<[^>]+>/g, '')
+  const text = htmlToPlainText(content)
   return text.length > maxLen ? `${text.slice(0, maxLen)}...` : text
 }
 
@@ -119,7 +97,7 @@ async function loadExistingUnread() {
       // 逐个弹窗展示，但带延迟防止同时弹出过多
       list.forEach((notice, index) => {
         const timer = setTimeout(() => {
-          showNotice(notice as any)
+          showNotice(notice)
         }, index * 500)
         timerIds.push(timer)
       })
@@ -141,7 +119,7 @@ function connectSocket() {
   connect(token)
 
   // 监听新公告推送
-  on('newNotice', (payload: any) => {
+  on('newNotice', (payload) => {
     showNotice(payload)
   })
 }

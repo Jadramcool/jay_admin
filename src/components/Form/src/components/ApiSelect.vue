@@ -38,7 +38,8 @@ async function loadData() {
     }
   }
   catch (err) {
-    console.error(err)
+    if (import.meta.env.DEV)
+      console.error(err)
   }
   finally {
     loading.value = false

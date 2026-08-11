@@ -15,12 +15,12 @@ export function usePagination(refProps: any) {
     const pageSize = config.pageSize || DEFAULTPAGESIZE
     const itemCount = config[itemCountField] || 0
     const pageCount = config.pageCount ?? Math.ceil(itemCount / pageSize)
-    const pageSizes = config.pageSizes || PAGESIZES
+    const pageSizes = [...(config.pageSizes || PAGESIZES)]
     if (config?.pageSize && !pageSizes.includes(config.pageSize)) {
       const index = pageSizes.findIndex(
         (item: number) => item > config.pageSize,
       )
-      pageSizes.splice(index, 0, config.pageSize)
+      pageSizes.splice(index === -1 ? pageSizes.length : index, 0, config.pageSize)
     }
     return {
       pageSize,

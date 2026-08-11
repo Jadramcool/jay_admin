@@ -91,7 +91,7 @@ async function loadTargetData(params: any) {
   const filters = getFieldsValue()
   const apiParams = { ...params, ...filters }
 
-  let res: any
+  let res: Api.PaginatedData<System.Role | System.Department | System.User>
   if (scopeType.value === 'ROLE') {
     res = await RoleApi.list(apiParams)
   }
@@ -102,20 +102,19 @@ async function loadTargetData(params: any) {
     res = await UserManagerApi.list(apiParams)
   }
 
-  const list = Array.isArray(res) ? res : res?.list || []
-  const pagination = res?.pagination || { total: list.length }
-
   itemNameMap.value = {}
-  list.forEach((item: any) => {
+  res.items.forEach((item) => {
     itemNameMap.value[item.id]
-      = item.name || item.username || `目标#${item.id}`
+      = item.name
+        || ('username' in item ? item.username : undefined)
+        || `目标#${item.id}`
   })
 
   if (checkedRowKeys.value.length === 0) {
     checkedRowKeys.value = getPreselectedKeys()
   }
 
-  return { list, pagination }
+  return res
 }
 
 function handleConfirm() {

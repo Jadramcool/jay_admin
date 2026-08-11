@@ -49,6 +49,13 @@ function clearMismatchedTargets(newScopeType: string) {
   )
 }
 
+function handleScopeTypeChange(value: string) {
+  const values = getFieldsValue()
+  values.scopeType = value
+  setFieldsValue(values)
+  clearMismatchedTargets(value)
+}
+
 async function resolveTargetNames(
   type: string,
   targets: { targetType: string, targetId: number, targetName?: string }[],
@@ -57,16 +64,15 @@ async function resolveTargetNames(
     return
   let list: any[]
   if (type === 'ROLE') {
-    const res = await RoleApi.all()
-    list = Array.isArray(res) ? res : (res as any)?.list || []
+    list = await RoleApi.all()
   }
   else if (type === 'DEPARTMENT') {
-    const res = await DepartmentApi.list({ page: 1, pageSize: 9999 })
-    list = Array.isArray(res) ? res : (res as any)?.list || []
+    const res = await DepartmentApi.list({ page: 1, pageSize: 100 })
+    list = res.items
   }
   else if (type === 'USER') {
-    const res = await UserManagerApi.list({ page: 1, pageSize: 9999 })
-    list = Array.isArray(res) ? res : (res as any)?.list || []
+    const res = await UserManagerApi.list({ page: 1, pageSize: 100 })
+    list = res.items
   }
   else {
     return
@@ -206,12 +212,7 @@ function handleConfirmTargets(
         <n-select
           :value="model.scopeType"
           :options="scopeTypeOptions"
-          @update:value="
-            (v) => {
-              model.scopeType = v;
-              clearMismatchedTargets(v);
-            }
-          "
+          @update:value="handleScopeTypeChange"
         />
       </template>
       <template #scopeTargets>

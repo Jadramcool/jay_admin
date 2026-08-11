@@ -12,20 +12,20 @@ enum API {
 
 export const MenuApi = {
   list: (params?: Api.PageParams) =>
-    request.get<Api.PaginatedList<System.Menu>>({ url: API.list, params }),
+    request.get<Api.PaginatedData<System.Menu>>({ url: API.list, params }),
 
   tree: () => request.get<System.Menu[]>({ url: API.tree }),
 
   create: (data: Partial<System.Menu>) =>
-    request.post({ url: API.create, data }),
+    request.post<null>({ url: API.create, data }),
 
   update: (data: Partial<System.Menu>) =>
-    request.put({ url: API.update, data }),
+    request.put<null>({ url: API.update, data }),
 
-  delete: (id: number) => request.delete({ url: `${API.delete}/${id}` }),
+  delete: (id: number) => request.delete<null>({ url: `${API.delete}/${id}` }),
 
   batchDelete: (ids: number[]) =>
-    request.delete({ url: API.batchDelete, data: { ids } }),
+    request.delete<null>({ url: API.batchDelete, data: { ids } }),
 
   onlineMenus: () => request.get<System.Menu[]>({ url: API.onlineMenus }),
 }

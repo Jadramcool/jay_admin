@@ -1,6 +1,7 @@
 export { useAppStore } from './app'
 export { useAuthStore } from './auth'
 export { useComponentTableStore } from './componentStore/table'
+export { useDictStore } from './dict'
 export { usePermissionStore } from './permission'
 export { useTabStore } from './tab'
 export { useUserStore } from './user'

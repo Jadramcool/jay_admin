@@ -49,7 +49,8 @@ async function loadData() {
     options.value = formatTree(result)
   }
   catch (err) {
-    console.error(err)
+    if (import.meta.env.DEV)
+      console.error(err)
   }
   finally {
     loading.value = false

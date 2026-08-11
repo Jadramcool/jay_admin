@@ -175,7 +175,7 @@ const formAction: FormActionType = {
   validateFields: ((name?: string | string[]) => {
     return (unref(formElRef) as any)?.validate(
       (errors: any) => {
-        if (errors)
+        if (errors && import.meta.env.DEV)
           console.error(errors)
       },
       (rule: any) => {

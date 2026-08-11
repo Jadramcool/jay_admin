@@ -1,0 +1,9 @@
+import { expect, login, test } from './fixtures'
+
+test.describe('{{titleCase name}}', () => {
+  test('列表加载', async ({ page }) => {
+    await login(page)
+    await page.goto('/#/{{kebabCase name}}')
+    await expect(page.getByText('{{titleCase name}}')).toBeVisible()
+  })
+})

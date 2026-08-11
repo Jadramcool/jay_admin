@@ -1,19 +1,19 @@
 import request from '@/utils/http/axios'
 
 interface NoticeTargetInput {
-  targetType: string
+  targetType: System.NoticeTargetType
   targetId: number
 }
 
 interface NoticeCreatePayload {
   title: string
-  type: string
+  type: System.NoticeType
   content?: string
   isPinned?: boolean
   isMandatory?: boolean
-  scopeType: string
+  scopeType: System.NoticeScopeType
   scopeTargets?: NoticeTargetInput[]
-  status: number
+  status: System.BinaryStatus
 }
 
 interface NoticeUpdatePayload extends NoticeCreatePayload {
@@ -24,6 +24,12 @@ interface ResendResult {
   id: number
   resendCount: number
   message: string
+}
+
+export interface NoticeReceiver extends System.User {
+  readAt?: string
+  readStatus?: System.NoticeReadStatus
+  userId: number
 }
 
 enum API {
@@ -40,7 +46,7 @@ enum API {
 
 export const NoticeApi = {
   list: (params?: Api.PageParams) =>
-    request.get<Api.PaginatedList<System.Notice>>({ url: API.list, params }),
+    request.get<Api.PaginatedData<System.Notice>>({ url: API.list, params }),
 
   detail: (id: number) =>
     request.get<System.Notice>({ url: `${API.detail}/${id}` }),
@@ -52,28 +58,28 @@ export const NoticeApi = {
     request.put<System.Notice>({ url: API.update, data }),
 
   delete: (id: number) =>
-    request.put({ url: `${API.delete}/${id}` }),
+    request.put<null>({ url: `${API.delete}/${id}` }),
 
   batchDelete: (ids: number[]) =>
-    request.put({ url: API.batchDelete, data: { ids } }),
+    request.put<null>({ url: API.batchDelete, data: { ids } }),
 
   toggleStatus: (id: number) =>
-    request.put({ url: `${API.toggleStatus}/${id}` }),
+    request.put<null>({ url: `${API.toggleStatus}/${id}` }),
 
   togglePin: (id: number) =>
-    request.put({ url: `${API.togglePin}/${id}` }),
+    request.put<null>({ url: `${API.togglePin}/${id}` }),
 
   resend: (id: number) =>
     request.post<ResendResult>({ url: `${API.resend}/${id}` }),
 
   // 用户端接口
   getUnreadNotices: () =>
-    request.get<{ noticeId: number, title: string, content?: string, type: string, isMandatory: boolean, isPinned: boolean, publishedAt?: string }[]>({ url: '/notice/user/unread' }),
+    request.get<Api.NoticePushEvent[]>({ url: '/notice/user/unread' }),
 
   markNoticeRead: (id: number) =>
-    request.put({ url: `/notice/user/read/${id}` }),
+    request.put<null>({ url: `/notice/user/read/${id}` }),
 
   // 获取公告接收人列表
-  getReceivers: (id: number, status?: string, page?: number, pageSize?: number) =>
-    request.get<{ list: any[], pagination: { page: number, pageSize: number, total: number } }>({ url: `/notice/${id}/receivers`, params: { status, page, pageSize } }),
+  getReceivers: (id: number, status?: System.NoticeReadStatus, page?: number, pageSize?: number) =>
+    request.get<Api.PaginatedData<NoticeReceiver>>({ url: `/notice/${id}/receivers`, params: { readStatus: status, page, pageSize } }),
 }

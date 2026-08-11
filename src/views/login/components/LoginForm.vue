@@ -11,10 +11,14 @@ const authStore = useAuthStore()
 const formRef = ref<FormInst | null>(null)
 const loading = ref(false)
 const rememberMe = ref(false)
+const captchaImage = ref('')
+const captchaLoading = ref(false)
 
 const formData = reactive({
   username: '',
   password: '',
+  captcha: '',
+  captchaId: '',
 })
 
 const rules = {
@@ -23,19 +27,41 @@ const rules = {
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 4, message: '密码长度不能小于4位', trigger: 'blur' },
   ],
+  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
 }
 
 const iconColor = computed(() => 'rgba(255,255,255,0.5)')
 const checkboxColor = computed(() => 'rgba(255,255,255,0.7)')
 
+/** 加载验证码图片 */
+async function loadCaptcha() {
+  captchaLoading.value = true
+  try {
+    const result = await UserApi.getCaptcha()
+    formData.captchaId = result.captchaId
+    formData.captcha = ''
+    captchaImage.value = result.image
+  }
+  catch {
+    /* handled by interceptor */
+  }
+  finally {
+    captchaLoading.value = false
+  }
+}
+
 onMounted(() => {
+  loadCaptcha()
   const saved = localStorage.getItem('REMEMBER_LOGIN')
   if (saved) {
     try {
       const data = JSON.parse(saved)
       formData.username = data.username || ''
-      formData.password = data.password || ''
       rememberMe.value = true
+      // Migrate legacy records that included the plaintext password.
+      localStorage.setItem('REMEMBER_LOGIN', JSON.stringify({
+        username: formData.username,
+      }))
     }
     catch {
       /* ignore */
@@ -56,12 +82,16 @@ async function handleLogin() {
     const result = await UserApi.login({
       username: formData.username,
       password: formData.password,
+      captcha: formData.captcha,
+      captchaId: formData.captchaId,
     })
 
     authStore.setToken(result)
 
     if (rememberMe.value) {
-      localStorage.setItem('REMEMBER_LOGIN', JSON.stringify(formData))
+      localStorage.setItem('REMEMBER_LOGIN', JSON.stringify({
+        username: formData.username,
+      }))
     }
     else {
       localStorage.removeItem('REMEMBER_LOGIN')
@@ -70,7 +100,8 @@ async function handleLogin() {
     emit('success')
   }
   catch {
-    // 错误已由全局 errorHandler 统一弹 toast
+    // 错误已由全局 errorHandler 统一弹 toast;验证码可能已失效,刷新一张
+    loadCaptcha()
   }
   finally {
     loading.value = false
@@ -127,9 +158,37 @@ async function handleLogin() {
         class="glass-checkbox"
         :style="{ '--checkbox-color': checkboxColor }"
       >
-        记住密码
+        记住用户名
       </n-checkbox>
     </div>
+
+    <n-form-item path="captcha">
+      <div class="captcha-row">
+        <n-input
+          v-model:value="formData.captcha"
+          placeholder="验证码"
+          :maxlength="4"
+          class="glass-input captcha-input"
+          :input-props="{ autocomplete: 'off' }"
+        >
+          <template #prefix>
+            <n-icon size="18" :color="iconColor">
+              <Icon icon="icon-park-outline:check-one" />
+            </n-icon>
+          </template>
+        </n-input>
+        <img
+          v-if="captchaImage"
+          :src="captchaImage"
+          alt="验证码"
+          class="captcha-image"
+          :class="{ 'captcha-image--loading': captchaLoading }"
+          title="点击刷新验证码"
+          @click="loadCaptcha"
+        >
+        <n-spin v-else size="small" />
+      </div>
+    </n-form-item>
 
     <n-button
       type="primary"
@@ -187,6 +246,35 @@ async function handleLogin() {
     justify-content: space-between;
     align-items: center;
     margin: 4px 0 16px;
+  }
+
+  /* Captcha */
+  .captcha-row {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .captcha-input {
+    flex: 1;
+  }
+
+  .captcha-image {
+    height: 48px;
+    width: 120px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: #fff;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.85;
+    }
+
+    &--loading {
+      opacity: 0.5;
+    }
   }
 
   .glass-checkbox {
