@@ -25,7 +25,7 @@ const schemaMethods = {
   },
   async handleTogglePublic(row: System.SysConfig) {
     await SysConfigApi.updatePublicStatus(row.id, !row.isPublic)
-    window.$message?.success?.(row.isPublic ? '已设为私有' : '已设为公开')
+    window.$message?.success?.(row.isPublic ? '已设为内部' : '已设为公开')
     await reload()
   },
 }
@@ -39,7 +39,13 @@ const [registerForm, { getFieldsValue }] = useForm({
 })
 
 function loadData(params: Api.PageParams) {
-  return SysConfigApi.list({ ...params, ...getFieldsValue() })
+  // 「全部」等空串条件不发送,后端不传即不过滤
+  const query: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(getFieldsValue())) {
+    if (value !== '' && value !== null && value !== undefined)
+      query[key] = value
+  }
+  return SysConfigApi.list({ ...params, ...query })
 }
 
 async function reload() {

@@ -16,6 +16,8 @@ enum API {
   delete = '/system/config/delete',
   batchDelete = '/system/config/batchDelete',
   status = '/system/config/status',
+  resolve = '/system/config/resolve',
+  public = '/system/config/public',
 }
 
 export const SysConfigApi = {
@@ -39,4 +41,16 @@ export const SysConfigApi = {
       url: `${API.status}/${id}`,
       data: { status: isPublic ? 1 : 0 },
     }),
+
+  /** 类型化读取单个配置(带后端缓存,消费方使用) */
+  resolve: <T = unknown>(key: string) =>
+    request.get<T>({ url: `${API.resolve}/${key}` }),
+
+  /** 批量类型化读取 */
+  resolveMany: (keys: string[]) =>
+    request.get<Record<string, unknown>>({ url: API.resolve, params: { keys: keys.join(',') } }),
+
+  /** 公开配置(匿名可读,登录页/布局品牌位使用) */
+  getPublic: () =>
+    request.get<System.SysConfig[]>({ url: API.public }),
 }

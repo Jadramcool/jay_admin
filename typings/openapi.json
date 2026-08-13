@@ -1715,6 +1715,64 @@
         ]
       }
     },
+    "/system/config/resolve/{key}": {
+      "get": {
+        "operationId": "SysConfigController_resolve",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "类型化读取配置(带缓存)",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/resolve": {
+      "get": {
+        "operationId": "SysConfigController_resolveMany",
+        "parameters": [
+          {
+            "name": "keys",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量类型化读取配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
     "/system/config/list": {
       "get": {
         "operationId": "SysConfigController_findAll",

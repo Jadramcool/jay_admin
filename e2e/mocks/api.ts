@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { Buffer } from 'node:buffer'
-import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockTodos, mockUsers } from './data'
+import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSysConfigs, mockTodos, mockUsers } from './data'
 
 /** 统一成功/失败响应(与后端契约一致)。注意:fulfill body 必须为字符串 */
 const ok = (data: unknown, message = '操作成功') => ({ code: 200, message, data })
@@ -61,6 +61,7 @@ export async function installApiMocks(page: Page) {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(ok({
+          enabled: true,
           captchaId: `mock-captcha-${Date.now()}`,
           image: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`,
         })),
@@ -270,6 +271,47 @@ export async function installApiMocks(page: Page) {
 
     if (pathname.startsWith('/api/system/session/kick/') && method === 'POST')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ kicked: 1 }, '已强制下线')) })
+
+    // ── 系统配置 ──
+    if (pathname === '/api/system/config/list' && method === 'GET') {
+      const page = Number(url.searchParams.get('page') || 1)
+      const pageSize = Number(url.searchParams.get('pageSize') || 20)
+      const keyword = url.searchParams.get('key')?.trim() || ''
+      const isPublicParam = url.searchParams.get('isPublic')
+      let items = mockSysConfigs
+      if (keyword)
+        items = items.filter(c => c.key.includes(keyword))
+      if (isPublicParam === 'true' || isPublicParam === 'false')
+        items = items.filter(c => String(c.isPublic) === isPublicParam)
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(ok({ items: items.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize), total: items.length, page, pageSize })),
+      })
+    }
+
+    if (pathname === '/api/system/config/public' && method === 'GET') {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(ok(mockSysConfigs.filter(c => c.isPublic))),
+      })
+    }
+
+    if (pathname === '/api/system/config/create' && method === 'POST')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(null, '创建成功')) })
+
+    if (pathname === '/api/system/config/update' && method === 'PUT')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(null, '更新成功')) })
+
+    if (pathname.startsWith('/api/system/config/resolve/') && method === 'GET') {
+      const key = pathname.split('/').pop()
+      const config = mockSysConfigs.find(c => c.key === key)
+      let value: unknown = config ? config.value : null
+      if (config?.type === 'NUMBER')
+        value = Number(value)
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(value)) })
+    }
 
     // ── 数据字典 ──
     if (pathname === '/api/system/dict/type/list' && method === 'GET') {

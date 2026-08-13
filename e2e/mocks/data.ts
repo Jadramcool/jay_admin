@@ -29,9 +29,13 @@ export const mockMenus = [
   { id: 11, code: 'system:user:create', name: '创建用户', type: 'BUTTON', pid: 3, permission: 'system:user:create', show: false, enable: true, order: 1, createdTime: ts(90), updatedTime: ts(30) },
   { id: 12, code: 'system:user:edit', name: '编辑用户', type: 'BUTTON', pid: 3, permission: 'system:user:edit', show: false, enable: true, order: 2, createdTime: ts(90), updatedTime: ts(30) },
   { id: 13, code: 'system:user:delete', name: '删除用户', type: 'BUTTON', pid: 3, permission: 'system:user:delete', show: false, enable: true, order: 3, createdTime: ts(90), updatedTime: ts(30) },
+  { id: 34, code: 'sys_config', name: '系统配置', type: 'MENU', pid: 2, path: '/system/config', icon: 'icon-park-outline:setting-config', component: '/src/views/system/config/index.vue', show: true, enable: true, order: 8, createdTime: ts(60), updatedTime: ts(15) },
   { id: 31, code: 'metrics', name: '前端监控', type: 'MENU', pid: 2, path: '/monitor', icon: 'icon-park-outline:monitor', component: '/src/views/monitor/index.vue', show: true, enable: true, order: 6, createdTime: ts(60), updatedTime: ts(15) },
   { id: 32, code: 'session', name: '在线用户', type: 'MENU', pid: 2, path: '/system/session', icon: 'icon-park-outline:people', component: '/src/views/system/session/index.vue', show: true, enable: true, order: 7, createdTime: ts(60), updatedTime: ts(15) },
   { id: 33, code: 'system:session:kick', name: '强制下线', type: 'BUTTON', pid: 32, permission: 'system:session:kick', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 35, code: 'system:config:create', name: '新增', type: 'BUTTON', pid: 34, permission: 'system:config:create', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 36, code: 'system:config:update', name: '编辑', type: 'BUTTON', pid: 34, permission: 'system:config:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 37, code: 'system:config:delete', name: '删除', type: 'BUTTON', pid: 34, permission: 'system:config:delete', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
   { id: 20, code: 'system:dict:create', name: '新增', type: 'BUTTON', pid: 10, permission: 'system:dict:create', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
   { id: 21, code: 'system:dict:update', name: '编辑', type: 'BUTTON', pid: 10, permission: 'system:dict:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
   { id: 22, code: 'system:dict:delete', name: '删除', type: 'BUTTON', pid: 10, permission: 'system:dict:delete', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
@@ -125,4 +129,14 @@ export const mockClientEvents = [
 export const mockSessions = [
   { id: 1, userId: 1, refreshToken: 'rt-1', accessJti: null, ipAddress: '192.168.1.10', userAgent: 'Chrome 126.0.0.0 on Windows', expiresAt: new Date(Date.now() + 6 * 86400000).toISOString(), lastActiveAt: ts(0), createdTime: ts(0) },
   { id: 2, userId: 2, refreshToken: 'rt-2', accessJti: null, ipAddress: '192.168.1.11', userAgent: 'Firefox 128.0 on macOS', expiresAt: new Date(Date.now() + 5 * 86400000).toISOString(), lastActiveAt: ts(1), createdTime: ts(1) },
+]
+
+export const mockSysConfigs = [
+  { id: 1, key: 'site_name', name: '站点名称', value: 'JDM 管理系统', type: 'STRING', category: 'site', isPublic: true, isSystem: false, sortOrder: 1, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 2, key: 'site_description', name: '网站描述', value: '基于 NestJS 和 Vue 3 的现代化管理系统', type: 'STRING', category: 'site', isPublic: true, isSystem: false, sortOrder: 2, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 3, key: 'copyright', name: '版权信息', value: 'JDM System', type: 'STRING', category: 'system', isPublic: true, isSystem: true, sortOrder: 3, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 4, key: 'notice.retentionDays', name: '公告保留天数', value: '180', type: 'NUMBER', category: 'notice', isPublic: false, isSystem: false, sortOrder: 4, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 5, key: 'security.login.maxRetry', name: '登录失败最大次数', value: '5', type: 'NUMBER', category: 'security', isPublic: false, isSystem: true, sortOrder: 5, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 6, key: 'security.login.lockMinutes', name: '登录失败锁定时长', value: '15', type: 'NUMBER', category: 'security', isPublic: false, isSystem: true, sortOrder: 6, createdTime: ts(30), updatedTime: ts(10) },
+  { id: 7, key: 'primary_color', name: '主题色', value: '#2080f0', type: 'STRING', category: 'theme', isPublic: true, isSystem: false, sortOrder: 7, createdTime: ts(30), updatedTime: ts(10) },
 ]

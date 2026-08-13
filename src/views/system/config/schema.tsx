@@ -126,12 +126,12 @@ export function useSysConfigSchema(methods: SysConfigSchemaMethods) {
       {
         key: 'isPublic',
         label: '公开配置',
-        defaultValue: false,
+        // 注意:属性级不设 defaultValue,否则会传导到查询表单导致默认只查「内部」
         table: {
           width: 100,
           render: (row: System.SysConfig) => (
             <NTag size="small" type={row.isPublic ? 'success' : 'default'}>
-              {row.isPublic ? '公开' : '私有'}
+              {row.isPublic ? '公开' : '内部'}
             </NTag>
           ),
         },
@@ -139,13 +139,14 @@ export function useSysConfigSchema(methods: SysConfigSchemaMethods) {
           component: 'NSelect',
           componentProps: {
             options: [
+              { label: '全部', value: '' },
               { label: '公开', value: true },
-              { label: '私有', value: false },
+              { label: '内部', value: false },
             ],
             placeholder: '请选择公开状态',
           },
         },
-        editForm: { component: 'NSwitch' },
+        editForm: { component: 'NSwitch', defaultValue: false },
       },
       {
         key: 'isSystem',
@@ -197,7 +198,7 @@ export function useSysConfigSchema(methods: SysConfigSchemaMethods) {
                   size="small"
                   onClick={() => methods.handleTogglePublic(row)}
                 >
-                  {row.isPublic ? '设为私有' : '设为公开'}
+                  {row.isPublic ? '设为内部' : '设为公开'}
                 </NButton>
               )}
               {hasPermission('system:config:update') && (
