@@ -14,9 +14,9 @@ test.describe('前端监控', () => {
     await expect(page.getByText('事件总数')).toBeVisible()
     await expect(page.getByText('错误总数')).toBeVisible()
     await expect(page.getByText('页面访问')).toBeVisible()
-    // 事件列表
-    await expect(page.getByRole('cell', { name: /Cannot read properties of undefined/ })).toBeVisible()
-    await expect(page.getByRole('cell', { name: 'JS_ERROR' })).toBeVisible()
+    // 事件列表(mock 事件跨测试累积,用 first 避免重复项歧义)
+    await expect(page.getByRole('cell', { name: /Cannot read properties of undefined/ }).first()).toBeVisible()
+    await expect(page.getByRole('cell', { name: 'JS_ERROR' }).first()).toBeVisible()
   })
 
   test('前端错误自动上报到监控接口', async ({ page }) => {

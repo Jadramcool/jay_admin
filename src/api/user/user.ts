@@ -20,7 +20,7 @@ export const UserApi = {
 
   /** 获取登录图形验证码 */
   getCaptcha: () =>
-    request.get<{ captchaId: string, image: string }>({ url: API.captcha, skipAuth: true }),
+    request.get<{ enabled: boolean, captchaId?: string, image?: string }>({ url: API.captcha, skipAuth: true }),
 
   register: (data: Api.RegisterParams) =>
     request.post<{ userId: number, username: string }>({

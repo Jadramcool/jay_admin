@@ -13,6 +13,8 @@ const loading = ref(false)
 const rememberMe = ref(false)
 const captchaImage = ref('')
 const captchaLoading = ref(false)
+/** 验证码是否启用(由后端 /auth/captcha 返回,本地环境可关闭) */
+const captchaEnabled = ref(false)
 
 const formData = reactive({
   username: '',
@@ -21,26 +23,31 @@ const formData = reactive({
   captchaId: '',
 })
 
-const rules = {
+const rules = computed(() => ({
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
     { min: 4, message: '密码长度不能小于4位', trigger: 'blur' },
   ],
-  captcha: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
-}
+  captcha: captchaEnabled.value
+    ? [{ required: true, message: '请输入验证码', trigger: 'blur' }]
+    : [],
+}))
 
 const iconColor = computed(() => 'rgba(255,255,255,0.5)')
 const checkboxColor = computed(() => 'rgba(255,255,255,0.7)')
 
-/** 加载验证码图片 */
+/** 加载验证码图片(后端关闭时不展示) */
 async function loadCaptcha() {
   captchaLoading.value = true
   try {
     const result = await UserApi.getCaptcha()
-    formData.captchaId = result.captchaId
-    formData.captcha = ''
-    captchaImage.value = result.image
+    captchaEnabled.value = result.enabled
+    if (result.enabled && result.captchaId) {
+      formData.captchaId = result.captchaId
+      formData.captcha = ''
+      captchaImage.value = result.image ?? ''
+    }
   }
   catch {
     /* handled by interceptor */
@@ -82,8 +89,10 @@ async function handleLogin() {
     const result = await UserApi.login({
       username: formData.username,
       password: formData.password,
-      captcha: formData.captcha,
-      captchaId: formData.captchaId,
+      // 验证码关闭时不携带验证码参数
+      ...(captchaEnabled.value
+        ? { captcha: formData.captcha, captchaId: formData.captchaId }
+        : {}),
     })
 
     authStore.setToken(result)
@@ -162,7 +171,7 @@ async function handleLogin() {
       </n-checkbox>
     </div>
 
-    <n-form-item path="captcha">
+    <n-form-item v-if="captchaEnabled" path="captcha">
       <div class="captcha-row">
         <n-input
           v-model:value="formData.captcha"
