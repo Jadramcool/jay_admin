@@ -29,6 +29,19 @@ test.describe('认证与动态路由', () => {
     await expect(page.getByRole('menuitem', { name: '个人中心' })).toBeVisible()
   })
 
+  test('主题色跟随公开配置 primary_color', async ({ page }) => {
+    await login(page)
+
+    // 启动时应用公开配置主题色(mock 配置为 #2080f0)
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.documentElement.style.getPropertyValue('--primary-color'),
+        ),
+      )
+      .toBe('#2080f0')
+  })
+
   test('登录后显示用户水印且防篡改', async ({ page }) => {
     await login(page)
 

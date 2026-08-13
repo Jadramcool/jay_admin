@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { usePublicConfig } from '@/composables/usePublicConfig'
 import LoginForm from './components/LoginForm.vue'
 import RegisterForm from './components/RegisterForm.vue'
 
 const isFlipped = ref(false)
 const router = useRouter()
 const route = useRoute()
+
+// 品牌信息(公开配置,匿名可读;未配置时回退默认文案)
+const siteName = ref('欢迎回来')
+const siteDescription = ref('登录您的账号以继续')
+onMounted(async () => {
+  siteName.value = await usePublicConfig('site_name', siteName.value)
+  siteDescription.value = await usePublicConfig('site_description', siteDescription.value)
+})
 
 // === Canvas particle system ===
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -301,7 +310,7 @@ function handleRegisterSuccess() {
                   width="32"
                   height="32"
                   rx="8"
-                  fill="rgba(24,160,88,0.9)"
+                  fill="rgba(var(--primary-color-rgb), 0.9)"
                 />
                 <text
                   x="16"
@@ -316,10 +325,10 @@ function handleRegisterSuccess() {
               </svg>
             </div>
             <h2 class="title text-2xl">
-              欢迎回来
+              {{ siteName }}
             </h2>
             <p class="subtitle text-sm">
-              登录您的账号以继续
+              {{ siteDescription }}
             </p>
           </div>
           <LoginForm
@@ -337,7 +346,7 @@ function handleRegisterSuccess() {
                   width="32"
                   height="32"
                   rx="8"
-                  fill="rgba(24,160,88,0.9)"
+                  fill="rgba(var(--primary-color-rgb), 0.9)"
                 />
                 <text
                   x="16"

@@ -13,6 +13,8 @@ const theme = computed(() => (appStore.isDark ? darkTheme : null))
 
 onMounted(() => {
   appStore.setFont(appStore.currentFont)
+  // 主题色跟随系统配置(用户手动自定义过则跳过)
+  appStore.applyConfigPrimaryColor()
 })
 
 // Auto mode follows OS preference through the same atomic transition path used

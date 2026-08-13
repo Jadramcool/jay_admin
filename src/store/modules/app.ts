@@ -2,6 +2,7 @@ import type { GlobalThemeOverrides } from 'naive-ui'
 import { useMediaQuery } from '@vueuse/core'
 import chroma from 'chroma-js'
 import { defineStore } from 'pinia'
+import { usePublicConfig } from '@/composables/usePublicConfig'
 import {
   darkThemeOverrides,
   defaultFont,
@@ -21,6 +22,7 @@ interface AppState {
   themeTransitionId: number
   currentFont: string
   primaryColor: string
+  primaryColorSource: App.PrimaryColorSource
   colorMode: App.ColorMode
   showLogo: boolean
   showTabs: boolean
@@ -41,6 +43,7 @@ export const useAppStore = defineStore('app', {
     themeTransitionId: 0,
     currentFont: defaultFont,
     primaryColor: '#18a058',
+    primaryColorSource: 'config',
     colorMode: 'light',
     showLogo: true,
     showTabs: true,
@@ -258,6 +261,14 @@ export const useAppStore = defineStore('app', {
         }
       }
     },
+    /** 应用公开配置的主题色(用户手动自定义过则跳过) */
+    async applyConfigPrimaryColor() {
+      if (this.primaryColorSource === 'manual')
+        return
+      const color = await usePublicConfig('primary_color', '')
+      if (color && color !== this.primaryColor)
+        this.setPrimaryColor(color)
+    },
     setGlobalLoading(loading: boolean) {
       this.globalLoading = loading
     },
@@ -273,6 +284,7 @@ export const useAppStore = defineStore('app', {
       this.collapsed = false
       this.currentFont = defaultFont
       this.primaryColor = '#18a058'
+      this.primaryColorSource = 'config'
       this.colorMode = 'light'
       this.resolvedDark = false
       this.showLogo = true
@@ -291,6 +303,7 @@ export const useAppStore = defineStore('app', {
       'collapsed',
       'currentFont',
       'primaryColor',
+      'primaryColorSource',
       'colorMode',
       'showLogo',
       'showTabs',

@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { usePublicConfig } from '@/composables/usePublicConfig'
 import { useAppStore } from '@/store/modules'
 
 const appStore = useAppStore()
+// 站点名称(公开配置;未配置时回退默认)
+const title = ref('JDM Admin')
+onMounted(async () => {
+  title.value = await usePublicConfig('site_name', title.value)
+})
 </script>
 
 <template>
@@ -9,7 +16,7 @@ const appStore = useAppStore()
     <div class="logo" aria-hidden="true">
       J
     </div>
-    <span v-show="appStore.collapsed ? false : true" key="title" class="title text-lg">JDM Admin</span>
+    <span v-show="appStore.collapsed ? false : true" key="title" class="title text-lg">{{ title }}</span>
   </div>
 </template>
 

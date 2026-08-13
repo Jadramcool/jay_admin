@@ -101,9 +101,9 @@ pnpm dev                    # Vite 开发服务，端口 4000
 - **登出**：`POST /auth/logout`（body 携带 `refreshToken`，删除对应会话使令牌立即失效）。
 - **登录会话**：登录时创建 `user_session`（记录 refreshToken/IP/UA/过期时间）；刷新令牌轮换时同步更新会话；登出/强制下线删除会话，refreshToken 立即失效。
 - **强制下线**：`POST /system/session/kick/:id` 删除会话并将 access token 的 `jti` 加入内存黑名单（2 小时内立即失效；内存实现仅单实例有效）。
-- **登录验证码**：`GET /auth/captcha`（@Public）返回 `{ captchaId, image }`（svg 图片,5 分钟过期,一次性）；登录必须携带 `captchaId` + `captcha`，错误返回 `42201`。
+- **登录验证码**：`GET /auth/captcha`（@Public）返回 `{ enabled, captchaId?, image? }`（svg 图片,5 分钟过期,一次性）；启用时登录必须携带 `captchaId` + `captcha`，错误返回 `42201`。**可通过环境变量 `LOGIN_CAPTCHA_ENABLED=false` 关闭**（本地/测试环境）,关闭后前端自动隐藏验证码输入框。
 - **登录限流**：按 用户名+IP 连续失败 5 次锁定 15 分钟（`42901`），登录成功清零；当前为内存实现，**仅单实例部署有效**，多实例需替换 Redis。
-- 登录端点：`POST /auth/login`，body `{ username, password, captcha, captchaId }`。
+- 登录端点：`POST /auth/login`，body `{ username, password, captcha?, captchaId? }`（验证码关闭时可不传）。
 
 ## 5. 权限与动态路由
 
@@ -118,18 +118,18 @@ pnpm dev                    # Vite 开发服务，端口 4000
 
 ### 6.1 认证 `auth`
 
-| 方法 | 路径                        | 说明                                                   |
-| ---- | --------------------------- | ------------------------------------------------------ |
-| POST | `/auth/login`               | 登录，返回令牌对（@Public，需验证码）                  |
-| GET  | `/auth/captcha`             | 获取登录验证码，返回 `{ captchaId, image }`（@Public） |
-| POST | `/auth/register`            | 注册，返回 `{ userId, username }`（@Public）           |
-| POST | `/auth/refresh`             | 刷新令牌，body `{ refreshToken }`（@Public）           |
-| POST | `/auth/logout`              | 登出                                                   |
-| GET  | `/auth/user/info`           | 当前用户信息                                           |
-| GET  | `/auth/user/menu`           | 当前用户菜单（平铺）                                   |
-| PUT  | `/auth/user/update`         | 更新个人信息                                           |
-| POST | `/auth/user/checkPassword`  | 校验密码，返回 `{ valid }`                             |
-| POST | `/auth/user/updatePassword` | 修改密码，body `{ oldPassword, newPassword }`          |
+| 方法 | 路径                        | 说明                                                                                                                 |
+| ---- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| POST | `/auth/login`               | 登录，返回令牌对（@Public，需验证码）                                                                                |
+| GET  | `/auth/captcha`             | 获取登录验证码，返回 `{ enabled, captchaId?, image? }`（@Public，`LOGIN_CAPTCHA_ENABLED=false` 时 `enabled: false`） |
+| POST | `/auth/register`            | 注册，返回 `{ userId, username }`（@Public）                                                                         |
+| POST | `/auth/refresh`             | 刷新令牌，body `{ refreshToken }`（@Public）                                                                         |
+| POST | `/auth/logout`              | 登出                                                                                                                 |
+| GET  | `/auth/user/info`           | 当前用户信息                                                                                                         |
+| GET  | `/auth/user/menu`           | 当前用户菜单（平铺）                                                                                                 |
+| PUT  | `/auth/user/update`         | 更新个人信息                                                                                                         |
+| POST | `/auth/user/checkPassword`  | 校验密码，返回 `{ valid }`                                                                                           |
+| POST | `/auth/user/updatePassword` | 修改密码，body `{ oldPassword, newPassword }`                                                                        |
 
 ### 6.2 用户管理 `system/user`
 
@@ -202,8 +202,14 @@ pnpm dev                    # Vite 开发服务，端口 4000
 | PUT    | `/system/config/update`             | 更新（body 含 `id`）                                                           |
 | DELETE | `/system/config/delete/:id`         | 删除                                                                           |
 | PUT    | `/system/config/batchDelete`        | 批量删除，body `{ ids }`                                                       |
-| PUT    | `/system/config/status/:id`         | 公开/隐藏，body `{ status: 0/1 }`                                              |
+| PUT    | `/system/config/status/:id`         | 公开/内部切换，body `{ status: 0/1 }`                                          |
 | POST   | `/system/config/validate-password`  | 校验默认密码，body `{ password }`                                              |
+| GET    | `/system/config/resolve/:key`       | **类型化读取**单个配置（带缓存，NUMBER→number、JSON→object…）                  |
+| GET    | `/system/config/resolve`            | 批量类型化读取，query `keys=a,b,c`                                             |
+
+**配置类型系统**:value 按 `type` 校验与解析（NUMBER/BOOLEAN/JSON/ARRAY/EMAIL/URL 等），写入非法值返回 422；`PASSWORD` 类型**不回显明文**（列表显示 `******`，编辑留空表示不修改）。**isSystem 保护**:系统内置配置禁止删除、禁止改 key/type。读取带内存缓存（5 分钟,写后失效）。前端配套 `useConfig(key)` 组合式读取 + `invalidateConfig()`。
+
+**可见性语义**:`isPublic` 决定读取方式——**公开**配置通过无鉴权的 `/system/config/public` 获取（匿名可读，适合登录页站点名、备案号等）；**内部**（非公开）配置必须登录且具备 `system:config:list` 权限才能读取，管理端接口均不对外暴露。
 
 ### 6.7 操作日志 `system/operation-log`
 
@@ -364,3 +370,6 @@ pnpm gen:page <name>     # 如 pnpm gen:page user-group
 - **2026-08-08**：在线用户/会话管理（`user_session` 表 + 迁移 + `system/session` 4 个端点 + 6 项测试）——登录建会话、刷新轮换、登出删会话、强制下线（refreshToken 失效 + access jti 内存黑名单 2h）;前端 `/system/session` 在线用户页（在线统计 + 列表 + 强制下线）;E2E 新增 2 个用例（共 21 个）。至此 **P1 全部完成**。
 - **2026-08-08**：接入 Plop 代码生成器（`pnpm gen:page <name>`，模板见 `plop-templates/`）——一键生成 API 封装 + 列表页 + 弹窗 + E2E 用例骨架，遵循 antfu 风格与既有组件模式。**P2 第 1 项完成**。
 - **2026-08-08**：全局水印（`v-watermark` 指令：Canvas 旋转文字平铺 + `pointer-events: none` 不阻塞交互 + MutationObserver 防篡改自动重建）;布局根节点接入,内容为当前用户 + 日期,登录后生效;E2E 新增水印渲染与防篡改用例（共 22 个）。**P2 第 2 项完成**。
+- **2026-08-08**：系统配置模块完善（M1+M2）——配置类型系统（parse/validate/serialize,非法值 422）、内存缓存（5 分钟写后失效）、isSystem 保护（禁删禁改 key/type）、PASSWORD 脱敏展示与编辑留空不修改、`resolve` 类型化读取端点、前端 `useConfig`/`invalidateConfig` 与类型化编辑控件;新增 18 项单元测试与 2 个 E2E 用例（共 25 个）。
+- **2026-08-13**：系统配置**接入业务生效**——配置查询支持「全部/公开/内部」三态（默认全部,不传即不过滤）,可见性统一命名为「公开/内部」（公开=匿名可读 `@Public`、内部=登录后可读）;登录限流参数改读配置 `security.login.maxRetry`/`security.login.lockMinutes`（写配置即时生效,新增 2 项测试,后端共 134 项）;seed 新增 security 配置并按 key 增量补充（幂等）;登录页品牌位/侧边栏标题/页脚版权读公开配置 `site_name`/`site_description`/`copyright`（前端 `usePublicConfig` + 模块级缓存,mock 同步对齐 key 并补 public 路由）。
+- **2026-08-13**：**主题色接入系统配置**——启动时读取公开配置 `primary_color` 应用为主题色（`appStore.setPrimaryColor` 全站生效:naive-ui overrides + CSS 变量 + 菜单/输入框变体色）;新增 `primaryColorSource`（config/manual）区分来源:配置色始终跟随,用户在设置抽屉手动改色后标记 manual 不再被覆盖,重置设置恢复跟随;登录页 logo 硬编码绿色改为 `--primary-color-rgb` 变量;E2E 新增主题色断言（共 26 个）,Playwright 超时放宽至 60s（dev 冷编译可达 20-30s）。

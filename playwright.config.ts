@@ -9,11 +9,12 @@ import { defineConfig } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
-  timeout: 30_000,
+  // dev 模式下 vite 冷编译 + 本地负载可使登录流程达到 20-30s,超时放宽到 60s
+  timeout: 60_000,
   // 串行执行:所有测试共享同一个 vite dev server,并行会触发首次编译竞争导致超时
   fullyParallel: false,
   workers: 1,
-  retries: process.env.CI ? 2 : 0,
+  retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: 'http://localhost:4000',

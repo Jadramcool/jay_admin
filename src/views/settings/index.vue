@@ -30,6 +30,12 @@ const colorModeOptions: { label: string, value: App.ColorMode }[] = [
   { label: '跟随系统', value: 'auto' },
 ]
 
+/** 手动自定义主题色:标记为 manual,之后不再被系统配置覆盖 */
+function handlePrimaryColor(color: string) {
+  appStore.setPrimaryColor(color)
+  appStore.primaryColorSource = 'manual'
+}
+
 defineExpose({ openDrawer })
 </script>
 
@@ -69,7 +75,7 @@ defineExpose({ openDrawer })
           :value="appStore.primaryColor"
           :swatches="['#18a058', '#2080f0', '#f0a020', '#d03050', '#8a2be2']"
           size="small"
-          @update:value="appStore.setPrimaryColor"
+          @update:value="handlePrimaryColor"
         />
       </div>
 
