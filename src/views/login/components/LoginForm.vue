@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormInst } from 'naive-ui'
 import { Icon } from '@iconify/vue'
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { UserApi } from '@/api/user'
 import { useAuthStore } from '@/store/modules'
 
@@ -16,61 +16,16 @@ const captchaLoading = ref(false)
 /** 验证码是否启用(由后端 /auth/captcha 返回,本地环境可关闭) */
 const captchaEnabled = ref(false)
 
-// ===== 登录渐进加载覆盖层 =====
+// ===== 登录加载覆盖层 =====
 // 覆盖「点击登录 → 守卫拉取用户信息/动态路由 → 进入工作台」的整段静默期
-const LOGIN_STAGES = [
-  { index: 1, label: '验证账号信息', target: 40 },
-  { index: 2, label: '加载用户与权限', target: 78 },
-  { index: 3, label: '进入工作台', target: 96 },
-] as const
+const overlayLoading = ref(false)
 
-const loginStage = ref(0)
-const loginProgress = ref(0)
-let progressTimer: ReturnType<typeof setInterval> | null = null
-let stageTimer: ReturnType<typeof setTimeout> | null = null
-
-function stepIcon(index: number) {
-  if (index < loginStage.value)
-    return 'icon-park-outline:check-one'
-  if (index === loginStage.value)
-    return 'icon-park-outline:loading'
-  return 'icon-park-outline:circle'
+/** 登录成功但导航被守卫拦截(权限失效/重复导航)时,由父组件调用复位 */
+function stopLoading() {
+  overlayLoading.value = false
 }
 
-function startLoginProgress() {
-  stopLoginProgress()
-  progressTimer = setInterval(() => {
-    // 进度向当前阶段目标缓动逼近,阶段推进时目标抬升、速度随之加快
-    const current = LOGIN_STAGES.find(s => s.index === loginStage.value)
-    const target = current ? current.target : 96
-    if (loginProgress.value < target) {
-      const delta = Math.max((target - loginProgress.value) * 0.06, 0.1)
-      loginProgress.value = Math.min(loginProgress.value + delta, target)
-    }
-  }, 50)
-}
-
-function stopLoginProgress() {
-  if (progressTimer) {
-    clearInterval(progressTimer)
-    progressTimer = null
-  }
-  if (stageTimer) {
-    clearTimeout(stageTimer)
-    stageTimer = null
-  }
-}
-
-/** 登录成功但导航被守卫拦截(权限失效/重复导航)时,由父组件调用复位覆盖层 */
-function resetLoginOverlay() {
-  stopLoginProgress()
-  loginStage.value = 0
-  loginProgress.value = 0
-}
-
-defineExpose({ resetLoginOverlay })
-
-onBeforeUnmount(stopLoginProgress)
+defineExpose({ stopLoading })
 
 const formData = reactive({
   username: '',
@@ -141,8 +96,7 @@ async function handleLogin() {
   }
 
   loading.value = true
-  loginStage.value = 1
-  startLoginProgress()
+  overlayLoading.value = true
   try {
     const result = await UserApi.login({
       username: formData.username,
@@ -164,17 +118,11 @@ async function handleLogin() {
       localStorage.removeItem('REMEMBER_LOGIN')
     }
 
-    loginStage.value = 2
     emit('success')
-    // 接下来守卫会拉取用户信息/菜单并注册动态路由;若停留较久则提示"进入工作台"
-    stageTimer = setTimeout(() => {
-      if (loginStage.value === 2)
-        loginStage.value = 3
-    }, 900)
   }
   catch {
     // 错误已由全局 errorHandler 统一弹 toast;验证码可能已失效,刷新一张
-    resetLoginOverlay()
+    overlayLoading.value = false
     loadCaptcha()
   }
   finally {
@@ -280,58 +228,14 @@ async function handleLogin() {
     </div>
   </n-form>
 
-  <!-- 登录渐进加载覆盖层(挂到 body,避免卡片 transform 影响 fixed 定位) -->
+  <!-- 登录加载覆盖层(挂到 body,避免卡片 transform 影响 fixed 定位) -->
   <Teleport to="body">
     <Transition name="login-fade">
-      <div v-if="loginStage > 0" class="login-overlay">
-        <div class="login-overlay-panel">
-          <div class="overlay-logo">
-            <svg width="52" height="52" viewBox="0 0 32 32" fill="none">
-              <rect
-                width="32"
-                height="32"
-                rx="8"
-                fill="rgba(var(--primary-color-rgb), 0.9)"
-              />
-              <text
-                x="16"
-                y="22"
-                font-size="18"
-                font-weight="bold"
-                fill="white"
-                text-anchor="middle"
-              >
-                J
-              </text>
-            </svg>
-          </div>
-
-          <div class="overlay-progress">
-            <div
-              class="overlay-progress-bar"
-              :style="{ width: `${loginProgress}%` }"
-            />
-          </div>
-
-          <div class="overlay-steps">
-            <div
-              v-for="step in LOGIN_STAGES"
-              :key="step.index"
-              class="overlay-step"
-              :class="{
-                'is-active': step.index === loginStage,
-                'is-done': step.index < loginStage,
-              }"
-            >
-              <span class="step-icon">
-                <n-icon size="16">
-                  <Icon :icon="stepIcon(step.index)" />
-                </n-icon>
-              </span>
-              <span>{{ step.label }}</span>
-            </div>
-          </div>
-        </div>
+      <div v-if="overlayLoading" class="login-overlay">
+        <n-spin size="large" />
+        <p class="overlay-text text-sm">
+          正在进入系统…
+        </p>
       </div>
     </Transition>
   </Teleport>
@@ -457,123 +361,24 @@ async function handleLogin() {
   }
 }
 
-/* ===== 登录渐进加载覆盖层 ===== */
+/* ===== 登录加载覆盖层 ===== */
 .login-overlay {
   position: fixed;
   inset: 0;
   z-index: 2000;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   background: rgba(7, 11, 22, 0.62);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
-.login-overlay-panel {
-  width: 300px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.overlay-logo {
-  display: inline-flex;
-  margin-bottom: 28px;
-  filter: drop-shadow(0 0 16px rgba(var(--primary-color-rgb), 0.45));
-  animation: logo-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes logo-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.06);
-  }
-}
-
-.overlay-progress {
-  width: 100%;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  overflow: hidden;
-}
-
-.overlay-progress-bar {
-  position: relative;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary-color, #18a058), rgba(var(--primary-color-rgb), 0.55));
-  transition: width 0.25s ease-out;
-
-  /* 流光扫过,进度停靠时仍保持"活着"的感觉 */
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-    animation: bar-sheen 1.4s linear infinite;
-  }
-}
-
-@keyframes bar-sheen {
-  from {
-    transform: translateX(-100%);
-  }
-
-  to {
-    transform: translateX(100%);
-  }
-}
-
-.overlay-steps {
-  margin-top: 24px;
-  display: grid;
-  gap: 12px;
-  align-self: flex-start;
-}
-
-.overlay-step {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.35);
-  transition: color 0.3s;
-
-  .step-icon {
-    display: inline-flex;
-  }
-
-  &.is-active {
-    color: #fff;
-
-    .step-icon {
-      color: var(--primary-color, #18a058);
-
-      svg {
-        animation: icon-spin 0.9s linear infinite;
-      }
-    }
-  }
-
-  &.is-done {
-    color: rgba(255, 255, 255, 0.7);
-
-    .step-icon {
-      color: #36ad6a;
-    }
-  }
-}
-
-@keyframes icon-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.overlay-text {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .login-fade-enter-active,
@@ -584,13 +389,5 @@ async function handleLogin() {
 .login-fade-enter-from,
 .login-fade-leave-to {
   opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .overlay-logo,
-  .overlay-progress-bar::after,
-  .overlay-step.is-active .step-icon svg {
-    animation: none;
-  }
 }
 </style>

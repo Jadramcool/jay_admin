@@ -274,12 +274,12 @@ async function handleLoginSuccess() {
       || '/home'
   try {
     const failure = await router.push(redirect.startsWith('/') ? redirect : `/${redirect}`)
-    // 守卫拦截(如权限失效、重复导航)时页面停留:复位覆盖层让用户重试,提示由 toast 展示
+    // 守卫拦截(如权限失效、重复导航)时页面停留:复位加载层让用户重试,提示由 toast 展示
     if (failure)
-      loginFormRef.value?.resetLoginOverlay()
+      loginFormRef.value?.stopLoading()
   }
   catch {
-    loginFormRef.value?.resetLoginOverlay()
+    loginFormRef.value?.stopLoading()
   }
 }
 function handleRegisterSuccess() {
