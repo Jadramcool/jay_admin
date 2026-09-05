@@ -266,12 +266,21 @@ function flipToRegister() {
 function flipToLogin() {
   isFlipped.value = false
 }
-function handleLoginSuccess() {
+const loginFormRef = ref<InstanceType<typeof LoginForm> | null>(null)
+async function handleLoginSuccess() {
   const redirect
     = (route.query?.redirect as string)
       || import.meta.env.VITE_HOME_PATH
       || '/home'
-  router.push(redirect.startsWith('/') ? redirect : `/${redirect}`)
+  try {
+    const failure = await router.push(redirect.startsWith('/') ? redirect : `/${redirect}`)
+    // 守卫拦截(如权限失效、重复导航)时页面停留:复位覆盖层让用户重试,提示由 toast 展示
+    if (failure)
+      loginFormRef.value?.resetLoginOverlay()
+  }
+  catch {
+    loginFormRef.value?.resetLoginOverlay()
+  }
 }
 function handleRegisterSuccess() {
   flipToLogin()
@@ -332,6 +341,7 @@ function handleRegisterSuccess() {
             </p>
           </div>
           <LoginForm
+            ref="loginFormRef"
             @success="handleLoginSuccess"
             @switch-to-register="flipToRegister"
           />
