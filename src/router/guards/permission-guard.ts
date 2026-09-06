@@ -73,21 +73,8 @@ export function createPermissionGuard(router: Router) {
           return { path: '/login' }
         }
 
-        // 空菜单 → 只配置根路由
-        if (menus.length === 0) {
-          permissionStore.setPermissions(menus)
-          permissionStore.setMenus(menus)
-          router.addRoute({
-            path: '/',
-            name: 'pageHome',
-            redirect: import.meta.env.VITE_HOME_PATH || '/home',
-            component: () => import('@/layout/index.vue'),
-            meta: { title: '首页' },
-          } as any)
-          return { path: to.path, query: to.query, hash: to.hash, replace: true }
-        }
-
-        // 正常生成路由
+        // 统一走 createRoutes：空菜单也会生成仅含根路由的结构并置位
+        // accessRoutes（若不置位，零菜单用户会在下方 !accessRoutes 分支被误判登出）
         permissionStore.setPermissions(menus)
         permissionStore.setMenus(menus)
         permissionStore.setRoutes(menus)

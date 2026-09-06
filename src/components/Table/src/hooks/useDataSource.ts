@@ -48,7 +48,12 @@ export function useDataSource<T = unknown>(
       sortState.sortOrder = options.sortOrder
   }
 
+  // 竞态保护：自增序号标记最新一次请求，过期响应（以及其 finally）一律丢弃，
+  // 避免快速搜索/翻页时慢的旧响应覆盖新数据
+  let requestSeq = 0
+
   async function fetch(options: Partial<Api.PageParams> = {}): Promise<void> {
+    const seq = ++requestSeq
     try {
       setLoading(true)
       const { filters, localPagination, pagination, request } = unref(propsRef)
@@ -62,6 +67,8 @@ export function useDataSource<T = unknown>(
 
       if (localPagination) {
         const result = await request({ ...filterParams })
+        if (seq !== requestSeq)
+          return
         fullDataSourceRef.value = expectArrayData(result)
         dataSourceRef.value = handleLocalPagination(fullDataSourceRef.value)
         return
@@ -69,6 +76,8 @@ export function useDataSource<T = unknown>(
 
       if (!usesPagination) {
         const result = await request({ ...filterParams, ...sortState })
+        if (seq !== requestSeq)
+          return
         dataSourceRef.value = expectArrayData(result)
         return
       }
@@ -84,6 +93,8 @@ export function useDataSource<T = unknown>(
         pageSize,
       }
       const result = expectPaginatedData(await request(params))
+      if (seq !== requestSeq)
+        return
       dataSourceRef.value = result.items
       setPagination({
         [pageField]: result.page,
@@ -98,7 +109,9 @@ export function useDataSource<T = unknown>(
         console.error(error)
     }
     finally {
-      setLoading(false)
+      // 只有最新一次请求有权关闭 loading，旧请求不能提前关闭新请求的 loading
+      if (seq === requestSeq)
+        setLoading(false)
     }
   }
 

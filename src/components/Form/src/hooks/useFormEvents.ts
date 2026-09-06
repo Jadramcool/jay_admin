@@ -158,7 +158,8 @@ export function useFormEvents({
       = schemas.length > 0
         && isFunction(handleFormatFormValues)
         && handleFormatFormValues(unref(formModel), schemas)
-    return formatFieldsValue || toRaw(unref(formModel))
+    // 不能返回 toRaw(formModel)：绕过响应式代理导致依赖收集失效，须返回浅拷贝
+    return formatFieldsValue || { ...unref(formModel) }
   }
 
   /**

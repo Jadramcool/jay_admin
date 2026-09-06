@@ -17,7 +17,6 @@ const statusFilter = ref<StatusFilter>('unread')
 
 // 用户详情弹窗
 const [registerUserModal, { openModal: openUserDetail }] = useModal()
-const selectedUser = ref<any>({})
 
 const [register] = useModalInner(async (data) => {
   noticeId.value = data?.id || 0
@@ -50,7 +49,7 @@ function formatDateTime(dt: string | null | undefined) {
 }
 
 function showUserDetail(row: any) {
-  selectedUser.value = {
+  const detail = {
     id: row.userId,
     username: row.username,
     name: row.name,
@@ -63,7 +62,9 @@ function showUserDetail(row: any) {
     departmentName: row.departmentName,
     roles: row.roles,
   }
-  openUserDetail()
+  // 必须传参：useModal.openModal() 无参调用不会触发 useModalInner 回调，
+  // 详情弹窗会一直显示空数据
+  openUserDetail({ record: detail })
 }
 
 const columns = [
@@ -146,15 +147,15 @@ const columns = [
   {
     title: '操作',
     key: 'actions',
-    width: 100,
+    width: 80,
     fixed: 'right',
     render: (row: any) =>
       h(
         NButton,
         {
           size: 'small',
+          text: true,
           type: 'primary',
-          ghost: true,
           onClick: () => showUserDetail(row),
         },
         { default: () => '详情' },

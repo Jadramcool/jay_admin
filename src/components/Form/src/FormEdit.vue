@@ -107,9 +107,13 @@ const getGrid = computed((): GridProps => {
 
 // ---------- 表单操作 ----------
 
-/** getFieldsValue 返回原始 formModel（无 query 格式化） */
+/** getFieldsValue 返回浅拷贝（无 query 格式化）。
+ *
+ * 不能返回 toRaw(formModel)：toRaw 绕过响应式代理，computed/watch 求值时
+ * 不收集任何依赖，派生状态会永久缓存（如密码强度条、isDirty 判断静默失效）。
+ * 浅拷贝会逐一读取代理属性从而正确收集依赖。 */
 function getFieldsValue(): Recordable {
-  return toRaw(unref(formModel))
+  return { ...unref(formModel) }
 }
 
 async function setFieldsValue(values: Recordable): Promise<void> {
