@@ -61,7 +61,14 @@ const { dataSourceRef, reload, handleLocalPagination, fullDataSourceRef }
     setLoading,
   })
 
-const checkedRowKeys = ref<any[]>([])
+// 选中键双源：父组件绑定 checkedRowKeys(经 NDataTable.props 展开已声明)时以父为准，
+// 否则内部自治；batchDelete 必须读同一数据源，避免父组件重置后内部残留旧 keys
+const internalCheckedRowKeys = ref<any[]>([])
+const checkedRowKeys = computed<any[]>(() =>
+  props.checkedRowKeys !== undefined
+    ? props.checkedRowKeys
+    : internalCheckedRowKeys.value,
+)
 const expandedRowKeys = ref<any[]>([])
 
 const getTableValue: any = computed(() => ({
@@ -122,7 +129,7 @@ function handleBatchDelete() {
 }
 
 function handleCheckChange(keys: any[]) {
-  checkedRowKeys.value = keys
+  internalCheckedRowKeys.value = keys
   emit('update:checkedRowKeys', keys)
 }
 

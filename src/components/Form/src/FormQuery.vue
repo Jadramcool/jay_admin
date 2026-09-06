@@ -221,17 +221,17 @@ function resetFields() {
   const fromValues = getFieldsValue()
   emit('reset', fromValues)
 
-  if (submitOnReset) {
-    emit('submit', fromValues)
+  // 有表格联动时只走「复位页码 + reload」一条链路(表格请求会自取最新表单值)，
+  // 不再 emit('submit')，避免固定发出两次请求且首个请求带旧页码；
+  // 无表格联动时保留 submitOnReset 兜底
+  const tableInstance = resetPageOnReset && tableRef ? unref(tableRef) : undefined
+  if (tableInstance && isFunction(tableInstance.setPagination)) {
+    tableInstance.setPagination({ page: 1 })
+    if (isFunction(tableInstance.reload))
+      tableInstance.reload()
   }
-  if (resetPageOnReset && tableRef && unref(tableRef)) {
-    const tableInstance = unref(tableRef)
-    if (tableInstance && isFunction(tableInstance.setPagination)) {
-      tableInstance.setPagination({ page: 1 })
-      if (isFunction(tableInstance.reload)) {
-        tableInstance.reload()
-      }
-    }
+  else if (submitOnReset) {
+    emit('submit', fromValues)
   }
 }
 
@@ -247,7 +247,17 @@ async function handleSubmit() {
   try {
     await validate()
     const values = getFieldsValue()
-    emit('submit', values)
+    // 查询时复位到第 1 页：第 N 页改筛选条件后搜索不再命中空结果
+    const { tableRef } = unref(getProps)
+    const tableInstance = tableRef ? unref(tableRef) : undefined
+    if (tableInstance && isFunction(tableInstance.setPagination)) {
+      tableInstance.setPagination({ page: 1 })
+      if (isFunction(tableInstance.reload))
+        tableInstance.reload()
+    }
+    else {
+      emit('submit', values)
+    }
   }
   catch {
     /* validation failed */

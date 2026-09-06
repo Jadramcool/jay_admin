@@ -1,7 +1,23 @@
 import type { FormActionType, FormSchema } from '../types'
-import { merge, uniqBy } from 'lodash-es'
+import { cloneDeep, merge, uniqBy } from 'lodash-es'
 import { isArray, isBoolean, isFunction } from '@/utils'
 import { createPlaceholderMessage } from '../helper'
+
+/**
+ * 深合并但数组整体替换：lodash merge 对数组按索引合并，
+ * 缩短数组（如 schemas / componentProps.options）时会残留旧元素
+ */
+function mergeReplacingArrays(target: any, patch: any): any {
+  if (Array.isArray(patch))
+    return cloneDeep(patch)
+  if (patch !== null && typeof patch === 'object') {
+    const out: Recordable = { ...(target ?? {}) }
+    for (const [key, value] of Object.entries(patch))
+      out[key] = mergeReplacingArrays(out[key], value)
+    return out
+  }
+  return patch
+}
 
 /**
  * useBaseForm — 表单核心逻辑基座
@@ -99,7 +115,7 @@ export function useBaseForm(props: any) {
   }
 
   async function setProps(formProps: Partial<any>): Promise<void> {
-    propsRef.value = merge({}, unref(propsRef) || {}, formProps)
+    propsRef.value = mergeReplacingArrays(unref(propsRef) || {}, formProps)
   }
 
   // ---------- 基础操作 ----------
@@ -154,7 +170,7 @@ export function useBaseForm(props: any) {
     unref(getSchema).forEach((val) => {
       const updatedItem = updateData.find(item => val.field === item.field)
       if (updatedItem) {
-        const newSchema = merge({}, val, updatedItem) as FormSchema
+        const newSchema = mergeReplacingArrays(val, updatedItem) as FormSchema
         updatedSchema.push(newSchema)
         schema.push(newSchema)
       }
