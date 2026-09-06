@@ -39,6 +39,8 @@ export function useProfileForm() {
     try {
       const formData = new FormData()
       formData.append('file', file.file)
+      // 后端对无白名单的 fileType=all 已 fail-closed，头像必须声明类型走 avatar 配置
+      formData.append('fileType', 'avatar')
       const res = await UploadApi.upload(formData)
       await UserApi.updateUser({ avatar: res.url })
       await loadUserInfo()
