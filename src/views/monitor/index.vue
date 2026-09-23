@@ -2,6 +2,7 @@
 import { NTag } from 'naive-ui'
 import { h, ref } from 'vue'
 import { MetricsApi } from '@/api/metrics'
+import SystemInfo from './components/SystemInfo.vue'
 
 const tableRef = ref<any>(null)
 const stats = ref({ total: 0, errors: 0, pageviews: 0, todayErrors: 0 })
@@ -65,6 +66,10 @@ const columns = [
 
 <template>
   <div class="system-page">
+    <div class="mb-3">
+      <!-- 系统信息卡自首页迁入:基础设施信息属监控页,且接口已收口至 system:monitor:view -->
+      <SystemInfo :visible="true" />
+    </div>
     <div class="mb-3 grid grid-cols-4 gap-3">
       <n-card size="small">
         <div class="text-sm" style="color: var(--card-sub-text)">

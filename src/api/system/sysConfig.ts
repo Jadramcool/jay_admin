@@ -50,7 +50,7 @@ export const SysConfigApi = {
   resolveMany: (keys: string[]) =>
     request.get<Record<string, unknown>>({ url: API.resolve, params: { keys: keys.join(',') } }),
 
-  /** 公开配置(匿名可读,登录页/布局品牌位使用) */
+  /** 公开配置(匿名可读,登录页/布局品牌位使用;非关键请求,失败由 usePublicConfig 降级为默认文案,不弹全局错误) */
   getPublic: () =>
-    request.get<System.SysConfig[]>({ url: API.public }),
+    request.get<System.SysConfig[]>({ url: API.public, silentFail: true }),
 }

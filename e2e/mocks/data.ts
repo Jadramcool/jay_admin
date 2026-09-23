@@ -10,7 +10,7 @@ export const mockUsers = [
   { id: 5, username: 'zhaoliu', password: '123456', name: '赵六', phone: '13800000005', email: 'zhaoliu@jdm.com', sex: 'FEMALE', avatar: '', status: 0, roleType: 'user', position: '测试工程师', departmentId: 7, departmentName: '测试组', roles: [], createdTime: '2026-03-15T00:00:00.000Z', updatedTime: '2026-03-15T00:00:00.000Z' },
 ]
 
-const ts = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString()
+export const ts = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString()
 
 /** 平铺菜单(与后端 /auth/user/menu 返回结构一致,前端 permission store 会转树) */
 export const mockMenus = [
@@ -39,6 +39,7 @@ export const mockMenus = [
   { id: 20, code: 'system:dict:create', name: '新增', type: 'BUTTON', pid: 10, permission: 'system:dict:create', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
   { id: 21, code: 'system:dict:update', name: '编辑', type: 'BUTTON', pid: 10, permission: 'system:dict:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
   { id: 22, code: 'system:dict:delete', name: '删除', type: 'BUTTON', pid: 10, permission: 'system:dict:delete', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 38, code: 'system:operation-log:list', name: '日志查询', type: 'BUTTON', pid: 7, permission: 'system:operation-log:list', show: false, enable: true, order: 0, createdTime: ts(90), updatedTime: ts(30) },
 ]
 
 export const mockNotices = [
@@ -89,6 +90,7 @@ export const mockDashboard = {
     { id: 1, username: 'admin', action: '登录系统', module: '认证模块', operationType: 'LOGIN', time: ts(0), status: 'SUCCESS' },
     { id: 2, username: 'zhangsan', action: '创建了用户', module: '用户管理', operationType: 'CREATE', time: ts(1), status: 'SUCCESS' },
     { id: 3, username: 'admin', action: '发布了公告', module: '通知管理', operationType: 'UPDATE', time: ts(2), status: 'SUCCESS' },
+    { id: 4, username: 'zhangsan', action: '登录系统', module: '认证模块', operationType: 'LOGIN', time: ts(1), status: 'SUCCESS' },
   ],
 }
 

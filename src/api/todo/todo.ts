@@ -11,7 +11,7 @@ enum API {
 
 export const TodoApi = {
   /** 当前用户待办(平铺,含子任务 pid) */
-  list: (params?: { onlyUndone?: 0 | 1, keyword?: string }) =>
+  list: (params?: { isDone?: 0 | 1, keyword?: string }) =>
     request.get<System.Todo[]>({ url: API.list, params }),
 
   stats: () =>

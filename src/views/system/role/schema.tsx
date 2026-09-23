@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { computed } from 'vue'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 import { isSystemAdminRole } from './roleRules'
 
@@ -92,7 +92,7 @@ export function useRoleSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 280,
+          width: 210,
           render: (row: System.Role) => {
             if (isSystemAdminRole(row)) {
               return (
@@ -102,44 +102,26 @@ export function useRoleSchema(methods: any = {}) {
               )
             }
 
-            return (
-              <NSpace justify="center">
-                {hasPermission('system:role:assign-menu') && (
-                  <NButton
-                    type="primary"
-                    ghost
-                    size="small"
-                    onClick={() => methods.handleAuth(row)}
-                  >
-                    分配菜单权限
-                  </NButton>
-                )}
-                {hasPermission('system:role:update') && (
-                  <NButton
-                    type="info"
-                    ghost
-                    size="small"
-                    onClick={() => methods.handleEdit(row)}
-                  >
-                    编辑
-                  </NButton>
-                )}
-                {hasPermission('system:role:delete') && (
-                  <NPopconfirm
-                    onPositiveClick={() => methods.handleDelete(row)}
-                  >
-                    {{
-                      trigger: () => (
-                        <NButton type="error" ghost size="small">
-                          删除
-                        </NButton>
-                      ),
-                      default: () => `确定删除角色 ${row.name}？`,
-                    }}
-                  </NPopconfirm>
-                )}
-              </NSpace>
-            )
+            return renderTableActions([
+              {
+                label: '分配菜单权限',
+                show: hasPermission('system:role:assign-menu'),
+                onClick: () => methods.handleAuth(row),
+              },
+              {
+                label: '编辑',
+                type: 'info',
+                show: hasPermission('system:role:update'),
+                onClick: () => methods.handleEdit(row),
+              },
+              {
+                label: '删除',
+                type: 'error',
+                show: hasPermission('system:role:delete'),
+                confirm: `确定删除角色 ${row.name}？`,
+                onClick: () => methods.handleDelete(row),
+              },
+            ])
           },
         },
       },

@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:checkedKeys': [keys: number[]]
+  'update:indeterminateKeys': [keys: number[]]
 }>()
 
 const searchKeyword = shallowRef('')
@@ -40,6 +41,10 @@ watch(
 
 function handleCheckedKeysUpdate(keys: Array<string | number>) {
   emit('update:checkedKeys', keys.map(Number))
+}
+
+function handleIndeterminateKeysUpdate(keys: Array<string | number>) {
+  emit('update:indeterminateKeys', keys.map(Number))
 }
 
 function handleExpandedKeysUpdate(keys: Array<string | number>) {
@@ -129,7 +134,7 @@ function flattenTree(tree: RoleMenuTreeNode[]): RoleMenuTreeNode[] {
   <section class="permission-tree-panel">
     <div class="permission-tree-panel__heading">
       <div>
-        <span class="permission-tree-panel__title">权限菜单</span>
+        <span class="permission-tree-panel__title">菜单与按钮权限</span>
         <span class="permission-tree-panel__total">共 {{ allNodes.length }} 项</span>
       </div>
       <div class="permission-tree-panel__bulk-actions">
@@ -189,6 +194,7 @@ function flattenTree(tree: RoleMenuTreeNode[]): RoleMenuTreeNode[] {
         :render-suffix="renderSuffix"
         :show-irrelevant-nodes="false"
         @update:checked-keys="handleCheckedKeysUpdate"
+        @update:indeterminate-keys="handleIndeterminateKeysUpdate"
         @update:expanded-keys="handleExpandedKeysUpdate"
       />
     </div>

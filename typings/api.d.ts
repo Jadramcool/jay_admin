@@ -113,6 +113,8 @@ declare global {
       departmentId?: number
       departmentName?: string
       roles: System.Role[]
+      /** 功能权限码列表（v-auth 按钮级控制） */
+      permissions: string[]
     }
   }
 }

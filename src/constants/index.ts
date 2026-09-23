@@ -14,6 +14,7 @@ export const roleTypeOptions = [
   { label: '普通用户', value: 'user' },
 ]
 
+// 菜单树统一管理：目录（导航分组）/ 菜单（页面）/ 按钮（页面操作权限，权限标识必填）
 export const menuTypeOptions = [
   { label: '目录', value: 'DIRECTORY' },
   { label: '菜单', value: 'MENU' },

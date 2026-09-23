@@ -7,8 +7,9 @@ export function useTrendChart(visible: Ref<boolean>) {
   const loading = ref(true)
   const activeSeries = ref<TrendSeriesKey>('visits')
 
+  // 口径:visits = 前端上报的 pageview 事件数(非操作量);operations = 操作日志条数
   const seriesConfig: Record<TrendSeriesKey, { label: string, color: string }> = {
-    visits: { label: '访问量', color: '#2080f0' },
+    visits: { label: '页面访问量', color: '#2080f0' },
     newUsers: { label: '新增用户', color: '#18a058' },
     operations: { label: '操作次数', color: '#f0a020' },
   }
@@ -27,6 +28,8 @@ export function useTrendChart(visible: Ref<boolean>) {
       yAxis: { type: 'value', splitLine: { lineStyle: { type: 'dashed' } } },
       series: [{
         type: 'line',
+        // tooltip 中显示口径名称(如"页面访问量")
+        name: seriesConfig[activeSeries.value].label,
         data,
         smooth: true,
         lineStyle: { color: clr },

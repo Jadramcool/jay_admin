@@ -44,10 +44,28 @@ declare global {
       isDeleted?: boolean
       createdTime: string
       updatedTime: string
+      /** 角色已分配的功能权限ID列表（角色详情返回） */
+      permissionIds?: number[]
       _count?: {
         users: number
         menus: number
       }
+    }
+
+    /** 功能权限（接口级按钮/操作权限，独立于路由菜单） */
+    interface Permission {
+      id: number
+      code: string
+      name: string
+      module: string
+      menuId?: number | null
+      enable?: boolean
+    }
+
+    /** 按模块分组的功能权限 */
+    interface PermissionGroup {
+      module: string
+      permissions: Permission[]
     }
 
     interface Menu {

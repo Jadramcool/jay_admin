@@ -11,6 +11,13 @@ const props = defineProps<{ visible: boolean }>()
 use([CanvasRenderer, LineChart, GridComponent, TooltipComponent])
 
 const { trends, loading, activeSeries, seriesConfig, chartOption, totalValue } = useTrendChart(toRef(props, 'visible'))
+
+// pageview 数据早期为 0 时的空态(不做除零/无意义平线展示)
+const visitsEmpty = computed(() =>
+  activeSeries.value === 'visits'
+  && !!trends.value
+  && trends.value.visits.every(v => v === 0),
+)
 </script>
 
 <template>
@@ -23,6 +30,9 @@ const { trends, loading, activeSeries, seriesConfig, chartOption, totalValue } =
       </div>
     </template>
     <n-skeleton v-if="loading && !trends" :repeat="4" text />
+    <div v-else-if="visitsEmpty" class="trend__empty">
+      暂无访问数据
+    </div>
     <template v-else>
       <VChart :option="chartOption" autoresize class="trend__chart" />
       <div class="trend__total">
@@ -65,6 +75,16 @@ const { trends, loading, activeSeries, seriesConfig, chartOption, totalValue } =
   flex: 1;
   width: 100%;
   min-height: 100px;
+}
+
+.trend__empty {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color-4);
+  font-size: 13px;
 }
 
 .trend__total {

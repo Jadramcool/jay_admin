@@ -54,6 +54,11 @@ export const basicProps = {
     type: Boolean,
     default: false,
   },
+  // 树形数据加载完成后自动展开全部行（此前仅在 BasicTable 内部被读取，未声明为 prop，永远不生效）
+  defaultExpandAll: {
+    type: Boolean,
+    default: false,
+  },
   headerNoWrap: {
     type: Boolean,
     default: true,

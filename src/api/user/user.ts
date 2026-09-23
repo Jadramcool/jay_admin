@@ -18,9 +18,9 @@ export const UserApi = {
   login: (data: Api.LoginParams) =>
     request.post<Api.LoginResult>({ url: API.login, data, skipAuth: true }),
 
-  /** 获取登录图形验证码 */
+  /** 获取登录图形验证码(非关键请求,失败由组件降级隐藏验证码,不弹全局错误) */
   getCaptcha: () =>
-    request.get<{ enabled: boolean, captchaId?: string, image?: string }>({ url: API.captcha, skipAuth: true }),
+    request.get<{ enabled: boolean, captchaId?: string, image?: string }>({ url: API.captcha, skipAuth: true, silentFail: true }),
 
   register: (data: Api.RegisterParams) =>
     request.post<{ userId: number, username: string }>({

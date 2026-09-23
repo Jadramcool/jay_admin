@@ -8,11 +8,25 @@ export function useRoleMenuPermission() {
   const menuTree = shallowRef<RoleMenuTreeNode[]>([])
   const checkedMenuIds = ref<number[]>([])
   const originalMenuIds = shallowRef<number[]>([])
+  /** 半选父菜单（cascade 下部分子节点勾选）。保存时需一并提交，否则后端按 pid 建树会断链 */
+  const indeterminateMenuIds = ref<number[]>([])
 
   const flatMenus = computed(() => flattenTree(menuTree.value))
   const menuMap = computed(() => new Map(flatMenus.value.map(menu => [menu.key, menu])))
   const availableMenuIds = computed(() => new Set(menuMap.value.keys()))
-  const selectedMenuIds = computed(() => checkedMenuIds.value.filter(id => availableMenuIds.value.has(id)))
+  /** 提交用菜单集：勾选 + 半选父节点（保持菜单树父链完整） */
+  const selectedMenuIds = computed(() => {
+    const ids = new Set<number>()
+    checkedMenuIds.value.forEach((id) => {
+      if (availableMenuIds.value.has(id))
+        ids.add(id)
+    })
+    indeterminateMenuIds.value.forEach((id) => {
+      if (availableMenuIds.value.has(id))
+        ids.add(id)
+    })
+    return [...ids]
+  })
   const originalMenuIdSet = computed(() => new Set(originalMenuIds.value))
   const selectedMenuIdSet = computed(() => new Set(selectedMenuIds.value))
 
@@ -28,7 +42,11 @@ export function useRoleMenuPermission() {
 
   const changeCount = computed(() => addedMenus.value.length + removedMenus.value.length)
 
-  function initialize(record: System.Role, menus: System.Menu[], assignedMenus: System.Menu[]) {
+  function initialize(
+    record: System.Role,
+    menus: System.Menu[],
+    assignedMenus: System.Menu[],
+  ) {
     const formattedTree = menus.map(formatMenu)
     const validIds = new Set(flattenTree(formattedTree).map(menu => menu.key))
     const assignedIds = assignedMenus
@@ -39,6 +57,7 @@ export function useRoleMenuPermission() {
     menuTree.value = formattedTree
     originalMenuIds.value = [...assignedIds]
     checkedMenuIds.value = [...assignedIds]
+    indeterminateMenuIds.value = []
   }
 
   function reset() {
@@ -46,14 +65,20 @@ export function useRoleMenuPermission() {
     menuTree.value = []
     originalMenuIds.value = []
     checkedMenuIds.value = []
+    indeterminateMenuIds.value = []
   }
 
   function updateCheckedMenuIds(ids: number[]) {
     checkedMenuIds.value = [...new Set(ids)].filter(id => availableMenuIds.value.has(id))
   }
 
+  function updateIndeterminateKeys(ids: number[]) {
+    indeterminateMenuIds.value = ids.filter(id => availableMenuIds.value.has(id))
+  }
+
   function restoreOriginalPermissions() {
     checkedMenuIds.value = [...originalMenuIds.value]
+    indeterminateMenuIds.value = []
   }
 
   function commitCurrentPermissions() {
@@ -88,6 +113,7 @@ export function useRoleMenuPermission() {
     initialize,
     reset,
     updateCheckedMenuIds,
+    updateIndeterminateKeys,
     restoreOriginalPermissions,
     commitCurrentPermissions,
   }

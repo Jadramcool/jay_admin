@@ -1,13 +1,28 @@
 import type { FormSchema } from '@/components/Form/src/types'
 import dayjs from 'dayjs'
 import { cityTreeData, sexOptions } from '@/constants'
+import { isPhone } from '@/utils'
+
+/** 可选字段校验：留空不报错，填了才检查格式（async-validator callback 风格，空字符串也会进入 pattern 校验） */
+function optionalPatternRule(message: string, test: (v: string) => boolean) {
+  return {
+    validator: (_rule: unknown, value: string, callback: (e?: Error) => void) => {
+      if (!value || test(value))
+        callback()
+      else
+        callback(new Error(message))
+    },
+    trigger: 'blur',
+  }
+}
+
 /** 基本信息字段 */
 export const basicInfoSchemas: FormSchema[] = [
   {
     field: 'name',
     label: '姓名',
     component: 'NInput',
-    componentProps: { placeholder: '例如：张三', maxlength: 32, showCount: true },
+    componentProps: { placeholder: '例如：张三', maxlength: 32 },
     defaultValue: '',
   },
   {
@@ -21,7 +36,7 @@ export const basicInfoSchemas: FormSchema[] = [
     field: 'birthday',
     label: '生日',
     component: 'NDatePicker',
-    componentProps: { type: 'date', clearable: true, placeholder: '选择生日…' },
+    componentProps: { type: 'date', placeholder: '选择生日…' },
     defaultValue: null,
   },
   {
@@ -42,7 +57,9 @@ export const contactSchemas: FormSchema[] = [
     componentProps: {
       placeholder: '例如：13800138000',
       maxlength: 11,
+      clearable: true,
     },
+    rules: [optionalPatternRule('手机号格式不正确', isPhone)],
     defaultValue: '',
   },
   {
@@ -50,6 +67,9 @@ export const contactSchemas: FormSchema[] = [
     label: '邮箱',
     component: 'NInput',
     componentProps: { placeholder: '例如：name@example.com', maxlength: 64 },
+    rules: [
+      optionalPatternRule('邮箱格式不正确', v => /^[\w.-]+@[\w-]+(?:\.[\w-]+)+$/.test(v)),
+    ],
     defaultValue: '',
   },
   {
@@ -63,7 +83,6 @@ export const contactSchemas: FormSchema[] = [
       labelField: 'label',
       childrenField: 'children',
       filterable: true,
-      clearable: true,
     },
     defaultValue: null,
   },

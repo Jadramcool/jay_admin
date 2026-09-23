@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { computed } from 'vue'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 
 export const configTypeOptions = [
@@ -188,43 +188,28 @@ export function useSysConfigSchema(methods: SysConfigSchemaMethods) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 250,
-          render: (row: System.SysConfig) => (
-            <NSpace justify="center">
-              {hasPermission('system:config:update') && (
-                <NButton
-                  type="primary"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleTogglePublic(row)}
-                >
-                  {row.isPublic ? '设为内部' : '设为公开'}
-                </NButton>
-              )}
-              {hasPermission('system:config:update') && (
-                <NButton
-                  type="info"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleEdit(row)}
-                >
-                  编辑
-                </NButton>
-              )}
-              {hasPermission('system:config:delete') && !row.isSystem && (
-                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                  {{
-                    trigger: () => (
-                      <NButton type="error" ghost size="small">
-                        删除
-                      </NButton>
-                    ),
-                    default: () => `确定删除配置 ${row.name}？`,
-                  }}
-                </NPopconfirm>
-              )}
-            </NSpace>
-          ),
+          width: 180,
+          render: (row: System.SysConfig) => renderTableActions([
+            {
+              label: row.isPublic ? '设为内部' : '设为公开',
+              type: 'primary',
+              show: hasPermission('system:config:update'),
+              onClick: () => methods.handleTogglePublic(row),
+            },
+            {
+              label: '编辑',
+              type: 'info',
+              show: hasPermission('system:config:update'),
+              onClick: () => methods.handleEdit(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              show: hasPermission('system:config:delete') && !row.isSystem,
+              confirm: `确定删除配置 ${row.name}？`,
+              onClick: () => methods.handleDelete(row),
+            },
+          ]),
         },
       },
     ],

@@ -3,7 +3,10 @@ import type { FormSchema } from '@/components/Form/src/types'
 import { UserApi } from '@/api/user/user'
 import { FormEdit, useForm } from '@/components/Form'
 
-// ---- Password field schemas ----
+// ---- 密码字段 schemas ----
+/** 表单值访问器：与 useForm 初始化顺序解耦，供 schema 中的 validator 使用 */
+const formValueGetter = shallowRef<() => Recordable>(() => ({}))
+
 const passwordSchemas: FormSchema[] = [
   {
     field: 'oldPassword',
@@ -11,7 +14,7 @@ const passwordSchemas: FormSchema[] = [
     giProps: { span: 2 },
     component: 'NInput',
     defaultValue: '',
-    rules: [{ required: true, message: '请输入旧密码', trigger: 'blur' }],
+    rules: [{ required: true, message: '请输入当前密码', trigger: 'blur' }],
     componentProps: {
       type: 'password',
       showPasswordOn: 'click',
@@ -40,7 +43,16 @@ const passwordSchemas: FormSchema[] = [
     component: 'NInput',
     defaultValue: '',
     rules: [
-      { required: true, message: '请确认密码', trigger: 'blur' },
+      { required: true, message: '请再次输入新密码', trigger: 'blur' },
+      {
+        validator: (_rule: unknown, value: string, callback: (e?: Error) => void) => {
+          if (!value || value === formValueGetter.value().newPassword)
+            callback()
+          else
+            callback(new Error('两次输入的密码不一致'))
+        },
+        trigger: 'blur',
+      },
     ],
     componentProps: {
       type: 'password',
@@ -51,44 +63,42 @@ const passwordSchemas: FormSchema[] = [
 ]
 
 // ---- Form instance ----
-const [registerForm, { getFieldsValue, validate, resetFields }] = useForm({
+const [registerForm, { getFieldsValue, validate, resetFields, clearValidate }] = useForm({
   schemas: passwordSchemas,
   showActionButtonGroup: false,
   labelPlacement: 'left',
-  labelWidth: 90,
-  gridProps: { cols: '1 s:1 m:2 l:2 xl:2', xGap: 18, yGap: 14 },
+  labelWidth: 80,
+  gridProps: { cols: '1 m:2 l:2 xl:2', xGap: 18, yGap: 10 },
 })
 
-// ---- Reactively track form values ----
+formValueGetter.value = getFieldsValue
+
+// ---- 表单值（驱动强度条与规则清单） ----
 const formValues = computed(() => getFieldsValue())
 
-// ---- Password strength & checks ----
-interface PasswordChecks { length: boolean, mixed: boolean }
-interface PasswordStrength { score: number, label: string }
-
-const passwordChecks = computed<PasswordChecks>(() => {
+// ---- 密码强度 ----
+const lengthOk = computed(() => (formValues.value?.newPassword?.length ?? 0) >= 6)
+const mixedOk = computed(() => {
   const pwd = formValues.value?.newPassword || ''
-  const length = pwd.length >= 6
   const varieties = [
     /[a-z]/.test(pwd),
     /[A-Z]/.test(pwd),
     /\d/.test(pwd),
     /[^a-z0-9]/i.test(pwd),
   ].filter(Boolean).length
-  return { length, mixed: varieties >= 2 }
+  return varieties >= 2
 })
 
-const passwordStrength = computed<PasswordStrength>(() => {
+const passwordStrength = computed<{ score: number, label: string }>(() => {
   const pwd = formValues.value?.newPassword || ''
   if (!pwd)
     return { score: 0, label: '未输入' }
-  const { length, mixed } = passwordChecks.value
   let score = 0
-  if (length)
+  if (lengthOk.value)
     score += 1
   if (pwd.length >= 10)
     score += 1
-  if (mixed)
+  if (mixedOk.value)
     score += 1
   const label = score <= 1 ? '弱' : score === 2 ? '中' : '强'
   return { score: Math.min(score, 3), label }
@@ -103,7 +113,7 @@ const strengthSegments = computed(() => {
   ]
 })
 
-// ---- Old password verification ----
+// ---- 当前密码即时验证 ----
 const oldPasswordChecking = shallowRef(false)
 const oldPasswordVerified = shallowRef<boolean | null>(null)
 
@@ -111,24 +121,34 @@ watch(() => formValues.value?.oldPassword, () => {
   oldPasswordVerified.value = null
 })
 
-async function handleOldPasswordBlur() {
-  const oldPwd = formValues.value?.oldPassword
-  if (!oldPwd)
-    return
+async function verifyOldPassword(pwd: string) {
+  if (!pwd)
+    return false
   oldPasswordChecking.value = true
   try {
-    await UserApi.checkPassword(oldPwd)
+    await UserApi.checkPassword(pwd)
     oldPasswordVerified.value = true
+    return true
   }
   catch {
     oldPasswordVerified.value = false
+    return false
   }
   finally {
     oldPasswordChecking.value = false
   }
 }
 
-// ---- Submit ----
+function handleOldPasswordBlur() {
+  verifyOldPassword(formValues.value?.oldPassword || '')
+}
+
+// 新密码变更后清除校验残留（如确认密码不一致的旧提示）
+watch(() => formValues.value?.newPassword, () => {
+  clearValidate()
+})
+
+// ---- 提交 ----
 const passwordLoading = shallowRef(false)
 
 async function handleSubmit() {
@@ -138,8 +158,9 @@ async function handleSubmit() {
   catch { return }
 
   const values = getFieldsValue()
-  if (values.newPassword !== values.confirmPassword) {
-    window.$message?.error?.('两次密码不一致')
+  // 表单校验通过后，确保当前密码确实验证通过（兼容未触发失焦校验的场景）
+  if (oldPasswordVerified.value !== true && !(await verifyOldPassword(values.oldPassword))) {
+    window.$message?.error?.('当前密码验证失败，请检查输入')
     return
   }
 
@@ -162,33 +183,36 @@ async function handleSubmit() {
 
 <template>
   <div class="password-content">
-    <section class="card card--password">
+    <section class="card">
       <header class="card__head">
-        <span class="card__icon" aria-hidden="true">
-          <JIcon icon="icon-park-outline:lock" :size="18" />
-        </span>
-        <div class="card__head-text">
-          <h3 class="card__title">
-            修改密码
-          </h3>
-          <p class="card__subtitle">
-            定期更换密码以保障账户安全
-          </p>
-        </div>
+        <h3 class="card__title">
+          修改密码
+        </h3>
+        <p class="card__subtitle">
+          定期更换密码以保障账户安全
+        </p>
       </header>
-      <div class="card__divider" />
 
       <FormEdit @register="registerForm" />
 
-      <!-- Old password verification feedback -->
+      <!-- 当前密码验证反馈 -->
       <div
-        v-if="oldPasswordVerified === false"
+        v-if="oldPasswordChecking"
+        class="feedback"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="feedback__spinner" aria-hidden="true" />
+        <span>正在验证当前密码…</span>
+      </div>
+      <div
+        v-else-if="oldPasswordVerified === false"
         class="feedback feedback--error"
         role="alert"
         aria-live="assertive"
       >
         <JIcon icon="icon-park-outline:attention" :size="15" aria-hidden="true" />
-        <span>当前密码验证失败，请重新输入</span>
+        <span>当前密码验证失败，请核对后重试</span>
       </div>
       <div
         v-else-if="oldPasswordVerified === true"
@@ -197,12 +221,12 @@ async function handleSubmit() {
         aria-live="polite"
       >
         <JIcon icon="icon-park-outline:check-one" :size="15" aria-hidden="true" />
-        <span>密码验证通过</span>
+        <span>当前密码验证通过</span>
       </div>
 
-      <!-- Strength meter -->
+      <!-- 强度条 -->
       <div v-if="formValues?.newPassword" class="strength" :aria-label="`密码强度：${passwordStrength.label}`">
-        <div class="strength__bars">
+        <div class="strength__bars" aria-hidden="true">
           <span
             v-for="seg in strengthSegments"
             :key="seg.key"
@@ -215,53 +239,47 @@ async function handleSubmit() {
         </span>
       </div>
 
-      <!-- Rule checklist -->
+      <!-- 规则清单 -->
       <ul class="rules" aria-label="密码规则">
-        <li class="rules__item" :class="{ 'rules__item--ok': passwordChecks.length }">
+        <li class="rules__item" :class="{ 'rules__item--ok': lengthOk }">
           <span class="rules__check" aria-hidden="true">
-            <JIcon :icon="passwordChecks.length ? 'icon-park-outline:check-one' : 'icon-park-outline:remind'" :size="15" />
+            <JIcon :icon="lengthOk ? 'icon-park-outline:check-one' : 'icon-park-outline:remind'" :size="14" />
           </span>
           <span>长度至少 6 个字符</span>
         </li>
-        <li class="rules__item" :class="{ 'rules__item--ok': passwordChecks.mixed }">
+        <li class="rules__item" :class="{ 'rules__item--ok': mixedOk }">
           <span class="rules__check" aria-hidden="true">
-            <JIcon :icon="passwordChecks.mixed ? 'icon-park-outline:check-one' : 'icon-park-outline:remind'" :size="15" />
+            <JIcon :icon="mixedOk ? 'icon-park-outline:check-one' : 'icon-park-outline:remind'" :size="14" />
           </span>
           <span>包含字母、数字、符号中的至少 2 种</span>
         </li>
       </ul>
     </section>
 
-    <!-- Security tips -->
+    <!-- 安全建议 -->
     <section class="tips">
-      <header class="tips__head">
-        <span class="tips__icon" aria-hidden="true">
-          <JIcon icon="icon-park-outline:shield" :size="18" />
-        </span>
-        <h3 class="tips__title">
-          安全建议
-        </h3>
-      </header>
+      <h4 class="tips__title">
+        安全建议
+      </h4>
       <ul class="tips__list">
         <li>避免使用生日、手机号、连续数字等易被猜测的密码</li>
-        <li>不要在多个网站使用相同密码</li>
+        <li>不建议在多个网站使用相同的密码</li>
         <li>建议混合使用大小写字母、数字与特殊符号</li>
         <li>定期更换密码，确保账户持续安全</li>
       </ul>
     </section>
 
-    <div class="actions">
+    <footer class="actions">
       <n-button
         type="primary"
+        class="actions__btn"
         :loading="passwordLoading"
         attr-aria-busy="passwordLoading"
-        class="actions__btn"
         @click="handleSubmit"
       >
-        <JIcon icon="icon-park-outline:lock" :size="16" aria-hidden="true" />
-        <span>{{ passwordLoading ? '更新中…' : '更新密码' }}</span>
+        {{ passwordLoading ? '更新中…' : '更新密码' }}
       </n-button>
-    </div>
+    </footer>
   </div>
 </template>
 
@@ -272,176 +290,90 @@ async function handleSubmit() {
   gap: 14px;
 }
 
-/* ---- Card ---- */
+/* ---- 卡片 ---- */
 .card {
-  position: relative;
-  background: var(--card-color);
-  border-radius: calc(var(--border-radius) + 8px);
-  border: 1px solid var(--border-color);
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.03),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-  padding: 18px 22px;
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-color-hover), transparent);
-    opacity: 0.6;
-    transition: opacity 0.25s ease;
-  }
-
-  &:hover {
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.05),
-      0 2px 6px rgba(0, 0, 0, 0.02);
-    transform: translateY(-1px);
-    &::before {
-      opacity: 1;
-    }
-  }
-}
-
-/* ---- Password card: warm amber tint to convey caution ---- */
-.card--password {
-  background: linear-gradient(135deg, #f5f3f1 0%, #faecd0 100%);
-  border-color: rgba(240, 160, 32, 0.32);
-  box-shadow:
-    0 4px 14px rgba(240, 160, 32, 0.1),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-
-  &::before {
-    background: linear-gradient(90deg, #f0a020, #ffba50, transparent);
-  }
-
-  &:hover {
-    box-shadow:
-      0 10px 26px rgba(240, 160, 32, 0.18),
-      0 2px 6px rgba(0, 0, 0, 0.02);
-  }
-
-  .card__icon {
-    background: linear-gradient(135deg, #f0a020, #c87f0a);
-    box-shadow: 0 4px 12px rgba(240, 160, 32, 0.4);
-  }
-}
-
-html.dark .card--password {
-  background: linear-gradient(135deg, rgba(240, 160, 32, 0.18) 0%, rgba(240, 160, 32, 0.08) 100%);
-  border-color: rgba(240, 160, 32, 0.36);
+  padding: 18px 20px;
+  border: 1px solid var(--layout-border-light);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
 }
 
 .card__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.card__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: calc(var(--border-radius) + 2px);
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.25);
-  svg {
-    width: 15px;
-    height: 15px;
-  }
-}
-
-.card__head-text {
-  min-width: 0;
+  margin-bottom: 14px;
 }
 
 .card__title {
-  font-family: var(--font-family);
+  margin: 0;
   font-size: 15px;
   font-weight: 700;
-  margin: 0;
-  line-height: 1.3;
-  color: var(--text-color-1);
+  color: var(--card-header-text);
 }
 
 .card__subtitle {
   margin: 2px 0 0;
-  font-size: 11.5px;
-  color: var(--text-color-3);
-  line-height: 1.4;
+  font-size: 12px;
+  color: var(--card-sub-text);
 }
 
-.card__divider {
-  height: 1px;
-  margin: 12px 0 14px;
-  background: var(--divider-color);
-}
-
-/* ---- Form override ---- */
 .card :deep(.n-form-item-label) {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-color-2);
-  padding-right: 10px !important;
-  text-align: right;
+  font-size: 13px;
+  color: var(--card-header-text);
 }
 
 .card :deep(.n-form-item) {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
-.card :deep(.n-input) {
-  border-radius: calc(var(--border-radius) + 2px);
+.card :deep(.n-form-item-feedback) {
+  font-size: 12px;
 }
 
-/* ---- Feedback ---- */
+/* ---- 当前密码验证反馈 ---- */
 .feedback {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 10px;
   padding: 8px 12px;
-  border-radius: calc(var(--border-radius) + 4px);
+  border-radius: var(--radius-sm);
   font-size: 12.5px;
-  font-weight: 500;
-  animation: feedback-in 0.25s ease;
 
   &--error {
-    background: rgba(208, 48, 80, 0.08);
     color: #d03050;
-    border: 1px solid rgba(208, 48, 80, 0.15);
+    background: rgba(208, 48, 80, 0.08);
+    border: 1px solid rgba(208, 48, 80, 0.18);
   }
 
   &--ok {
-    background: rgba(var(--primary-color-rgb), 0.08);
     color: var(--primary-color);
-    border: 1px solid rgba(var(--primary-color-rgb), 0.15);
+    background: rgba(var(--primary-color-rgb), 0.08);
+    border: 1px solid rgba(var(--primary-color-rgb), 0.18);
   }
 }
 
-@keyframes feedback-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
+.feedback__spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 2px solid rgba(var(--primary-color-rgb), 0.25);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: feedback-spin 0.8s linear infinite;
+}
+
+@keyframes feedback-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* ---- Strength meter ---- */
+/* ---- 强度条 ---- */
 .strength {
   display: flex;
   align-items: center;
   gap: 10px;
   max-width: 520px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .strength__bars {
@@ -451,54 +383,54 @@ html.dark .card--password {
 }
 
 .strength__bar {
-  height: 5px;
+  height: 4px;
   flex: 1;
-  border-radius: 3px;
-  background: var(--divider-color);
-  transition:
-    background-color 0.3s ease,
-    transform 0.3s ease;
+  border-radius: 2px;
+  background: var(--card-divider);
+  transition: background-color 0.25s ease;
 
   &--weak.strength__bar--active {
     background: #d03050;
-    transform: scaleY(1.15);
   }
+
   &--medium.strength__bar--active {
     background: #f0a020;
-    transform: scaleY(1.15);
   }
+
   &--strong.strength__bar--active {
     background: var(--primary-color);
-    transform: scaleY(1.15);
   }
 }
 
 .strength__label {
-  font-size: 11.5px;
-  font-weight: 700;
   min-width: 28px;
+  font-size: 11.5px;
+  font-weight: 600;
   text-align: right;
-  color: var(--text-color-3);
+  color: var(--card-sub-text);
+
   &--1 {
     color: #d03050;
   }
+
   &--2 {
     color: #f0a020;
   }
+
   &--3 {
     color: var(--primary-color);
   }
 }
 
-/* ---- Checklist ---- */
+/* ---- 规则清单 ---- */
 .rules {
-  list-style: none;
-  margin: 10px 0 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
   max-width: 520px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
 }
 
 .rules__item {
@@ -506,11 +438,12 @@ html.dark .card--password {
   align-items: center;
   gap: 8px;
   font-size: 12.5px;
-  color: var(--text-color-3);
-  transition: color 0.25s ease;
+  color: var(--card-sub-text);
+  transition: color 0.2s ease;
 
   &--ok {
-    color: var(--text-color-2);
+    color: var(--card-header-text);
+
     .rules__check {
       color: var(--primary-color);
       background: rgba(var(--primary-color-rgb), 0.1);
@@ -522,94 +455,79 @@ html.dark .card--password {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  color: var(--text-color-3);
-  background: var(--hover-color);
+  color: var(--card-sub-text);
+  background: var(--layout-bg-hover);
+  flex-shrink: 0;
   transition:
-    color 0.25s ease,
-    background 0.25s ease;
+    color 0.2s ease,
+    background-color 0.2s ease;
 }
 
-/* ---- Tips ---- */
+/* ---- 安全建议 ---- */
 .tips {
-  background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.08), rgba(var(--primary-color-rgb), 0.02));
-  border: 1px solid rgba(var(--primary-color-rgb), 0.18);
-  border-radius: calc(var(--border-radius) + 8px);
-  padding: 14px 18px;
-}
-
-.tips__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.tips__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: calc(var(--border-radius) + 2px);
-  color: var(--primary-color);
-  background: rgba(var(--primary-color-rgb), 0.1);
+  padding: 14px 16px;
+  border: 1px solid var(--layout-border-light);
+  border-radius: var(--radius-md);
+  background: var(--layout-bg-secondary);
 }
 
 .tips__title {
-  font-family: var(--font-family);
-  font-size: 14px;
+  margin: 0 0 8px;
+  font-size: 13px;
   font-weight: 700;
-  margin: 0;
-  color: var(--text-color-1);
+  color: var(--card-header-text);
 }
 
 .tips__list {
-  margin: 0;
-  padding-left: 18px;
   display: flex;
   flex-direction: column;
   gap: 5px;
+  margin: 0;
+  padding-left: 16px;
+
   li {
     font-size: 12.5px;
-    color: var(--text-color-2);
     line-height: 1.55;
+    color: var(--card-sub-text);
   }
 }
 
-/* ---- Actions ---- */
+/* ---- 操作区 ---- */
 .actions {
   display: flex;
-  justify-content: flex-start;
-  padding-top: 2px;
+  justify-content: flex-end;
+}
 
-  &__btn {
-    min-width: 124px;
-    height: 36px;
-    border-radius: calc(var(--border-radius) + 4px) !important;
-    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb), 0.28);
+.actions__btn {
+  min-width: 124px !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.2);
 
-    :deep(.n-button__content) {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-    }
+  :deep(.n-button__content) {
+    font-weight: 600;
   }
 }
 
 @media (max-width: 860px) {
   .card {
     padding: 14px 16px;
-    border-radius: calc(var(--border-radius) + 6px);
   }
+
   .actions {
     justify-content: stretch;
-    &__btn {
+
+    .actions__btn {
       width: 100%;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedback__spinner {
+    animation: none;
   }
 }
 </style>

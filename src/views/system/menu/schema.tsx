@@ -1,11 +1,31 @@
 import { Icon } from '@iconify/vue/dist/iconify.js'
 import dayjs from 'dayjs'
-import { NButton, NSpace, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { MenuApi } from '@/api/system'
 import { menuTypeOptions } from '@/constants'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
+import { buildParentOptions, MENU_TYPE_LABEL } from './menu-tree'
+
+/**
+ * 「父级菜单」候选参数缓存
+ *
+ * componentProps 以函数形式声明，每次表单模型变化都会重新求值；若每次返回新对象，
+ * ApiTreeSelect 的 `watch(params, loadData, { deep: true })` 会在任意字段输入时重复拉树。
+ * 用 (类型, 自身ID) 做键复用同一对象，保证只有真正影响候选集的改动才触发重新加载。
+ */
+const parentOptionParamsCache = new Map<string, { type: string, selfId: number | null }>()
+
+function getParentOptionParams(type?: string, selfId?: number | null) {
+  const key = `${type ?? ''}#${selfId ?? ''}`
+  let params = parentOptionParamsCache.get(key)
+  if (!params) {
+    params = { type: type ?? 'MENU', selfId: selfId ?? null }
+    parentOptionParamsCache.set(key, params)
+  }
+  return params
+}
 
 export function useMenuSchema(methods: any = {}) {
   const schema = computed(() => ({
@@ -15,6 +35,43 @@ export function useMenuSchema(methods: any = {}) {
         label: 'ID',
         defaultValue: undefined,
         editForm: { ifShow: false },
+      },
+      // ==================== 查询表单专用字段 ====================
+      // 菜单树一次取全、筛选在前端完成，这套字段不参与新增/编辑表单
+      {
+        key: 'keyword',
+        label: '关键字',
+        form: {
+          component: 'NInput',
+          componentProps: { placeholder: '名称 / 路由标识 / 权限码' },
+        },
+      },
+      {
+        key: 'typeFilter',
+        label: '类型',
+        form: {
+          component: 'NSelect',
+          componentProps: {
+            options: menuTypeOptions,
+            placeholder: '全部类型',
+            clearable: true,
+          },
+        },
+      },
+      {
+        key: 'statusFilter',
+        label: '状态',
+        form: {
+          component: 'NSelect',
+          componentProps: {
+            options: [
+              { label: '启用', value: 'enabled' },
+              { label: '停用', value: 'disabled' },
+            ],
+            placeholder: '全部状态',
+            clearable: true,
+          },
+        },
       },
       {
         key: 'type',
@@ -29,9 +86,9 @@ export function useMenuSchema(methods: any = {}) {
           width: 90,
           render: (row: any) => {
             const map: Record<string, { label: string, color: string }> = {
-              DIRECTORY: { label: '目录', color: 'info' },
-              MENU: { label: '菜单', color: 'success' },
-              BUTTON: { label: '按钮', color: 'warning' },
+              DIRECTORY: { label: MENU_TYPE_LABEL.DIRECTORY, color: 'info' },
+              MENU: { label: MENU_TYPE_LABEL.MENU, color: 'success' },
+              BUTTON: { label: MENU_TYPE_LABEL.BUTTON, color: 'warning' },
             }
             const info = map[row.type]
             return info
@@ -70,10 +127,17 @@ export function useMenuSchema(methods: any = {}) {
         key: 'permission',
         label: '权限标识',
         defaultValue: undefined,
-        ifShow: ({ values }: any) => values.type === 'MENU' || values.type === 'BUTTON',
+        // 权限码只声明在按钮行：目录/菜单行的可见性取决于角色是否被分配该节点，
+        // 接口鉴权则由该页面下的按钮行承载（后端会强制把非按钮行的 permission 落库为 null）
+        ifShow: ({ values }: any) => values.type === 'BUTTON',
         editForm: {
           component: 'NInput',
-          componentProps: { placeholder: '例如: system:user:list' },
+          componentProps: {
+            placeholder: '与接口 @RequirePermissions 的 code 一致，如 system:user:create',
+          },
+          rules: [
+            { required: true, message: '按钮必须填写权限标识', trigger: 'blur' },
+          ],
         },
         table: {
           width: 190,
@@ -85,13 +149,17 @@ export function useMenuSchema(methods: any = {}) {
         key: 'code',
         label: '路由标识',
         defaultValue: undefined,
+        // 按钮不使用路由标识：其 code 由权限码派生（提交时强制同源）
+        ifShow: ({ values }: any) => values.type !== 'BUTTON',
         form: {
           component: 'NInput',
           componentProps: { placeholder: '路由标识' },
         },
         editForm: {
           rules: [{ required: true, message: '请输入路由标识', trigger: 'blur' }],
-          componentProps: { placeholder: '例如: UserList' },
+          componentProps: {
+            placeholder: '例如: UserList（已作为路由 name，创建后改名会导致标签页缓存失效）',
+          },
         },
         table: {
           width: 150,
@@ -139,13 +207,23 @@ export function useMenuSchema(methods: any = {}) {
         defaultValue: null,
         editForm: {
           component: 'ApiTreeSelect',
-          componentProps: {
-            api: MenuApi.tree,
-            placeholder: '请选择父菜单',
-            labelField: 'name',
-            keyField: 'id',
-            clearable: true,
-            filterable: true,
+          // 候选集按当前类型过滤：目录/菜单只能挂目录下，按钮只能挂菜单下；
+          // 同时剔除自身子树，从交互层杜绝成环（后端仍会再校验一次）
+          componentProps: ({ formModel }: any) => {
+            const type = formModel?.type ?? 'MENU'
+            const selfId = formModel?.id ?? null
+            return {
+              api: (params: { type: string, selfId: number | null }) =>
+                MenuApi.tree().then(tree =>
+                  buildParentOptions(tree ?? [], params.type as any, params.selfId),
+                ),
+              params: getParentOptionParams(type, selfId),
+              placeholder: type === 'BUTTON' ? '所属目录 / 菜单（必选）' : '不选则作为根节点',
+              labelField: 'name',
+              keyField: 'id',
+              clearable: true,
+              filterable: true,
+            }
           },
         },
       },
@@ -238,6 +316,25 @@ export function useMenuSchema(methods: any = {}) {
         },
       },
       {
+        key: 'enable',
+        label: '启用',
+        defaultValue: true,
+        // enable 同时是鉴权与导航的过滤条件：按钮停用即刻退出权限集合，
+        // 目录/菜单停用则整棵子树从侧边栏与用户菜单中消失，因此必须可见可改
+        editForm: { component: 'NSwitch' },
+        table: {
+          width: 80,
+          render: (row: any) => {
+            const enabled = row.enable !== false
+            return (
+              <NTag bordered={false} type={(enabled ? 'success' : 'error') as any} size="small">
+                {enabled ? '启用' : '停用'}
+              </NTag>
+            )
+          },
+        },
+      },
+      {
         key: 'keepAlive',
         label: '缓存',
         defaultValue: false,
@@ -315,41 +412,26 @@ export function useMenuSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 280,
-          render: (row: any) => (
-            <NSpace justify="center">
-              {row.type !== 'BUTTON' && hasPermission('system:menu:create') && (
-                <NButton
-                  type="primary"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleAddChild(row)}
-                >
-                  添加子菜单
-                </NButton>
-              )}
-              {hasPermission('system:menu:update') && (
-                <NButton
-                  type="info"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleEdit(row)}
-                >
-                  编辑
-                </NButton>
-              )}
-              {hasPermission('system:menu:delete') && (
-                <NButton
-                  type="error"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleDelete(row)}
-                >
-                  删除
-                </NButton>
-              )}
-            </NSpace>
-          ),
+          width: 200,
+          render: (row: any) => renderTableActions([
+            {
+              label: '添加子菜单',
+              show: row.type !== 'BUTTON' && hasPermission('system:menu:create'),
+              onClick: () => methods.handleAddChild(row),
+            },
+            {
+              label: '编辑',
+              type: 'info',
+              show: hasPermission('system:menu:update'),
+              onClick: () => methods.handleEdit(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              show: hasPermission('system:menu:delete'),
+              onClick: () => methods.handleDelete(row),
+            },
+          ]),
         },
       },
     ],
@@ -364,10 +446,11 @@ export function useMenuSchema(methods: any = {}) {
     'icon',
     'order',
     'show',
+    'enable',
     'createdTime',
     'operate',
   ]
-  const formFields = ['name']
+  const formFields = ['keyword', 'typeFilter', 'statusFilter']
   const editFormFields = [
     'id',
     'type',
@@ -387,6 +470,7 @@ export function useMenuSchema(methods: any = {}) {
     'redirect',
     'order',
     'show',
+    'enable',
     'keepAlive',
     'withContentCard',
     'description',

@@ -27,6 +27,7 @@ const {
   initialize,
   reset,
   updateCheckedMenuIds,
+  updateIndeterminateKeys,
   restoreOriginalPermissions,
   commitCurrentPermissions,
 } = useRoleMenuPermission()
@@ -47,11 +48,16 @@ const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data
   loading.value = true
   setModalProps({ loading: true })
   try {
+    // 菜单树含目录/菜单/按钮（按钮即页面操作权限），分配在一棵树内完成
     const [menus, roleDetail] = await Promise.all([
       MenuApi.tree(),
       RoleApi.detail(data.record.id),
     ])
-    initialize(data.record, menus ?? [], roleDetail?.menus ?? [])
+    initialize(
+      data.record,
+      menus ?? [],
+      roleDetail?.menus ?? [],
+    )
   }
   finally {
     loading.value = false
@@ -65,9 +71,10 @@ async function handleOk() {
 
   saving.value = true
   try {
+    // 半选父节点并入 menuIds，保证后端按 pid 建树不断链
     await RoleApi.assignMenu(role.value.id, selectedMenuIds.value)
     commitCurrentPermissions()
-    window.$message?.success?.(`已更新「${role.value.name}」的菜单权限`)
+    window.$message?.success?.(`已更新「${role.value.name}」的权限配置`)
     closeModal()
     emit('success')
   }
@@ -123,7 +130,7 @@ async function handleCancel() {
           </n-tag>
         </div>
         <span class="role-menu-permission__description">
-          为该角色配置可访问的目录、菜单及页面操作权限
+          在一棵树内完成配置：勾选菜单即授予页面访问，菜单下的按钮节点对应页面操作权限
         </span>
       </div>
 
@@ -132,6 +139,7 @@ async function handleCancel() {
           :data="menuTree"
           :checked-keys="checkedMenuIds"
           @update:checked-keys="updateCheckedMenuIds"
+          @update:indeterminate-keys="updateIndeterminateKeys"
         />
         <RoleMenuSummary
           :menus="flatMenus"
@@ -147,7 +155,7 @@ async function handleCancel() {
       <div class="role-menu-permission__footer">
         <div class="role-menu-permission__updated">
           <span>上次更新：{{ updatedTimeLabel }}</span>
-          <span v-if="originalMenuIds.length">原权限 {{ originalMenuIds.length }} 项</span>
+          <span v-if="originalMenuIds.length">已分配 {{ originalMenuIds.length }} 项</span>
         </div>
         <n-space>
           <n-button :disabled="saving" @click="handleCancel">

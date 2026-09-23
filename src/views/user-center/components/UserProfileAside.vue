@@ -18,6 +18,10 @@ const roleTypeLabel = computed(() =>
 
 const isAdmin = computed(() => props.userInfo.roleType === 'admin')
 
+const joinedLabel = computed(() =>
+  props.userInfo.joinedAt ? dayjs(props.userInfo.joinedAt).format('YYYY年M月') : '',
+)
+
 function onAvatarUpload(options: UploadCustomRequestOptions) {
   emit('avatarUpload', options)
 }
@@ -25,53 +29,40 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
 
 <template>
   <section class="hero">
-    <!-- Gradient banner backdrop -->
-    <div class="hero__banner" aria-hidden="true">
-      <div class="hero__banner-mesh" />
-      <div class="hero__banner-glow hero__banner-glow--a" />
-      <div class="hero__banner-glow hero__banner-glow--b" />
-      <div class="hero__banner-glow hero__banner-glow--c" />
-      <div class="hero__banner-noise" />
-    </div>
+    <div class="hero__banner" aria-hidden="true" />
 
     <div class="hero__body">
-      <!-- Avatar with soft halo + upload overlay -->
+      <!-- 头像：点击更换（n-upload 不直接参与 flex 布局，避免其内部宽度撑满整行） -->
       <div class="hero__avatar-col">
         <n-upload
           :show-file-list="false"
           accept="image/*"
           :custom-request="onAvatarUpload"
         >
-          <button class="hero__avatar" type="button" aria-label="更换头像">
-            <span class="hero__avatar-ring" aria-hidden="true" />
-            <span class="hero__avatar-ring hero__avatar-ring--slow" aria-hidden="true" />
-            <n-avatar :size="76" round :src="avatarUrl" class="hero__avatar-img">
-              <JIcon v-if="!avatarUrl" icon="icon-park-outline:avatar" :size="34" aria-hidden="true" />
+          <button class="hero__avatar" type="button" aria-label="更换头像" title="点击更换头像">
+            <n-avatar :size="72" round :src="avatarUrl" class="hero__avatar-img">
+              <JIcon v-if="!avatarUrl" icon="icon-park-outline:avatar" :size="30" aria-hidden="true" />
             </n-avatar>
             <span class="hero__avatar-overlay" aria-hidden="true">
-              <JIcon icon="icon-park-outline:camera" :size="18" />
+              <JIcon icon="icon-park-outline:camera" :size="16" />
             </span>
-            <span class="hero__avatar-status" aria-hidden="true" />
           </button>
         </n-upload>
       </div>
 
-      <!-- Identity -->
+      <!-- 身份信息 -->
       <div class="hero__identity">
         <div class="hero__name-row">
           <h2 class="hero__name">
             {{ userInfo.name || userInfo.username || '—' }}
           </h2>
           <span class="hero__chip" :class="{ 'hero__chip--admin': isAdmin }">
-            <JIcon :icon="isAdmin ? 'icon-park-outline:star' : 'icon-park-outline:user'" :size="12" aria-hidden="true" />
             {{ roleTypeLabel }}
           </span>
         </div>
         <p class="hero__handle">
           @{{ userInfo.username }}
         </p>
-
-        <!-- Role tags -->
         <div v-if="userInfo.roles?.length" class="hero__tags">
           <n-tag
             v-for="role in userInfo.roles"
@@ -86,34 +77,31 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
         </div>
       </div>
 
-      <!-- Meta info column (right) -->
+      <!-- 右侧元信息 -->
       <dl class="hero__meta">
-        <div class="hero__meta-item" :title="userInfo.departmentName || '未分配部门'">
-          <span class="hero__meta-icon" aria-hidden="true">
-            <JIcon icon="icon-park-outline:building-one" :size="14" />
-          </span>
-          <div class="hero__meta-text">
-            <span class="hero__meta-label">部门</span>
-            <span class="hero__meta-value">{{ userInfo.departmentName || '未分配' }}</span>
-          </div>
+        <div class="hero__meta-item">
+          <dt class="hero__meta-label">
+            部门
+          </dt>
+          <dd class="hero__meta-value" :title="userInfo.departmentName || undefined">
+            {{ userInfo.departmentName || '未分配' }}
+          </dd>
         </div>
-        <div v-if="userInfo.position" class="hero__meta-item" :title="userInfo.position">
-          <span class="hero__meta-icon" aria-hidden="true">
-            <JIcon icon="icon-park-outline:peoples" :size="14" />
-          </span>
-          <div class="hero__meta-text">
-            <span class="hero__meta-label">职位</span>
-            <span class="hero__meta-value">{{ userInfo.position }}</span>
-          </div>
+        <div v-if="userInfo.position" class="hero__meta-item">
+          <dt class="hero__meta-label">
+            职位
+          </dt>
+          <dd class="hero__meta-value" :title="userInfo.position">
+            {{ userInfo.position }}
+          </dd>
         </div>
-        <div v-if="userInfo.joinedAt" class="hero__meta-item">
-          <span class="hero__meta-icon" aria-hidden="true">
-            <JIcon icon="icon-park-outline:calendar" :size="14" />
-          </span>
-          <div class="hero__meta-text">
-            <span class="hero__meta-label">入职</span>
-            <span class="hero__meta-value">{{ dayjs(userInfo.joinedAt).format('YYYY年M月') }}</span>
-          </div>
+        <div v-if="joinedLabel" class="hero__meta-item">
+          <dt class="hero__meta-label">
+            入职
+          </dt>
+          <dd class="hero__meta-value">
+            {{ joinedLabel }}
+          </dd>
         </div>
       </dl>
     </div>
@@ -124,229 +112,85 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(var(--primary-color-rgb), 0.06) 0%, transparent 38%), var(--card-color);
-  border-radius: calc(var(--border-radius) + 8px);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--box-shadow);
-  isolation: isolate;
-  margin: 0 24px;
+  border: 1px solid var(--layout-border-light);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
 }
 
-/* ---- Banner backdrop with brand gradient ---- */
+/* 顶部品牌色带：静态渐变，无动画 */
 .hero__banner {
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 78px;
+  inset: 0 0 auto;
+  height: 64px;
   background:
-    linear-gradient(
-      135deg,
-      rgba(var(--primary-color-rgb), 0.32),
-      rgba(var(--primary-color-rgb), 0.08) 55%,
-      transparent
-    ),
-    linear-gradient(180deg, rgba(var(--primary-color-rgb), 0.14), transparent);
-  z-index: 0;
+    radial-gradient(ellipse 60% 120% at 85% 0%, rgba(var(--primary-color-rgb), 0.18), transparent),
+    linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.14), rgba(var(--primary-color-rgb), 0.04) 60%, transparent);
 }
 
-.hero__banner-mesh {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 30%, rgba(var(--primary-color-rgb), 0.22), transparent 40%),
-    radial-gradient(circle at 80% 20%, rgba(var(--primary-color-rgb), 0.16), transparent 45%);
-}
-
-.hero__banner-glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(28px);
-  opacity: 0.5;
-
-  &--a {
-    width: 200px;
-    height: 200px;
-    top: -90px;
-    right: 6%;
-    background: rgba(var(--primary-color-rgb), 0.45);
-    animation: float 8s ease-in-out infinite;
-  }
-
-  &--b {
-    width: 160px;
-    height: 160px;
-    top: -50px;
-    left: 16%;
-    background: rgba(var(--primary-color-rgb), 0.28);
-    animation: float 10s ease-in-out infinite reverse;
-  }
-
-  &--c {
-    width: 120px;
-    height: 120px;
-    top: -20px;
-    right: 38%;
-    background: rgba(var(--primary-color-rgb), 0.18);
-    animation: float 12s ease-in-out infinite;
-  }
-}
-
-.hero__banner-noise {
-  position: absolute;
-  inset: 0;
-  opacity: 0.2;
-  mix-blend-mode: overlay;
-  background-size: 96px 96px;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-10px) scale(1.04);
-  }
-}
-
-/* ---- Body: 3-column layout (avatar | identity | meta) ---- */
 .hero__body {
   position: relative;
-  z-index: 1;
   display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  padding: 38px 24px 18px;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
 }
 
-/* ---- Avatar ---- */
+/* ---- 头像 ---- */
 .hero__avatar-col {
   flex-shrink: 0;
 }
 
+/* n-upload 内部 trigger 会带额外空隙，压缩为紧贴按钮 */
+.hero__avatar-col :deep(.n-upload) {
+  display: inline-flex;
+  line-height: 0;
+}
+
 .hero__avatar {
   position: relative;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  padding: 0;
-  font: inherit;
-  border-radius: 50%;
-  line-height: 0;
   display: inline-flex;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font: inherit;
+  line-height: 0;
+  cursor: pointer;
 
-  &:hover .hero__avatar-overlay {
+  &:hover .hero__avatar-overlay,
+  &:focus-visible .hero__avatar-overlay {
     opacity: 1;
-  }
-
-  &:hover .hero__avatar-img {
-    transform: scale(1.03);
-  }
-
-  &:hover .hero__avatar-ring {
-    opacity: 1;
-    transform: scale(1.06);
   }
 
   &:focus-visible {
     outline: 2px solid var(--primary-color);
-    outline-offset: 4px;
-  }
-}
-
-.hero__avatar-ring {
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    rgba(var(--primary-color-rgb), 0.7),
-    rgba(var(--primary-color-rgb), 0.1),
-    rgba(var(--primary-color-rgb), 0.7)
-  );
-  opacity: 0.55;
-  transition:
-    opacity 0.25s ease,
-    transform 0.25s ease;
-  z-index: -1;
-  animation: spin 10s linear infinite;
-
-  &--slow {
-    inset: -9px;
-    opacity: 0.22;
-    background: conic-gradient(
-      from 180deg,
-      rgba(var(--primary-color-rgb), 0.4),
-      transparent,
-      rgba(var(--primary-color-rgb), 0.4)
-    );
-    animation: spin 18s linear infinite reverse;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+    outline-offset: 3px;
   }
 }
 
 .hero__avatar-img {
   box-shadow:
-    0 0 0 5px var(--card-color),
-    0 8px 24px rgba(0, 0, 0, 0.1);
-  transition: transform 0.25s ease;
+    0 0 0 3px var(--card-bg),
+    0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .hero__avatar-overlay {
   position: absolute;
-  inset: 6px;
-  border-radius: 50%;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
   background: rgba(0, 0, 0, 0.45);
   color: #fff;
   opacity: 0;
   transition: opacity 0.2s ease;
 }
 
-.hero__avatar-status {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  border: 3px solid var(--card-color);
-  box-shadow: 0 0 0 1px rgba(var(--primary-color-rgb), 0.35);
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    opacity: 0;
-    animation: pulse 2s ease-out infinite;
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.6;
-  }
-  100% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-}
-
-/* ---- Identity ---- */
+/* ---- 身份信息 ---- */
 .hero__identity {
-  min-width: 0;
   flex: 1;
-  padding-bottom: 4px;
+  min-width: 0;
 }
 
 .hero__name-row {
@@ -357,50 +201,43 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
 }
 
 .hero__name {
-  font-family: var(--font-family);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1.2;
   margin: 0;
-  text-wrap: balance;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--card-header-text);
+  max-width: 320px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 320px;
-  background: linear-gradient(135deg, var(--text-color-1), var(--text-color-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .hero__chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
+  padding: 2px 9px;
   border-radius: 999px;
   font-size: 11.5px;
   font-weight: 600;
   color: var(--primary-color);
-  background: rgba(var(--primary-color-rgb), 0.12);
-  white-space: nowrap;
+  background: rgba(var(--primary-color-rgb), 0.1);
   border: 1px solid rgba(var(--primary-color-rgb), 0.18);
+  white-space: nowrap;
 
   &--admin {
     color: #fff;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
+    background: var(--primary-color);
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.28);
   }
 }
 
 .hero__handle {
   margin: 3px 0 0;
   font-size: 12.5px;
-  color: var(--text-color-3);
+  color: var(--card-sub-text);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .hero__tags {
@@ -410,111 +247,52 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
   margin-top: 8px;
 }
 
-.hero__tag {
-  background: rgba(var(--primary-color-rgb), 0.08) !important;
-  color: var(--text-color-2) !important;
-  transition: transform 0.2s ease !important;
-
-  &:hover {
-    transform: translateY(-1px);
-  }
-}
-
-/* ---- Meta column (right side) ---- */
+/* ---- 右侧元信息 ---- */
 .hero__meta {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  gap: 20px;
   margin: 0;
+  padding: 0 4px 0 18px;
+  border-left: 1px solid var(--card-divider);
   flex-shrink: 0;
-  min-width: 160px;
-  max-width: 220px;
-  padding-bottom: 4px;
 }
 
 .hero__meta-item {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 10px;
-  border-radius: calc(var(--border-radius) + 2px);
-  color: var(--text-color-2);
-  background: color-mix(in srgb, var(--hover-color) 70%, transparent);
-  border: 1px solid var(--border-color);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    background: rgba(var(--primary-color-rgb), 0.06);
-    border-color: rgba(var(--primary-color-rgb), 0.2);
-    transform: translateX(-2px);
-  }
-}
-
-.hero__meta-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--border-radius);
-  color: var(--primary-color);
-  background: rgba(var(--primary-color-rgb), 0.1);
-  flex-shrink: 0;
-}
-
-.hero__meta-text {
-  display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
-  line-height: 1.2;
+  max-width: 160px;
 }
 
 .hero__meta-label {
-  font-size: 10.5px;
-  font-weight: 500;
-  color: var(--text-color-3);
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  font-size: 11.5px;
+  color: var(--card-sub-text);
 }
 
 .hero__meta-value {
-  font-size: 12.5px;
+  margin: 0;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-color-1);
-  margin-top: 1px;
+  color: var(--card-header-text);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.hero__meta-dot {
-  display: none;
 }
 
 @media (max-width: 860px) {
-  .hero {
-    margin: 0 12px;
-    border-radius: calc(var(--border-radius) + 6px);
-  }
-
-  .hero__banner {
-    height: 70px;
-  }
-
   .hero__body {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 32px 16px 14px;
-    gap: 14px;
+    gap: 12px;
+    padding: 18px 16px;
   }
 
   .hero__identity {
-    text-align: center;
-    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .hero__name-row {
@@ -523,7 +301,6 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
 
   .hero__name {
     max-width: 100%;
-    font-size: 20px;
   }
 
   .hero__tags {
@@ -531,26 +308,21 @@ function onAvatarUpload(options: UploadCustomRequestOptions) {
   }
 
   .hero__meta {
+    border-left: none;
+    padding: 12px 0 0;
+    border-top: 1px solid var(--card-divider);
     width: 100%;
-    max-width: 320px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding-bottom: 0;
+    justify-content: space-around;
+    gap: 8px;
+  }
 
-    .hero__meta-item {
-      flex: 1 1 130px;
-    }
+  .hero__meta-item {
+    align-items: center;
+    max-width: 33%;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__banner-glow,
-  .hero__avatar-ring,
-  .hero__avatar-status::after {
-    animation: none;
-  }
-
   .hero__avatar-overlay {
     transition: none;
   }

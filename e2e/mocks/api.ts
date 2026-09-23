@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { Buffer } from 'node:buffer'
-import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSysConfigs, mockTodos, mockUsers } from './data'
+import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSysConfigs, mockTodos, mockUsers, ts } from './data'
 
 /** 统一成功/失败响应(与后端契约一致)。注意:fulfill body 必须为字符串 */
 const ok = (data: unknown, message = '操作成功') => ({ code: 200, message, data })
@@ -11,6 +11,19 @@ function fail(code: number, message: string, status: number) {
     body: JSON.stringify({ code, message, data: null }),
   }
 }
+
+/**
+ * 当前登录用户(mock 会话状态,按 worker 隔离)。
+ * 默认 admin,保持既有用例行为;普通用户用例在登录时切换。
+ */
+let currentUserId = 1
+
+function currentUser() {
+  return mockUsers.find(u => u.id === currentUserId) ?? mockUsers[0]
+}
+
+/** 普通用户可见菜单(无系统管理/审计权限,用于工作台视图用例) */
+const normalUserMenuIds = [1, 8, 9, 30]
 
 /** 用户列表过滤 + 分页(对齐后端 paginate 行为) */
 function paginateUsers(url: URL) {
@@ -75,6 +88,7 @@ export async function installApiMocks(page: Page) {
         return route.fulfill(fail(40103, '用户名或密码错误', 401))
       if (user.status === 0)
         return route.fulfill(fail(40302, '账号已被禁用，请联系管理员', 403))
+      currentUserId = user.id
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -102,13 +116,15 @@ export async function installApiMocks(page: Page) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(null, '退出成功')) })
 
     if (pathname === '/api/auth/user/info' && method === 'GET') {
-      const user = mockUsers[0]
+      const user = currentUser()
       const { password, ...info } = user
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(info)) })
     }
 
     if (pathname === '/api/auth/user/menu' && method === 'GET') {
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockMenus)) })
+      const user = currentUser()
+      const menus = user.roleType === 'admin' ? mockMenus : mockMenus.filter(m => normalUserMenuIds.includes(m.id))
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(menus)) })
     }
 
     // ── 用户管理 ──
@@ -373,10 +389,41 @@ export async function installApiMocks(page: Page) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDashboard.stats)) })
     if (pathname === '/api/dashboard/trends' && method === 'GET')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDashboard.trends)) })
+    if (pathname === '/api/dashboard/mine' && method === 'GET') {
+      const user = currentUser()
+      const open = mockTodos.filter(t => !t.isDone)
+      const done = mockTodos.length - open.length
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(ok({
+          todo: { openCount: open.length, doneCount: done, recent: open.slice(0, 5) },
+          notice: {
+            unreadCount: 1,
+            recent: mockNotices.slice(0, 5).map((n, i) => ({
+              id: i + 1,
+              noticeId: n.id,
+              title: n.title,
+              publishedAt: n.publishedAt,
+              type: n.type,
+              isPinned: n.isPinned,
+              isMandatory: n.isMandatory,
+              readTime: i === 0 ? ts(1) : null,
+              assignedTime: n.createdTime,
+            })),
+          },
+          myActivities: mockDashboard.activities.filter(a => a.username === user.username),
+        })),
+      })
+    }
     if (pathname === '/api/dashboard/system-info' && method === 'GET')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDashboard.systemInfo)) })
-    if (pathname === '/api/dashboard/activities' && method === 'GET')
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDashboard.activities)) })
+    if (pathname === '/api/dashboard/activities' && method === 'GET') {
+      // 与后端 C2 分级一致:非审计用户仅返回本人操作记录
+      const user = currentUser()
+      const items = user.roleType === 'admin' ? mockDashboard.activities : mockDashboard.activities.filter(a => a.username === user.username)
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(items)) })
+    }
 
     // ── 下拉数据 ──
     if (pathname === '/api/system/role/all' && method === 'GET')

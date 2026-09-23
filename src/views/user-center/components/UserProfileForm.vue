@@ -17,7 +17,7 @@ const [registerBasic, basicMethods] = useForm({
   showActionButtonGroup: false,
   labelPlacement: 'left',
   labelWidth: 80,
-  gridProps: { cols: '1 s:1 m:1 l:2 xl:2', xGap: 18, yGap: 14 },
+  gridProps: { cols: '1 m:2 l:2 xl:2', xGap: 18, yGap: 10 },
 })
 
 const [registerContact, contactMethods] = useForm({
@@ -25,66 +25,94 @@ const [registerContact, contactMethods] = useForm({
   showActionButtonGroup: false,
   labelPlacement: 'left',
   labelWidth: 80,
-  gridProps: { cols: '1 s:1 m:2 l:2 xl:2', xGap: 18, yGap: 14 },
+  gridProps: { cols: '1 m:2 l:2 xl:2', xGap: 18, yGap: 10 },
 })
 
 // ---- State ----
 const saving = shallowRef(false)
-const saveSuccess = shallowRef(false)
-let initialSnapshot = ''
-let loading = false
+const loading = shallowRef(false)
+/** 最近一次已保存（或已加载）的表单数据，用于「重置」 */
+const lastLoaded = shallowRef<ReturnType<typeof mapUserInfoToForm> | null>(null)
+let baseline = ''
 
-// ---- Dirty tracking — computed, no timing issues ----
-const isDirty = computed(() => {
-  if (loading || !initialSnapshot)
-    return false
-  const current = JSON.stringify({ basic: basicMethods.getFieldsValue(), contact: contactMethods.getFieldsValue() })
-  return current !== initialSnapshot
-})
+function snapshot() {
+  return JSON.stringify({
+    basic: basicMethods.getFieldsValue(),
+    contact: contactMethods.getFieldsValue(),
+  })
+}
+
+/** 脏数据检测 — JSON 快照比较，纯派生、无时序问题 */
+const isDirty = computed(() => !loading.value && !!baseline && snapshot() !== baseline)
+
+const actionsDisabled = computed(() => !isDirty.value || saving.value)
 
 function checkUnsaved() {
   return isDirty.value
 }
 
-// ---- Data loading ----
-function loadFormData(data: Api.UserInfo) {
-  loading = true
-  const formData = mapUserInfoToForm(data)
-  basicMethods.setFieldsValue(formData)
-  contactMethods.setFieldsValue(formData)
-  nextTick(() => {
-    initialSnapshot = JSON.stringify({
-      basic: basicMethods.getFieldsValue(),
-      contact: contactMethods.getFieldsValue(),
-    })
-    loading = false
-  })
+// ---- 数据加载 / 重置共用同一套回填逻辑 ----
+async function applyFormData(data: ReturnType<typeof mapUserInfoToForm>) {
+  loading.value = true
+  try {
+    await basicMethods.setFieldsValue(data)
+    await contactMethods.setFieldsValue(data)
+    await basicMethods.clearValidate()
+    await contactMethods.clearValidate()
+    await nextTick()
+    baseline = snapshot()
+  }
+  finally {
+    loading.value = false
+  }
 }
 
+async function loadFormData(data: Api.UserInfo) {
+  const formData = mapUserInfoToForm(data)
+  lastLoaded.value = formData
+  await applyFormData(formData)
+}
+
+// 首次加载：父组件 onMounted 晚于子组件 FormEdit 注册，表单实例此时已就绪。
+// 不能用 watch immediate —— setup 同步阶段注册尚未完成，setFieldsValue 会拿到 null。
+onMounted(() => {
+  if (props.userData?.id)
+    loadFormData(props.userData)
+})
+
+// 后续数据刷新（父级保存成功后更新 userInfo）
 watch(
   () => props.userData,
   (data) => {
-    if (data?.id) {
+    if (data?.id)
       loadFormData(data)
-    }
   },
-  { immediate: true, deep: true },
+  { deep: true },
 )
 
-// ---- Save ----
+// ---- 操作 ----
+function handleReset() {
+  if (lastLoaded.value)
+    applyFormData(lastLoaded.value)
+}
+
 async function handleSave() {
+  try {
+    await basicMethods.validate()
+    await contactMethods.validate()
+  }
+  catch {
+    window.$message?.warning?.('请检查表单填写内容')
+    return
+  }
+
   saving.value = true
   try {
     const basic = basicMethods.getFieldsValue()
     const contact = contactMethods.getFieldsValue()
     await UserApi.updateUser(mapFormToSubmit({ ...basic, ...contact }))
     const data = await UserApi.getUserInfo()
-    loadFormData(data)
-    await nextTick()
-    saveSuccess.value = true
-    setTimeout(() => {
-      saveSuccess.value = false
-    }, 2000)
+    await loadFormData(data)
     window.$message?.success?.('个人信息更新成功')
     emit('saveSuccess')
   }
@@ -99,87 +127,72 @@ defineExpose({ checkUnsaved })
 
 <template>
   <div class="profile-content">
-    <!-- Unsaved hint -->
+    <!-- 未保存提示 -->
     <Transition name="uc-fade">
       <div
-        v-if="isDirty && !saveSuccess"
+        v-if="isDirty"
         class="profile-hint"
         role="status"
         aria-live="polite"
       >
         <span class="profile-hint__dot" aria-hidden="true" />
-        <JIcon icon="icon-park-outline:remind" :size="16" aria-hidden="true" />
-        <span>您有未保存的更改，记得点击「保存修改」</span>
+        <span>您有未保存的更改</span>
+        <button
+          type="button"
+          class="profile-hint__action"
+          @click="handleReset"
+        >
+          放弃更改
+        </button>
       </div>
     </Transition>
 
-    <section class="card card--basic">
+    <!-- 基本信息 -->
+    <section class="card">
       <header class="card__head">
-        <span class="card__icon" aria-hidden="true">
-          <JIcon icon="icon-park-outline:people" :size="18" />
-        </span>
-        <div class="card__head-text">
-          <h3 class="card__title">
-            基本信息
-          </h3>
-          <p class="card__subtitle">
-            完善个人身份资料
-          </p>
-        </div>
+        <h3 class="card__title">
+          基本信息
+        </h3>
+        <p class="card__subtitle">
+          完善个人身份资料
+        </p>
       </header>
-      <div class="card__divider" />
-      <FormEdit
-        @register="registerBasic"
-      />
+      <FormEdit @register="registerBasic" />
     </section>
 
-    <section class="card card--contact">
+    <!-- 联系方式 -->
+    <section class="card">
       <header class="card__head">
-        <span class="card__icon" aria-hidden="true">
-          <JIcon icon="icon-park-outline:phone-telephone" :size="18" />
-        </span>
-        <div class="card__head-text">
-          <h3 class="card__title">
-            联系方式
-          </h3>
-          <p class="card__subtitle">
-            便于团队与系统通知联系
-          </p>
-        </div>
+        <h3 class="card__title">
+          联系方式
+        </h3>
+        <p class="card__subtitle">
+          便于团队与系统通知联系
+        </p>
       </header>
-      <div class="card__divider" />
-      <FormEdit
-        @register="registerContact"
-      />
+      <FormEdit @register="registerContact" />
     </section>
 
-    <!-- Actions -->
-    <div class="actions">
-      <Transition name="uc-scale" mode="out-in">
-        <n-button
-          v-if="!saveSuccess"
-          key="save"
-          type="primary"
-          :loading="saving"
-          attr-aria-busy="saving"
-          class="actions__btn"
-          @click="handleSave"
-        >
-          <JIcon icon="icon-park-outline:check" :size="16" aria-hidden="true" />
-          <span>{{ saving ? '保存中…' : '保存修改' }}</span>
-        </n-button>
-        <n-button
-          v-else
-          key="done"
-          type="success"
-          disabled
-          class="actions__btn"
-        >
-          <JIcon icon="icon-park-outline:check-one" :size="16" aria-hidden="true" />
-          <span>已保存</span>
-        </n-button>
-      </Transition>
-    </div>
+    <!-- 操作区 -->
+    <footer class="actions">
+      <n-button
+        class="actions__btn"
+        :disabled="actionsDisabled"
+        @click="handleReset"
+      >
+        重置
+      </n-button>
+      <n-button
+        type="primary"
+        class="actions__btn actions__btn--primary"
+        :loading="saving"
+        :disabled="!isDirty"
+        attr-aria-busy="saving"
+        @click="handleSave"
+      >
+        {{ saving ? '保存中…' : '保存修改' }}
+      </n-button>
+    </footer>
   </div>
 </template>
 
@@ -190,272 +203,119 @@ defineExpose({ checkUnsaved })
   gap: 14px;
 }
 
-/* ---- Unsaved hint ---- */
+/* ---- 未保存提示 ---- */
 .profile-hint {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  border-radius: calc(var(--border-radius) + 4px);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
   font-size: 12.5px;
-  font-weight: 500;
   color: var(--primary-color);
-  background: linear-gradient(135deg, rgba(var(--primary-color-rgb), 0.1), rgba(var(--primary-color-rgb), 0.04));
-  border: 1px solid rgba(var(--primary-color-rgb), 0.22);
-  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.06);
-
-  svg {
-    color: var(--primary-color);
-    flex-shrink: 0;
-  }
+  background: rgba(var(--primary-color-rgb), 0.08);
+  border: 1px solid rgba(var(--primary-color-rgb), 0.2);
 }
 
 .profile-hint__dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--primary-color);
-  animation: hint-pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-@keyframes hint-pulse {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
+.profile-hint__action {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 12px;
+  color: var(--card-sub-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--primary-color);
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 }
 
-/* ---- Glass card ---- */
+/* ---- 卡片：与系统扁平风格一致 ---- */
 .card {
-  position: relative;
-  background: var(--card-color);
-  border-radius: calc(var(--border-radius) + 8px);
-  border: 1px solid var(--border-color);
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.03),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-  padding: 18px 22px;
-  transition:
-    box-shadow 0.25s ease,
-    transform 0.25s ease;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--primary-color), var(--primary-color-hover), transparent);
-    opacity: 0.6;
-    transition: opacity 0.25s ease;
-  }
-
-  &:hover {
-    box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.05),
-      0 2px 6px rgba(0, 0, 0, 0.02);
-    transform: translateY(-1px);
-
-    &::before {
-      opacity: 1;
-    }
-  }
-}
-
-/* ---- Color-distinct tints ---- */
-.card--basic {
-  background: linear-gradient(135deg, #f5f9fd 0%, #e1efff 100%);
-  border-color: rgba(64, 158, 255, 0.28);
-  box-shadow:
-    0 4px 14px rgba(64, 158, 255, 0.08),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-
-  &::before {
-    background: linear-gradient(90deg, #409eff, #66b1ff, transparent);
-  }
-
-  &:hover {
-    box-shadow:
-      0 10px 26px rgba(64, 158, 255, 0.14),
-      0 2px 6px rgba(0, 0, 0, 0.02);
-  }
-
-  .card__icon {
-    background: linear-gradient(135deg, #409eff, #2b7fd9);
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.36);
-  }
-}
-
-.card--contact {
-  background: linear-gradient(135deg, #f2faf6 0%, #d9f2e6 100%);
-  border-color: rgba(35, 178, 130, 0.28);
-  box-shadow:
-    0 4px 14px rgba(35, 178, 130, 0.08),
-    0 1px 3px rgba(0, 0, 0, 0.02);
-
-  &::before {
-    background: linear-gradient(90deg, #23b282, #4ed1a0, transparent);
-  }
-
-  &:hover {
-    box-shadow:
-      0 10px 26px rgba(35, 178, 130, 0.14),
-      0 2px 6px rgba(0, 0, 0, 0.02);
-  }
-
-  .card__icon {
-    background: linear-gradient(135deg, #23b282, #1a8e66);
-    box-shadow: 0 4px 12px rgba(35, 178, 130, 0.36);
-  }
-}
-
-html.dark .card--basic {
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.18) 0%, rgba(64, 158, 255, 0.08) 100%);
-  border-color: rgba(64, 158, 255, 0.32);
-}
-
-html.dark .card--contact {
-  background: linear-gradient(135deg, rgba(35, 178, 130, 0.18) 0%, rgba(35, 178, 130, 0.08) 100%);
-  border-color: rgba(35, 178, 130, 0.32);
+  padding: 18px 20px;
+  border: 1px solid var(--layout-border-light);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
 }
 
 .card__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.card__icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: calc(var(--border-radius) + 2px);
-  color: #fff;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-color-hover));
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.25);
-
-  svg {
-    width: 15px;
-    height: 15px;
-  }
-}
-
-.card__head-text {
-  min-width: 0;
+  margin-bottom: 14px;
 }
 
 .card__title {
-  font-family: var(--font-family);
+  margin: 0;
   font-size: 15px;
   font-weight: 700;
-  margin: 0;
-  line-height: 1.3;
-  text-wrap: balance;
-  color: var(--text-color-1);
+  color: var(--card-header-text);
 }
 
 .card__subtitle {
   margin: 2px 0 0;
-  font-size: 11.5px;
-  color: var(--text-color-3);
-  line-height: 1.4;
+  font-size: 12px;
+  color: var(--card-sub-text);
 }
 
-.card__divider {
-  height: 1px;
-  margin: 12px 0 14px;
-  background: var(--divider-color);
-  opacity: 0.6;
-}
-
-.card--basic .card__divider {
-  background: linear-gradient(90deg, rgba(64, 158, 255, 0.25), rgba(64, 158, 255, 0.08));
-  opacity: 1;
-}
-
-.card--contact .card__divider {
-  background: linear-gradient(90deg, rgba(35, 178, 130, 0.25), rgba(35, 178, 130, 0.08));
-  opacity: 1;
-}
-
-/* ---- Form override ---- */
 .card :deep(.n-form-item-label) {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-color-2);
-  padding-right: 10px !important;
-  text-align: right;
+  font-size: 13px;
+  color: var(--card-header-text);
 }
 
 .card :deep(.n-form-item) {
-  margin-bottom: 0 !important;
+  margin-bottom: 0;
 }
 
-.card :deep(.n-input) {
-  border-radius: calc(var(--border-radius) + 2px);
+.card :deep(.n-form-item-feedback) {
+  font-size: 12px;
 }
 
-.card :deep(.n-base-selection) {
-  border-radius: calc(var(--border-radius) + 2px);
-}
-
-/* ---- Actions ---- */
+/* ---- 操作区 ---- */
 .actions {
   display: flex;
-  justify-content: flex-start;
-  padding-top: 2px;
+  justify-content: flex-end;
+  gap: 10px;
+}
 
-  &__btn {
-    min-width: 124px;
-    height: 36px;
-    border-radius: calc(var(--border-radius) + 4px) !important;
-    box-shadow: 0 4px 14px rgba(var(--primary-color-rgb), 0.28);
+.actions__btn {
+  min-width: 104px !important;
+  border-radius: var(--radius-sm) !important;
 
-    :deep(.n-button__content) {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-    }
+  &--primary {
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.2);
+  }
+
+  :deep(.n-button__content) {
+    font-weight: 600;
   }
 }
 
 @media (max-width: 860px) {
   .card {
     padding: 14px 16px;
-    border-radius: calc(var(--border-radius) + 6px);
   }
 
   .actions {
-    justify-content: stretch;
-    &__btn {
+    flex-direction: column-reverse;
+
+    .actions__btn {
       width: 100%;
     }
   }
-}
-
-.uc-scale-enter-active,
-.uc-scale-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
-.uc-scale-enter-from {
-  opacity: 0;
-  transform: scale(0.92);
-}
-.uc-scale-leave-to {
-  opacity: 0;
-  transform: scale(1.04);
 }
 
 .uc-fade-enter-active,

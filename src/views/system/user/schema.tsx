@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NSpace, NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { RoleApi } from '@/api/system'
 import { roleTypeOptions, sexOptions, statusOptions } from '@/constants'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil, isPhone } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, isPhone, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useUserSchema(methods: any = {}) {
@@ -312,53 +312,33 @@ export function useUserSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 280,
-          render: (row: any) => (
-            <NSpace justify="center">
-              {hasPermission('system:user:assign-role') && (
-                <NButton
-                  type="primary"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleAssignRole(row)}
-                >
-                  分配角色
-                </NButton>
-              )}
-              {hasPermission('system:user:update') && (
-                <NButton
-                  type={row.status === 1 ? 'error' : 'primary'}
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleEnable(row)}
-                >
-                  {row.status === 0 ? '启用' : '禁用'}
-                </NButton>
-              )}
-              {hasPermission('system:user:update') && (
-                <NButton
-                  type="info"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleEdit(row)}
-                >
-                  编辑
-                </NButton>
-              )}
-              {hasPermission('system:user:delete') && (
-                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                  {{
-                    trigger: () => (
-                      <NButton type="error" ghost size="small">
-                        删除
-                      </NButton>
-                    ),
-                    default: () => `是否确认删除用户 ${row.username}？`,
-                  }}
-                </NPopconfirm>
-              )}
-            </NSpace>
-          ),
+          width: 220,
+          render: (row: any) => renderTableActions([
+            {
+              label: '分配角色',
+              show: hasPermission('system:user:assign-role'),
+              onClick: () => methods.handleAssignRole(row),
+            },
+            {
+              label: row.status === 0 ? '启用' : '禁用',
+              type: row.status === 1 ? 'error' : 'primary',
+              show: hasPermission('system:user:update'),
+              onClick: () => methods.handleEnable(row),
+            },
+            {
+              label: '编辑',
+              type: 'info',
+              show: hasPermission('system:user:update'),
+              onClick: () => methods.handleEdit(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              show: hasPermission('system:user:delete'),
+              confirm: `是否确认删除用户 ${row.username}？`,
+              onClick: () => methods.handleDelete(row),
+            },
+          ]),
         },
       },
     ],

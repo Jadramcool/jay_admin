@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { methodOptions, operationStatusOptions, operationTypeOptions } from '@/constants'
-import { columnsUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 
 export function useOperationLogSchema(methods: any = {}) {
@@ -191,31 +191,21 @@ export function useOperationLogSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 160,
-          render: (row: any) => (
-            <NSpace justify="center">
-              <NButton
-                type="primary"
-                ghost
-                size="small"
-                onClick={() => methods.handleDetail(row)}
-              >
-                详情
-              </NButton>
-              {hasPermission('system:operation-log:delete') && (
-                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                  {{
-                    trigger: () => (
-                      <NButton type="error" ghost size="small">
-                        删除
-                      </NButton>
-                    ),
-                    default: () => '确定要删除该日志吗？',
-                  }}
-                </NPopconfirm>
-              )}
-            </NSpace>
-          ),
+          width: 120,
+          render: (row: any) => renderTableActions([
+            {
+              label: '详情',
+              type: 'primary',
+              onClick: () => methods.handleDetail(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              show: hasPermission('system:operation-log:delete'),
+              confirm: '确定要删除该日志吗？',
+              onClick: () => methods.handleDelete(row),
+            },
+          ]),
         },
       },
     ],

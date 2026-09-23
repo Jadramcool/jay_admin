@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NButton, NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { noticeTypeOptions } from '@/constants'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 
 /**
@@ -399,67 +399,42 @@ export function useNoticeSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 300,
-          render: (row: any) => (
-            <NSpace justify="center" wrap>
-              {(() => {
-                const isPublished = row.status === 1
-                return (
-                  hasPermission('notice:publish') && (
-                    <NButton
-                      type={isPublished ? 'warning' : 'success'}
-                      ghost
-                      size="small"
-                      onClick={() => methods.handleToggleStatus(row)}
-                    >
-                      {isPublished ? '下刊' : '发布'}
-                    </NButton>
-                  )
-                )
-              })()}
-              {hasPermission('notice:update') && (
-                <NButton
-                  type={row.isPinned ? 'error' : 'primary'}
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleTogglePin(row)}
-                >
-                  {row.isPinned ? '取消置顶' : '置顶'}
-                </NButton>
-              )}
-              {row.status === 1 && hasPermission('notice:update') && (
-                <NButton
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleResend(row)}
-                >
-                  重推
-                </NButton>
-              )}
-              {hasPermission('notice:update') && (
-                <NButton
-                  type="info"
-                  ghost
-                  size="small"
-                  onClick={() => methods.handleEdit(row)}
-                >
-                  编辑
-                </NButton>
-              )}
-              {hasPermission('notice:delete') && (
-                <NPopconfirm onPositiveClick={() => methods.handleDelete(row)}>
-                  {{
-                    trigger: () => (
-                      <NButton type="error" ghost size="small">
-                        删除
-                      </NButton>
-                    ),
-                    default: () => `确定删除公告「${row.title}」吗？`,
-                  }}
-                </NPopconfirm>
-              )}
-            </NSpace>
-          ),
+          width: 260,
+          render: (row: any) => {
+            const isPublished = row.status === 1
+            return renderTableActions([
+              {
+                label: isPublished ? '下刊' : '发布',
+                type: isPublished ? 'warning' : 'success',
+                show: hasPermission('notice:publish'),
+                onClick: () => methods.handleToggleStatus(row),
+              },
+              {
+                label: row.isPinned ? '取消置顶' : '置顶',
+                type: row.isPinned ? 'error' : 'primary',
+                show: hasPermission('notice:update'),
+                onClick: () => methods.handleTogglePin(row),
+              },
+              {
+                label: '重推',
+                show: row.status === 1 && hasPermission('notice:update'),
+                onClick: () => methods.handleResend(row),
+              },
+              {
+                label: '编辑',
+                type: 'info',
+                show: hasPermission('notice:update'),
+                onClick: () => methods.handleEdit(row),
+              },
+              {
+                label: '删除',
+                type: 'error',
+                show: hasPermission('notice:delete'),
+                confirm: `确定删除公告「${row.title}」吗？`,
+                onClick: () => methods.handleDelete(row),
+              },
+            ])
+          },
         },
       },
     ],

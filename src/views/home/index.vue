@@ -1,19 +1,26 @@
 <script setup lang="ts">
-import { useUserStore } from '@/store/modules'
+import { hasPermission } from '@/utils/common'
 import QuickActions from './components/QuickActions.vue'
 import RecentActivity from './components/RecentActivity.vue'
 import StatCards from './components/StatCards.vue'
-import SystemInfo from './components/SystemInfo.vue'
 import TrendChart from './components/TrendChart.vue'
 import WelcomeBanner from './components/WelcomeBanner.vue'
+import { useWorkbench } from './components/workbench/useWorkbench'
+import WorkbenchNoticeCard from './components/workbench/WorkbenchNoticeCard.vue'
+import WorkbenchTodayStrip from './components/workbench/WorkbenchTodayStrip.vue'
+import WorkbenchTodoCard from './components/workbench/WorkbenchTodoCard.vue'
 
-const userStore = useUserStore()
-const isAdmin = computed(() => userStore.userInfo?.roleType === 'admin')
+// 首页双视图(渲染层选择,不做路由拆分):
+// 持有审计查询权(≈运营人员,与 activities 全站动态的权限口径一致)→ 运营看板;否则个人工作台
+const isAdminView = computed(() => hasPermission('system:operation-log:list'))
 
 const visible = ref(false)
 onMounted(() => {
   visible.value = true
 })
+
+// 工作台数据:单请求共享给三张卡片;看板视图下不请求
+const { mine, loading, reload } = useWorkbench(visible, computed(() => !isAdminView.value))
 </script>
 
 <template>
@@ -21,13 +28,10 @@ onMounted(() => {
     <div class="db__body">
       <WelcomeBanner />
 
-      <template v-if="isAdmin">
+      <template v-if="isAdminView">
         <StatCards :visible="visible" />
 
-        <div class="db__row">
-          <TrendChart :visible="visible" />
-          <SystemInfo :visible="visible" />
-        </div>
+        <TrendChart :visible="visible" />
 
         <div class="db__row db__row--wide-left">
           <QuickActions />
@@ -36,9 +40,11 @@ onMounted(() => {
       </template>
 
       <template v-else>
-        <div class="db__row db__row--wide-left">
-          <QuickActions />
-          <RecentActivity :visible="visible" />
+        <WorkbenchTodayStrip :mine="mine" :loading="loading" />
+
+        <div class="db__row">
+          <WorkbenchTodoCard :mine="mine" :loading="loading" :reload="reload" />
+          <WorkbenchNoticeCard :mine="mine" :loading="loading" :reload="reload" />
         </div>
       </template>
     </div>

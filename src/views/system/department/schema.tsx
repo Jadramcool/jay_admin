@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
-import { NButton, NPopconfirm, NSpace, NTag } from 'naive-ui'
+import { NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { DepartmentApi } from '@/api/system'
-import { columnsUtil, editFormSchemaUtil, formSchemaUtil } from '@/utils'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 
 interface DepartmentSchemaMethods {
   getEditingDepartmentId?: () => number | null
@@ -167,37 +167,25 @@ export function useDepartmentSchema(methods: DepartmentSchemaMethods = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 240,
-          render: (row: any) => (
-            <NSpace justify="center">
-              <NButton
-                type={row.status === 1 ? 'warning' : 'success'}
-                ghost
-                size="small"
-                onClick={() => methods.handleToggleStatus?.(row)}
-              >
-                {row.status === 1 ? '禁用' : '启用'}
-              </NButton>
-              <NButton
-                type="info"
-                ghost
-                size="small"
-                onClick={() => methods.handleEdit?.(row)}
-              >
-                编辑
-              </NButton>
-              <NPopconfirm onPositiveClick={() => methods.handleDelete?.(row)}>
-                {{
-                  trigger: () => (
-                    <NButton type="error" ghost size="small">
-                      删除
-                    </NButton>
-                  ),
-                  default: () => `确定删除部门 ${row.name}？`,
-                }}
-              </NPopconfirm>
-            </NSpace>
-          ),
+          width: 160,
+          render: (row: any) => renderTableActions([
+            {
+              label: row.status === 1 ? '禁用' : '启用',
+              type: row.status === 1 ? 'warning' : 'success',
+              onClick: () => methods.handleToggleStatus?.(row),
+            },
+            {
+              label: '编辑',
+              type: 'info',
+              onClick: () => methods.handleEdit?.(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              confirm: `确定删除部门 ${row.name}？`,
+              onClick: () => methods.handleDelete?.(row),
+            },
+          ]),
         },
       },
     ],
