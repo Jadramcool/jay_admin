@@ -4,6 +4,7 @@ import { setupDirectives } from './directives'
 import router, { setupRouterGuards } from './router'
 import { registerLoginNavigator } from './router/auth-navigation'
 import pinia from './store'
+import { registerLocalIconCollections } from './utils/common/register-icons'
 import { initMonitor } from './utils/monitor'
 import { setupAuthSessionSync } from './utils/token/session-sync'
 
@@ -13,6 +14,9 @@ import './style.scss'
 import '@wangeditor/editor/dist/css/style.css'
 
 async function bootstrap() {
+  // 注册本地图标集(异步不阻塞)，避免 @iconify/vue 在线拉取境外 API 失败
+  registerLocalIconCollections()
+
   const app = createApp(App)
 
   app.use(pinia)
