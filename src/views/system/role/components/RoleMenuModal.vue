@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { computed, ref, shallowRef } from 'vue'
 import { MenuApi, RoleApi } from '@/api/system'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
-import { assignablePlatforms, DEFAULT_PLATFORM, platformLabel } from '@/constants'
+import { configurablePlatforms, DEFAULT_PLATFORM, PLATFORM_COMMON, platformLabel } from '@/constants'
 import RoleMenuSummary from './role-menu-permission/RoleMenuSummary.vue'
 import RoleMenuTreePanel from './role-menu-permission/RoleMenuTreePanel.vue'
 import { useRoleMenuPermission } from './role-menu-permission/useRoleMenuPermission'
@@ -51,7 +51,12 @@ const treesByPlatform = new Map<string, System.Menu[]>()
 const assignedByPlatform = new Map<string, System.Menu[]>()
 let currentRole: System.Role | null = null
 
-const platformTabs = computed(() => assignablePlatforms(role.value?.platform))
+const platformTabs = computed(() => configurablePlatforms(role.value?.platform))
+/** 通用端角色：在所有端都生效，需要按端分别配置权限 */
+const isCommonRole = computed(() => (role.value?.platform ?? DEFAULT_PLATFORM) === PLATFORM_COMMON)
+const platformsHint = computed(() => isCommonRole.value
+  ? '通用端角色在所有端生效，请按端分别配置权限'
+  : `角色属于「${platformLabel(role.value?.platform || DEFAULT_PLATFORM)}」，仅可配置本端与通用端的权限`)
 const totalChangeCount = computed(() =>
   Object.values(platformChangeCounts.value).reduce((sum, count) => sum + count, 0),
 )
@@ -152,8 +157,8 @@ const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data
   setModalProps({ loading: true })
   try {
     currentRole = data.record
-    // 角色只能配置「自身端 + 通用端」，服务端同样会拒绝跨端分配
-    const platforms = assignablePlatforms(data.record.platform)
+    // 角色的可配置端：普通角色为「自身端 + 通用端」，通用角色为「所有端 + 通用端」
+    const platforms = configurablePlatforms(data.record.platform)
     const [trees, roleDetail] = await Promise.all([
       Promise.all(platforms.map(platform => MenuApi.tree(platform))),
       RoleApi.detail(data.record.id),
@@ -274,7 +279,7 @@ async function handleCancel() {
           />
         </n-radio-group>
         <span class="role-menu-permission__platforms-hint">
-          角色属于「{{ platformLabel(role?.platform || DEFAULT_PLATFORM) }}」，仅可配置本端与通用端的权限
+          {{ platformsHint }}
         </span>
       </div>
 
