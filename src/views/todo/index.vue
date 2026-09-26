@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NButton, NInput, NTag } from 'naive-ui'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { TodoApi } from '@/api/todo'
 import TodoEditModal from './components/TodoEditModal.vue'
 import TodoItem from './components/TodoItem.vue'
