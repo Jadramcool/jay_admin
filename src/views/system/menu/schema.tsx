@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { NTag } from 'naive-ui'
 import { computed } from 'vue'
 import { MenuApi } from '@/api/system'
-import { menuTypeOptions } from '@/constants'
+import { DEFAULT_PLATFORM, menuTypeOptions, platformLabel } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 import { buildParentOptions, MENU_TYPE_LABEL } from './menu-tree'
@@ -434,12 +434,22 @@ export function useMenuSchema(methods: any = {}) {
           ]),
         },
       },
+      {
+        key: 'platform',
+        label: '端',
+        defaultValue: DEFAULT_PLATFORM,
+        table: {
+          width: 90,
+          render: (row: any) => platformLabel(row.platform),
+        },
+      },
     ],
   }))
 
   const tableFields = [
     'name',
     'type',
+    'platform',
     'permission',
     'code',
     'path',

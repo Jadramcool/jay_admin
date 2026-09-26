@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import { NTag } from 'naive-ui'
 import { computed } from 'vue'
+import { clientPlatformOptions, DEFAULT_PLATFORM, platformLabel, platformOptions } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 import { isSystemAdminRole } from './roleRules'
@@ -60,6 +61,30 @@ export function useRoleSchema(methods: any = {}) {
             { required: true, message: '请输入角色名称', trigger: 'blur' },
           ],
           componentProps: { placeholder: '例如: 管理员' },
+        },
+      },
+      {
+        key: 'platform',
+        label: '所属端',
+        defaultValue: DEFAULT_PLATFORM,
+        table: {
+          width: 100,
+          render: (row: any) => platformLabel(row.platform),
+        },
+        form: {
+          component: 'NSelect',
+          componentProps: {
+            options: platformOptions,
+            placeholder: '全部端',
+            clearable: true,
+          },
+        },
+        editForm: {
+          component: 'NSelect',
+          componentProps: { options: clientPlatformOptions },
+          rules: [
+            { required: true, message: '请选择所属端', trigger: ['blur', 'change'] },
+          ],
         },
       },
       {
@@ -129,9 +154,9 @@ export function useRoleSchema(methods: any = {}) {
     setting: { table: { resizable: true } },
   }))
 
-  const tableFields = ['code', 'name', 'description', 'createdTime', 'operate']
-  const formFields = ['code', 'name']
-  const editFormFields = ['id', 'code', 'name', 'description']
+  const tableFields = ['code', 'name', 'platform', 'description', 'createdTime', 'operate']
+  const formFields = ['platform', 'code', 'name']
+  const editFormFields = ['id', 'code', 'name', 'platform', 'description']
 
   const columns = computed(() => columnsUtil(schema.value, tableFields))
   const formSchemas = computed(() => formSchemaUtil(schema.value, formFields))

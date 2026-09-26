@@ -14,7 +14,12 @@ export const MenuApi = {
   list: (params?: Api.PageParams) =>
     request.get<Api.PaginatedData<System.Menu>>({ url: API.list, params }),
 
-  tree: () => request.get<System.Menu[]>({ url: API.tree }),
+  /** 菜单树；传 platform 时只返回该端的节点 */
+  tree: (platform?: string) =>
+    request.get<System.Menu[]>({
+      url: API.tree,
+      params: platform ? { platform } : undefined,
+    }),
 
   create: (data: Partial<System.Menu>) =>
     request.post<null>({ url: API.create, data }),

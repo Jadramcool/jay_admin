@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { computed, shallowRef } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
 import { MenuApi, RoleApi } from '@/api/system'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+import { assignablePlatforms, DEFAULT_PLATFORM, platformLabel } from '@/constants'
 import RoleMenuSummary from './role-menu-permission/RoleMenuSummary.vue'
 import RoleMenuTreePanel from './role-menu-permission/RoleMenuTreePanel.vue'
 import { useRoleMenuPermission } from './role-menu-permission/useRoleMenuPermission'
@@ -12,6 +13,11 @@ const emit = defineEmits<{
   register: [instance: any, uuid: number]
 }>()
 
+interface PlatformMemory {
+  checked: number[]
+  indeterminate: number[]
+}
+
 const loading = shallowRef(false)
 const saving = shallowRef(false)
 const {
@@ -20,7 +26,6 @@ const {
   flatMenus,
   checkedMenuIds,
   originalMenuIds,
-  selectedMenuIds,
   addedMenus,
   removedMenus,
   changeCount,
@@ -32,32 +37,145 @@ const {
   commitCurrentPermissions,
 } = useRoleMenuPermission()
 
+/** 正在配置的端 */
+const activePlatform = shallowRef<string>(DEFAULT_PLATFORM)
+/** 每个端的勾选/半选记忆，切换 Tab 时保存与恢复 */
+const platformMemory = ref<Record<string, PlatformMemory>>({})
+/** 每个端相对服务端原始授权的变更数（Tab 与保存按钮共用） */
+const platformChangeCounts = ref<Record<string, number>>({})
+/** 当前端的半选父节点（组合式函数未暴露，这里单独跟踪） */
+const indeterminateIds = ref<number[]>([])
+/** 不属于本角色可配置端的既有授权，保存时原样保留，避免被覆盖 */
+const preservedMenuIds = ref<number[]>([])
+const treesByPlatform = new Map<string, System.Menu[]>()
+const assignedByPlatform = new Map<string, System.Menu[]>()
+let currentRole: System.Role | null = null
+
+const platformTabs = computed(() => assignablePlatforms(role.value?.platform))
+const totalChangeCount = computed(() =>
+  Object.values(platformChangeCounts.value).reduce((sum, count) => sum + count, 0),
+)
+
 const modalTitle = computed(() => role.value ? `分配菜单权限 · ${role.value.name}` : '分配菜单权限')
 const updatedTimeLabel = computed(() => role.value?.updatedTime
   ? dayjs(role.value.updatedTime).format('YYYY-MM-DD HH:mm')
   : '暂无记录')
-const saveButtonText = computed(() => changeCount.value
-  ? `保存权限（${changeCount.value} 项变更）`
+const saveButtonText = computed(() => totalChangeCount.value
+  ? `保存权限（${totalChangeCount.value} 项变更）`
   : '保存权限')
+
+/** Tab 角标：该端已勾选数量 */
+function platformTabLabel(platform: string): string {
+  const count = platform === activePlatform.value
+    ? checkedMenuIds.value.length
+    : (platformMemory.value[platform]?.checked.length
+      ?? assignedByPlatform.get(platform)?.length
+      ?? 0)
+  return `${platformLabel(platform)}（${count}）`
+}
+
+function rememberActivePlatform() {
+  const platform = activePlatform.value
+  platformMemory.value = {
+    ...platformMemory.value,
+    [platform]: {
+      checked: [...checkedMenuIds.value],
+      indeterminate: [...indeterminateIds.value],
+    },
+  }
+  platformChangeCounts.value = {
+    ...platformChangeCounts.value,
+    [platform]: changeCount.value,
+  }
+}
+
+function activatePlatform(platform: string) {
+  if (!currentRole)
+    return
+
+  initialize(
+    currentRole,
+    treesByPlatform.get(platform) ?? [],
+    assignedByPlatform.get(platform) ?? [],
+  )
+
+  const memory = platformMemory.value[platform]
+  checkedMenuIds.value = [
+    ...(memory?.checked ?? (assignedByPlatform.get(platform) ?? []).map(menu => menu.id)),
+  ]
+  indeterminateIds.value = [...(memory?.indeterminate ?? [])]
+  updateIndeterminateKeys(indeterminateIds.value)
+  activePlatform.value = platform
+  platformChangeCounts.value = {
+    ...platformChangeCounts.value,
+    [platform]: changeCount.value,
+  }
+}
+
+function handlePlatformChange(platform: string) {
+  if (platform === activePlatform.value)
+    return
+
+  rememberActivePlatform()
+  activatePlatform(platform)
+}
+
+function handleCheckedKeysUpdate(ids: number[]) {
+  updateCheckedMenuIds(ids)
+  rememberActivePlatform()
+}
+
+function handleIndeterminateKeysUpdate(ids: number[]) {
+  indeterminateIds.value = ids
+  updateIndeterminateKeys(ids)
+  rememberActivePlatform()
+}
+
+function resetAll() {
+  reset()
+  currentRole = null
+  platformMemory.value = {}
+  platformChangeCounts.value = {}
+  indeterminateIds.value = []
+  preservedMenuIds.value = []
+  treesByPlatform.clear()
+  assignedByPlatform.clear()
+  activePlatform.value = DEFAULT_PLATFORM
+}
 
 const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data: { record?: System.Role }) => {
   if (!data?.record)
     return
 
-  reset()
+  resetAll()
   loading.value = true
   setModalProps({ loading: true })
   try {
-    // 菜单树含目录/菜单/按钮（按钮即页面操作权限），分配在一棵树内完成
-    const [menus, roleDetail] = await Promise.all([
-      MenuApi.tree(),
+    currentRole = data.record
+    // 角色只能配置「自身端 + 通用端」，服务端同样会拒绝跨端分配
+    const platforms = assignablePlatforms(data.record.platform)
+    const [trees, roleDetail] = await Promise.all([
+      Promise.all(platforms.map(platform => MenuApi.tree(platform))),
       RoleApi.detail(data.record.id),
     ])
-    initialize(
-      data.record,
-      menus ?? [],
-      roleDetail?.menus ?? [],
-    )
+    const assignedMenus = roleDetail?.menus ?? []
+
+    platforms.forEach((platform, index) => {
+      treesByPlatform.set(platform, trees[index] ?? [])
+      assignedByPlatform.set(
+        platform,
+        assignedMenus.filter(
+          menu => (menu.platform ?? DEFAULT_PLATFORM) === platform,
+        ),
+      )
+    })
+
+    // 历史数据里可能存在其他端的授权：不在本界面展示，但保存时保留
+    preservedMenuIds.value = assignedMenus
+      .filter(menu => !platforms.includes(menu.platform ?? DEFAULT_PLATFORM))
+      .map(menu => menu.id)
+
+    activatePlatform(platforms[0] ?? DEFAULT_PLATFORM)
   }
   finally {
     loading.value = false
@@ -66,13 +184,21 @@ const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data
 })
 
 async function handleOk() {
-  if (!role.value || saving.value || !changeCount.value)
+  if (!role.value || saving.value || !totalChangeCount.value)
     return
+
+  rememberActivePlatform()
+
+  const selected = new Set<number>(preservedMenuIds.value)
+  Object.values(platformMemory.value).forEach((memory) => {
+    memory.checked.forEach(id => selected.add(id))
+    memory.indeterminate.forEach(id => selected.add(id))
+  })
 
   saving.value = true
   try {
     // 半选父节点并入 menuIds，保证后端按 pid 建树不断链
-    await RoleApi.assignMenu(role.value.id, selectedMenuIds.value)
+    await RoleApi.assignMenu(role.value.id, [...selected])
     commitCurrentPermissions()
     window.$message?.success?.(`已更新「${role.value.name}」的权限配置`)
     closeModal()
@@ -84,7 +210,7 @@ async function handleOk() {
 }
 
 async function handleBeforeClose() {
-  if (!changeCount.value || saving.value)
+  if (!totalChangeCount.value || saving.value)
     return !saving.value
 
   const dialog = window.$dialog
@@ -94,7 +220,7 @@ async function handleBeforeClose() {
   return new Promise<boolean>((resolve) => {
     dialog.warning({
       title: '放弃权限变更？',
-      content: `当前有 ${changeCount.value} 项权限变更尚未保存，关闭后将丢失。`,
+      content: `当前有 ${totalChangeCount.value} 项权限变更尚未保存，关闭后将丢失。`,
       positiveText: '放弃变更',
       negativeText: '继续编辑',
       onPositiveClick: () => resolve(true),
@@ -134,12 +260,30 @@ async function handleCancel() {
         </span>
       </div>
 
+      <div class="role-menu-permission__platforms">
+        <n-radio-group
+          :value="activePlatform"
+          size="small"
+          @update:value="handlePlatformChange"
+        >
+          <n-radio-button
+            v-for="platform in platformTabs"
+            :key="platform"
+            :value="platform"
+            :label="platformTabLabel(platform)"
+          />
+        </n-radio-group>
+        <span class="role-menu-permission__platforms-hint">
+          角色属于「{{ platformLabel(role?.platform || DEFAULT_PLATFORM) }}」，仅可配置本端与通用端的权限
+        </span>
+      </div>
+
       <div class="role-menu-permission__body">
         <RoleMenuTreePanel
           :data="menuTree"
           :checked-keys="checkedMenuIds"
-          @update:checked-keys="updateCheckedMenuIds"
-          @update:indeterminate-keys="updateIndeterminateKeys"
+          @update:checked-keys="handleCheckedKeysUpdate"
+          @update:indeterminate-keys="handleIndeterminateKeysUpdate"
         />
         <RoleMenuSummary
           :menus="flatMenus"
@@ -155,7 +299,7 @@ async function handleCancel() {
       <div class="role-menu-permission__footer">
         <div class="role-menu-permission__updated">
           <span>上次更新：{{ updatedTimeLabel }}</span>
-          <span v-if="originalMenuIds.length">已分配 {{ originalMenuIds.length }} 项</span>
+          <span v-if="originalMenuIds.length">本端已分配 {{ originalMenuIds.length }} 项</span>
         </div>
         <n-space>
           <n-button :disabled="saving" @click="handleCancel">
@@ -163,7 +307,7 @@ async function handleCancel() {
           </n-button>
           <n-button
             type="primary"
-            :disabled="loading || !role || !changeCount"
+            :disabled="loading || !role || !totalChangeCount"
             :loading="saving"
             @click="handleOk"
           >
@@ -212,6 +356,18 @@ async function handleCancel() {
   font-size: 13px;
 }
 
+.role-menu-permission__platforms {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.role-menu-permission__platforms-hint {
+  color: var(--n-text-color-3);
+  font-size: 12px;
+}
+
 .role-menu-permission__body {
   min-height: 0;
   display: grid;
@@ -237,6 +393,10 @@ async function handleCancel() {
 
 @media (max-width: 900px) {
   .role-menu-permission__description {
+    display: none;
+  }
+
+  .role-menu-permission__platforms-hint {
     display: none;
   }
 

@@ -3,6 +3,7 @@ import type { FormInst } from 'naive-ui'
 import { Icon } from '@iconify/vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { UserApi } from '@/api/user'
+import { DEFAULT_PLATFORM } from '@/constants'
 import { useAuthStore } from '@/store/modules'
 
 const emit = defineEmits(['success', 'switchToRegister'])
@@ -98,14 +99,17 @@ async function handleLogin() {
   loading.value = true
   overlayLoading.value = true
   try {
-    const result = await UserApi.login({
+    // 管理端登录显式声明端：服务端只下发该端的角色与权限
+    const payload: Api.LoginParams & { platform?: string } = {
       username: formData.username,
       password: formData.password,
+      platform: DEFAULT_PLATFORM,
       // 验证码关闭时不携带验证码参数
       ...(captchaEnabled.value
         ? { captcha: formData.captcha, captchaId: formData.captchaId }
         : {}),
-    })
+    }
+    const result = await UserApi.login(payload)
 
     authStore.setToken(result)
 
