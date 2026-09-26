@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import { NTag } from 'naive-ui'
 import { computed } from 'vue'
-import { clientPlatformOptions, DEFAULT_PLATFORM, platformLabel, platformOptions } from '@/constants'
+import { DEFAULT_PLATFORM, enabledPlatformOptions, platformLabel, platformOptions } from '@/constants'
 import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
 import { hasPermission } from '@/utils/common/hasPermission'
 import { isSystemAdminRole } from './roleRules'
@@ -81,7 +81,7 @@ export function useRoleSchema(methods: any = {}) {
         },
         editForm: {
           component: 'NSelect',
-          componentProps: { options: clientPlatformOptions },
+          componentProps: { options: enabledPlatformOptions },
           rules: [
             { required: true, message: '请选择所属端', trigger: ['blur', 'change'] },
           ],

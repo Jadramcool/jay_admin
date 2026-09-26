@@ -2,7 +2,7 @@
 import type { MenuTreeFilters } from './menu-tree'
 import { MenuApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
-import { DEFAULT_PLATFORM, platformLabel, platformOptions } from '@/constants'
+import { DEFAULT_PLATFORM, enabledPlatformOptions } from '@/constants'
 import { hasPermission } from '@/utils/common/hasPermission'
 import MenuModal from './components/MenuModal.vue'
 import { filterMenuTree } from './menu-tree'
@@ -98,25 +98,6 @@ function handleAdd() {
 
 <template>
   <div class="system-page">
-    <div class="platform-switch">
-      <span class="platform-switch__label">端</span>
-      <n-radio-group
-        :value="activePlatform"
-        size="small"
-        @update:value="handlePlatformChange"
-      >
-        <n-radio-button
-          v-for="option in platformOptions"
-          :key="option.value"
-          :value="option.value"
-          :label="option.label"
-        />
-      </n-radio-group>
-      <span class="platform-switch__hint">
-        正在配置「{{ platformLabel(activePlatform) }}」的菜单与按钮：子节点必须与父节点同端
-      </span>
-    </div>
-
     <FormQuery @register="register" @submit="reload" />
     <BasicTable
       ref="tableRef"
@@ -129,31 +110,56 @@ function handleAdd() {
       :default-expand-all="true"
       :scroll-x="1700"
       @add="handleAdd"
-    />
+    >
+      <!-- 端切换放在列表标题左侧：菜单与按钮按端隔离 -->
+      <template #header>
+        <div class="menu-table-header">
+          <span class="menu-table-header__title">菜单管理</span>
+          <n-radio-group
+            :value="activePlatform"
+            size="small"
+            @update:value="handlePlatformChange"
+          >
+            <n-radio-button
+              v-for="option in enabledPlatformOptions"
+              :key="option.value"
+              :value="option.value"
+              :label="option.label"
+            />
+          </n-radio-group>
+        </div>
+      </template>
+    </BasicTable>
 
     <MenuModal @register="registerModal" @success="reload" />
   </div>
 </template>
 
 <style scoped lang="scss">
-.platform-switch {
+.menu-table-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  border: 1px solid #e2e5e9;
-  border-radius: 8px;
-  background: #fff;
+  gap: 14px;
 }
 
-.platform-switch__label {
-  color: #646a73;
-  font-size: 13px;
+.menu-table-header__title {
+  position: relative;
+  padding-left: 12px;
+  color: var(--card-header-text, #1f2329);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
 }
 
-.platform-switch__hint {
-  color: var(--n-text-color-3);
-  font-size: 12px;
+.menu-table-header__title::before {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--primary-color, #18a058);
+  content: '';
+  transform: translateY(-50%);
 }
 </style>

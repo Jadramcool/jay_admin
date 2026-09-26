@@ -24,9 +24,16 @@ export const platformOptions: PlatformOption[] = [
   { label: '通用', value: PLATFORM_COMMON },
 ]
 
-/** 可作为角色归属/登录端的端（不含通用端） */
-export const clientPlatformOptions = platformOptions.filter(
-  option => option.value !== PLATFORM_COMMON,
+/**
+ * 当前启用的端：界面上的端切换只展示这些
+ *
+ * 后端已支持 admin/app/mp/common，启用新端时在这里登记（与后端
+ * src/common/constants/platform.ts 保持同名常量），界面无需改动。
+ */
+export const enabledPlatforms: string[] = [PLATFORM_ADMIN, PLATFORM_APP]
+
+export const enabledPlatformOptions = platformOptions.filter(option =>
+  enabledPlatforms.includes(option.value),
 )
 
 export function platformLabel(value?: string | null): string {
@@ -40,5 +47,9 @@ export function platformLabel(value?: string | null): string {
  */
 export function assignablePlatforms(rolePlatform?: string | null): string[] {
   const primary = rolePlatform || DEFAULT_PLATFORM
-  return primary === PLATFORM_COMMON ? [PLATFORM_COMMON] : [primary, PLATFORM_COMMON]
+  // 通用端是共享端：仅在它被启用时才作为可配置项
+  const shared = enabledPlatforms.includes(PLATFORM_COMMON)
+    ? [PLATFORM_COMMON]
+    : []
+  return primary === PLATFORM_COMMON ? [PLATFORM_COMMON] : [primary, ...shared]
 }

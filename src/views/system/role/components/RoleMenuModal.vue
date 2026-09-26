@@ -260,7 +260,7 @@ async function handleCancel() {
         </span>
       </div>
 
-      <div class="role-menu-permission__platforms">
+      <div v-if="platformTabs.length > 1" class="role-menu-permission__platforms">
         <n-radio-group
           :value="activePlatform"
           size="small"
