@@ -1,3 +1,5 @@
+export { cityTreeData } from './city'
+
 export const sexOptions = [
   { label: '男', value: 'MALE' },
   { label: '女', value: 'FEMALE' },
@@ -64,4 +66,4 @@ export const scopeTypeOptions = [
   { label: '指定用户', value: 'USER' },
 ]
 
-export { cityTreeData } from './city'
+export * from './platform'

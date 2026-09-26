@@ -42,6 +42,8 @@ declare global {
       description?: string
       isSystem?: boolean
       isDeleted?: boolean
+      /** 所属端: admin | app | mp | common */
+      platform?: string
       createdTime: string
       updatedTime: string
       /** 角色已分配的功能权限ID列表（角色详情返回） */
@@ -74,6 +76,8 @@ declare global {
       name: string
       permission?: string
       type: 'DIRECTORY' | 'MENU' | 'BUTTON'
+      /** 所属端: admin | app | mp | common */
+      platform?: string
       pid?: number
       path?: string
       redirect?: string
