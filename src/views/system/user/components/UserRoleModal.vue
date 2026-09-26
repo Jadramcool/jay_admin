@@ -3,6 +3,7 @@ import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 import { RoleApi, UserManagerApi } from '@/api/system'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+import { platformLabel } from '@/constants'
 
 const emit = defineEmits<{
   success: []
@@ -30,6 +31,15 @@ function toggleRole(id: number) {
   else if (checkedRoleIds.value.length < 5) {
     checkedRoleIds.value.push(id)
   }
+}
+
+/** 角色所属端的标签配色：管理端蓝、App 端绿、通用端橙 */
+function rolePlatformTagType(platform?: string) {
+  if (platform === 'app')
+    return 'success' as const
+  if (platform === 'common')
+    return 'warning' as const
+  return 'info' as const
 }
 
 function getIconClass(code: string) {
@@ -117,6 +127,18 @@ async function handleOk() {
                 <div class="role-code text-xs">
                   {{ role.code }}
                 </div>
+                <div class="role-meta">
+                  <n-tag
+                    :bordered="false"
+                    size="tiny"
+                    :type="rolePlatformTagType(role.platform)"
+                  >
+                    {{ platformLabel(role.platform) }}
+                  </n-tag>
+                  <span>
+                    {{ role.menuCount ?? 0 }} 项权限 · {{ role.userCount ?? 0 }} 人
+                  </span>
+                </div>
               </div>
             </div>
             <div
@@ -179,6 +201,15 @@ async function handleOk() {
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .role-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    color: var(--card-sub-text);
+    font-size: 12px;
   }
 
   .role-icon {

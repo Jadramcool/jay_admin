@@ -4,6 +4,7 @@ import { computed, ref, shallowRef } from 'vue'
 import { MenuApi, RoleApi } from '@/api/system'
 import { useModalInner } from '@/components/Modal/src/hooks/useModal'
 import { configurablePlatforms, DEFAULT_PLATFORM, PLATFORM_COMMON, platformLabel } from '@/constants'
+import { hasPermission } from '@/utils/common/hasPermission'
 import RoleMenuSummary from './role-menu-permission/RoleMenuSummary.vue'
 import RoleMenuTreePanel from './role-menu-permission/RoleMenuTreePanel.vue'
 import { useRoleMenuPermission } from './role-menu-permission/useRoleMenuPermission'
@@ -54,9 +55,13 @@ let currentRole: System.Role | null = null
 const platformTabs = computed(() => configurablePlatforms(role.value?.platform))
 /** 通用端角色：在所有端都生效，需要按端分别配置权限 */
 const isCommonRole = computed(() => (role.value?.platform ?? DEFAULT_PLATFORM) === PLATFORM_COMMON)
+/** 非通用端角色可以一键改为全端生效（需要角色编辑权限） */
+const canPromoteToCommon = computed(() => Boolean(role.value)
+  && role.value?.platform !== PLATFORM_COMMON
+  && hasPermission('system:role:update'))
 const platformsHint = computed(() => isCommonRole.value
   ? '通用端角色在所有端生效，请按端分别配置权限'
-  : `角色属于「${platformLabel(role.value?.platform || DEFAULT_PLATFORM)}」，仅可配置本端与通用端的权限`)
+  : `角色属于「${platformLabel(role.value?.platform || DEFAULT_PLATFORM)}」，当前只在${platformLabel(role.value?.platform || DEFAULT_PLATFORM)}生效，其它端需先改为全端生效`)
 const totalChangeCount = computed(() =>
   Object.values(platformChangeCounts.value).reduce((sum, count) => sum + count, 0),
 )
@@ -148,6 +153,77 @@ function resetAll() {
   activePlatform.value = DEFAULT_PLATFORM
 }
 
+/** 拉取角色可配置端的菜单树与已有授权（切换端、改为全端生效后复用） */
+async function fetchRoleData(record: System.Role) {
+  const platforms = configurablePlatforms(record.platform)
+  const [trees, roleDetail] = await Promise.all([
+    Promise.all(platforms.map(platform => MenuApi.tree(platform))),
+    RoleApi.detail(record.id),
+  ])
+  const assignedMenus = roleDetail?.menus ?? []
+
+  treesByPlatform.clear()
+  assignedByPlatform.clear()
+  platforms.forEach((platform, index) => {
+    treesByPlatform.set(platform, trees[index] ?? [])
+    assignedByPlatform.set(
+      platform,
+      assignedMenus.filter(
+        menu => (menu.platform ?? DEFAULT_PLATFORM) === platform,
+      ),
+    )
+  })
+
+  // 历史数据里可能存在其他端的授权：不在本界面展示，但保存时保留
+  preservedMenuIds.value = assignedMenus
+    .filter(menu => !platforms.includes(menu.platform ?? DEFAULT_PLATFORM))
+    .map(menu => menu.id)
+
+  return platforms
+}
+
+/**
+ * 把角色改为「全端生效」（归属端 = 通用端）
+ *
+ * 非通用端角色只在自身端生效，勾选其它端的权限不会下发；这里给出一条明路：
+ * 改为通用端后，管理端/App 端等各端都能分别配置，登录时仍只下发本端可见的权限。
+ */
+async function handlePromoteToCommon() {
+  const target = currentRole
+  if (!target || saving.value)
+    return
+
+  const promote = async () => {
+    saving.value = true
+    try {
+      await RoleApi.update({ id: target.id, platform: PLATFORM_COMMON })
+      window.$message?.success?.(`「${target.name}」已改为全端生效`)
+      currentRole = { ...target, platform: PLATFORM_COMMON }
+      const platforms = await fetchRoleData(currentRole)
+      activatePlatform(
+        platforms.includes(activePlatform.value)
+          ? activePlatform.value
+          : platforms[0],
+      )
+    }
+    finally {
+      saving.value = false
+    }
+  }
+
+  const dialog = window.$dialog
+  if (!dialog)
+    return promote()
+
+  dialog.warning({
+    title: '改为全端生效？',
+    content: `「${target.name}」当前只在「${platformLabel(target.platform)}」生效。改为全端生效后，可以在管理端、App 端等各端分别勾选权限（登录时仍只下发该端可见的权限）。`,
+    positiveText: '改为全端生效',
+    negativeText: '取消',
+    onPositiveClick: promote,
+  })
+}
+
 const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data: { record?: System.Role }) => {
   if (!data?.record)
     return
@@ -157,29 +233,7 @@ const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data
   setModalProps({ loading: true })
   try {
     currentRole = data.record
-    // 角色的可配置端：普通角色为「自身端 + 通用端」，通用角色为「所有端 + 通用端」
-    const platforms = configurablePlatforms(data.record.platform)
-    const [trees, roleDetail] = await Promise.all([
-      Promise.all(platforms.map(platform => MenuApi.tree(platform))),
-      RoleApi.detail(data.record.id),
-    ])
-    const assignedMenus = roleDetail?.menus ?? []
-
-    platforms.forEach((platform, index) => {
-      treesByPlatform.set(platform, trees[index] ?? [])
-      assignedByPlatform.set(
-        platform,
-        assignedMenus.filter(
-          menu => (menu.platform ?? DEFAULT_PLATFORM) === platform,
-        ),
-      )
-    })
-
-    // 历史数据里可能存在其他端的授权：不在本界面展示，但保存时保留
-    preservedMenuIds.value = assignedMenus
-      .filter(menu => !platforms.includes(menu.platform ?? DEFAULT_PLATFORM))
-      .map(menu => menu.id)
-
+    const platforms = await fetchRoleData(data.record)
     activatePlatform(platforms[0] ?? DEFAULT_PLATFORM)
   }
   finally {
@@ -278,9 +332,19 @@ async function handleCancel() {
             :label="platformTabLabel(platform)"
           />
         </n-radio-group>
-        <span class="role-menu-permission__platforms-hint">
-          {{ platformsHint }}
-        </span>
+        <div class="role-menu-permission__platforms-hint">
+          <span>{{ platformsHint }}</span>
+          <n-button
+            v-if="canPromoteToCommon"
+            text
+            size="tiny"
+            type="primary"
+            :disabled="saving"
+            @click="handlePromoteToCommon"
+          >
+            改为全端生效
+          </n-button>
+        </div>
       </div>
 
       <div class="role-menu-permission__body">
@@ -369,6 +433,9 @@ async function handleCancel() {
 }
 
 .role-menu-permission__platforms-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--n-text-color-3);
   font-size: 12px;
 }
