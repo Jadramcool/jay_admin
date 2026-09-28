@@ -153,12 +153,25 @@ function resetAll() {
   activePlatform.value = DEFAULT_PLATFORM
 }
 
+/** 表格行可能是改端前的缓存，端信息一律以服务端为准 */
+async function resolveRole(record: System.Role): Promise<System.Role> {
+  try {
+    const roles = await RoleApi.all()
+    const fresh = (roles ?? []).find(item => item.id === record.id)
+    return fresh ? { ...record, ...fresh } : record
+  }
+  catch {
+    return record
+  }
+}
+
 /** 拉取角色可配置端的菜单树与已有授权（切换端、改为全端生效后复用） */
 async function fetchRoleData(record: System.Role) {
-  const platforms = configurablePlatforms(record.platform)
+  const role = await resolveRole(record)
+  const platforms = configurablePlatforms(role.platform)
   const [trees, roleDetail] = await Promise.all([
     Promise.all(platforms.map(platform => MenuApi.tree(platform))),
-    RoleApi.detail(record.id),
+    RoleApi.detail(role.id),
   ])
   const assignedMenus = roleDetail?.menus ?? []
 
@@ -179,6 +192,7 @@ async function fetchRoleData(record: System.Role) {
     .filter(menu => !platforms.includes(menu.platform ?? DEFAULT_PLATFORM))
     .map(menu => menu.id)
 
+  currentRole = role
   return platforms
 }
 
@@ -197,14 +211,24 @@ async function handlePromoteToCommon() {
     saving.value = true
     try {
       await RoleApi.update({ id: target.id, platform: PLATFORM_COMMON })
+      // 以服务端返回为准重新渲染：表格行缓存可能还是改端前的数据
+      const platforms = await fetchRoleData({
+        ...target,
+        platform: PLATFORM_COMMON,
+      })
+      if (currentRole?.platform !== PLATFORM_COMMON) {
+        window.$message?.error?.('角色所属端未能更新，请刷新页面后重试')
+        return
+      }
+
       window.$message?.success?.(`「${target.name}」已改为全端生效`)
-      currentRole = { ...target, platform: PLATFORM_COMMON }
-      const platforms = await fetchRoleData(currentRole)
       activatePlatform(
         platforms.includes(activePlatform.value)
           ? activePlatform.value
           : platforms[0],
       )
+      // 让列表重新拉取，避免下次打开弹窗仍用旧行数据
+      emit('success')
     }
     finally {
       saving.value = false
@@ -232,7 +256,6 @@ const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data
   loading.value = true
   setModalProps({ loading: true })
   try {
-    currentRole = data.record
     const platforms = await fetchRoleData(data.record)
     activatePlatform(platforms[0] ?? DEFAULT_PLATFORM)
   }
