@@ -57,6 +57,9 @@ const [register, { getFieldsValue }] = useForm({
 
 async function loadData(params: any) {
   const filters = getFieldsValue()
+  // 所属端留空即「全部端」：不带该参数，避免后端按空值筛选
+  if (!filters.platform)
+    delete filters.platform
   return RoleApi.list({ ...params, ...filters })
 }
 

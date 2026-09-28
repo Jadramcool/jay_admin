@@ -66,7 +66,6 @@ export function useRoleSchema(methods: any = {}) {
       {
         key: 'platform',
         label: '所属端',
-        defaultValue: DEFAULT_PLATFORM,
         table: {
           width: 100,
           render: (row: any) => platformLabel(row.platform),
@@ -82,6 +81,8 @@ export function useRoleSchema(methods: any = {}) {
         editForm: {
           component: 'NSelect',
           componentProps: { options: rolePlatformOptions },
+          // 查询表单默认「全部端」（不筛选）；新建角色的默认所属端放在 editForm
+          defaultValue: DEFAULT_PLATFORM,
           rules: [
             { required: true, message: '请选择所属端', trigger: ['blur', 'change'] },
           ],
