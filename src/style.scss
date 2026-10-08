@@ -189,6 +189,24 @@ html.theme-transitioning *::after {
   min-height: 0;
 }
 
+// 「整页滚动」变体：适合「顶部有仪表盘 + 下方大表格」的页面。
+// 默认的 .system-page 是「锁死视口高度 + 卡片内滚动」模型，上方内容一多就会把
+// 表格的可用高度挤成 0；该变体改成高度自适应，页面随内容增高，由外层 content-card 统一滚动。
+//
+// 关键：表格区必须给**确定高度**，不能用 min-height —— BasicTable 内层是
+// height:100% 百分比链（.table-wrapper → .n-data-table → 表体），百分比只对
+// 「确定高度」的父级生效；min-height 不会让父高度变成确定值，表体仍会塌成 0
+// （表现为「只有表头、看不到数据行」）。需要改高度时按页覆写 --table-height。
+.system-page.system-page--scroll {
+  height: auto;
+  min-height: 100%;
+}
+
+.system-page.system-page--scroll .table-wrapper {
+  flex: none;
+  height: var(--table-height, 560px);
+}
+
 // Shared query surface for schema-driven CRUD pages.
 // 扁平化设计:无阴影,靠极淡边框与色差组织层次。表单为白色色块,
 // 与表格之间留白分割,三者(表单/表格/页面背景)扁平而清晰。
