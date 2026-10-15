@@ -271,16 +271,6 @@ pnpm dev                    # Vite 开发服务，端口 4000
 
 前端配套：`TodoApi` 封装、`/todo` 待办页面（统计卡片 + 树形列表 + 子任务 + 勾选完成）。
 
-### 6.11 前端监控 `metrics`
-
-| 方法 | 路径              | 说明                                                                                                      |
-| ---- | ----------------- | --------------------------------------------------------------------------------------------------------- |
-| POST | `/metrics/events` | 前端批量上报事件（仅需登录），body `{ events: [{ type, category, message, stack, url, route, extra? }] }` |
-| GET  | `/metrics/events` | 事件分页查询（权限 `system:metrics:list`，query 支持 `type`/`category`）                                  |
-| GET  | `/metrics/stats`  | 统计（权限 `system:metrics:list`），返回 `{ total, errors, pageviews, todayErrors }`                      |
-
-前端配套：`utils/monitor`（采集 JS 错误 / Promise 拒绝 / Vue 错误 / 路由访问,批量防抖上报,失败走 localStorage 缓冲重试）、`MetricsApi` 封装、`/monitor` 监控页（统计卡片 + 类型筛选 + 事件列表）。
-
 ### 6.13 在线用户 `system/session`
 
 | 方法 | 路径                                | 说明                                                                                |
@@ -294,13 +284,13 @@ pnpm dev                    # Vite 开发服务，端口 4000
 
 ### 6.12 其他
 
-| 方法 | 路径                                                            | 说明                                                                                              |
-| ---- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| GET  | `/dashboard/stats` / `/trends` / `/system-info` / `/activities` | 仪表盘（trends 参数 `days`，activities 参数 `limit`）                                             |
-| POST | `/upload`                                                       | 单文件上传（multipart 字段 `file`），返回 `{ originalName, fileName, path, url, size, mimeType }` |
-| POST | `/upload/batch`                                                 | 批量上传（字段 `files`，≤10 个）                                                                  |
-| POST | `/public/sort` / `/public/resetSort`                            | 拖拽排序（前端暂未封装）                                                                          |
-| GET  | `/health` / `/health/database`                                  | 健康检查（@Public）                                                                               |
+| 方法 | 路径                                           | 说明                                                                                              |
+| ---- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| GET  | `/dashboard/stats` / `/trends` / `/activities` | 仪表盘（trends 参数 `days`，activities 参数 `limit`）                                             |
+| POST | `/upload`                                      | 单文件上传（multipart 字段 `file`），返回 `{ originalName, fileName, path, url, size, mimeType }` |
+| POST | `/upload/batch`                                | 批量上传（字段 `files`，≤10 个）                                                                  |
+| POST | `/public/sort` / `/public/resetSort`           | 拖拽排序（前端暂未封装）                                                                          |
+| GET  | `/health` / `/health/database`                 | 健康检查（@Public）                                                                               |
 
 ## 7. WebSocket（公告实时推送）
 
@@ -373,3 +363,4 @@ pnpm gen:page <name>     # 如 pnpm gen:page user-group
 - **2026-08-08**：系统配置模块完善（M1+M2）——配置类型系统（parse/validate/serialize,非法值 422）、内存缓存（5 分钟写后失效）、isSystem 保护（禁删禁改 key/type）、PASSWORD 脱敏展示与编辑留空不修改、`resolve` 类型化读取端点、前端 `useConfig`/`invalidateConfig` 与类型化编辑控件;新增 18 项单元测试与 2 个 E2E 用例（共 25 个）。
 - **2026-08-13**：系统配置**接入业务生效**——配置查询支持「全部/公开/内部」三态（默认全部,不传即不过滤）,可见性统一命名为「公开/内部」（公开=匿名可读 `@Public`、内部=登录后可读）;登录限流参数改读配置 `security.login.maxRetry`/`security.login.lockMinutes`（写配置即时生效,新增 2 项测试,后端共 134 项）;seed 新增 security 配置并按 key 增量补充（幂等）;登录页品牌位/侧边栏标题/页脚版权读公开配置 `site_name`/`site_description`/`copyright`（前端 `usePublicConfig` + 模块级缓存,mock 同步对齐 key 并补 public 路由）。
 - **2026-08-13**：**主题色接入系统配置**——启动时读取公开配置 `primary_color` 应用为主题色（`appStore.setPrimaryColor` 全站生效:naive-ui overrides + CSS 变量 + 菜单/输入框变体色）;新增 `primaryColorSource`（config/manual）区分来源:配置色始终跟随,用户在设置抽屉手动改色后标记 manual 不再被覆盖,重置设置恢复跟随;登录页 logo 硬编码绿色改为 `--primary-color-rgb` 变量;E2E 新增主题色断言（共 26 个）,Playwright 超时放宽至 60s（dev 冷编译可达 20-30s）。
+- **2026-10-15**：**移除前端监控模块**——`/monitor` 监控页、`utils/monitor` 采集器、`MetricsApi`、后端 `metrics` 模块（3 个端点）、`client_event` 表及相关菜单/权限（`Metrics` / `system:metrics:list` / `system:monitor:view`）全部下线；`SystemInfo` 卡与 `GET /dashboard/system-info` 一并移除；首页趋势图去掉 `visits` 序列（原口径为 pageview 上报量），只保留 `operations` / `newUsers`。新增迁移 `20261015120000_drop_frontend_monitor_module` 清理库内已播种的菜单/权限行并 drop 表（幂等）。测试：E2E 移除 3 个监控用例、单测移除采集/传输层 12 项与 UA 解析 4 项。

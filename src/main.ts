@@ -5,7 +5,6 @@ import router, { setupRouterGuards } from './router'
 import { registerLoginNavigator } from './router/auth-navigation'
 import pinia from './store'
 import { registerLocalIconCollections } from './utils/common/register-icons'
-import { initMonitor } from './utils/monitor'
 import { setupAuthSessionSync } from './utils/token/session-sync'
 
 import 'uno.css'
@@ -26,9 +25,6 @@ async function bootstrap() {
 
   // Register guards BEFORE router install so the initial navigation is protected
   setupRouterGuards(router)
-
-  // 错误监控与埋点(幂等;上报失败走 localStorage 缓冲)
-  initMonitor(app, router)
 
   app.use(router)
 

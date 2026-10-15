@@ -196,21 +196,6 @@ declare global {
       createdTime: string
     }
 
-    // ── 前端监控事件 ──
-    interface ClientEvent {
-      id: number
-      type: 'error' | 'pageview'
-      category?: string
-      message?: string
-      stack?: string
-      url?: string
-      route?: string
-      userId?: number | null
-      browser?: string | null
-      extra?: Record<string, unknown> | null
-      createdTime: string
-    }
-
     // ── 待办事项 ──
     interface Todo {
       id: number
