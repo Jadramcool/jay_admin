@@ -401,6 +401,437 @@
         ]
       }
     },
+    "/system/config/resolve/{key}": {
+      "get": {
+        "operationId": "SysConfigController_resolve",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "类型化读取配置(带缓存)",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/resolve": {
+      "get": {
+        "operationId": "SysConfigController_resolveMany",
+        "parameters": [
+          {
+            "name": "keys",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量类型化读取配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/list": {
+      "get": {
+        "operationId": "SysConfigController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "页码",
+            "schema": {
+              "minimum": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "description": "每页数量",
+            "schema": {
+              "minimum": 1,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "配置名称",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "key",
+            "required": false,
+            "in": "query",
+            "description": "配置键",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "配置类型",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "STRING",
+                "NUMBER",
+                "BOOLEAN",
+                "JSON",
+                "ARRAY",
+                "FILE",
+                "EMAIL",
+                "URL",
+                "PASSWORD"
+              ]
+            }
+          },
+          {
+            "name": "category",
+            "required": false,
+            "in": "query",
+            "description": "配置分类",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isPublic",
+            "required": false,
+            "in": "query",
+            "description": "是否公开配置",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isSystem",
+            "required": false,
+            "in": "query",
+            "description": "是否系统配置",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取系统配置列表",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/detail/{id}": {
+      "get": {
+        "operationId": "SysConfigController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取系统配置详情",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/key/{key}": {
+      "get": {
+        "operationId": "SysConfigController_findByKey",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "根据键获取系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/category/{category}": {
+      "get": {
+        "operationId": "SysConfigController_findByCategory",
+        "parameters": [
+          {
+            "name": "category",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "根据分类获取系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/public": {
+      "get": {
+        "operationId": "SysConfigController_findPublic",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取公开配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/create": {
+      "post": {
+        "operationId": "SysConfigController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSysConfigDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "创建系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/update": {
+      "put": {
+        "operationId": "SysConfigController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSysConfigWithIdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "更新系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/delete/{id}": {
+      "delete": {
+        "operationId": "SysConfigController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "删除系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/batchDelete": {
+      "put": {
+        "operationId": "SysConfigController_batchRemove",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "批量删除系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/status/{id}": {
+      "put": {
+        "operationId": "SysConfigController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "启用/禁用系统配置",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
+    "/system/config/validate-password": {
+      "post": {
+        "operationId": "SysConfigController_validatePassword",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "校验密码",
+        "tags": [
+          "系统配置"
+        ]
+      }
+    },
     "/system/user/list": {
       "get": {
         "operationId": "UserController_findAll",
@@ -484,6 +915,16 @@
       "put": {
         "operationId": "UserController_update",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserWithIdDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -533,6 +974,16 @@
       "put": {
         "operationId": "UserController_batchRemove",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchIdsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -562,6 +1013,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -591,6 +1052,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignUserRolesDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -620,6 +1091,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetUserPasswordDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -741,6 +1222,15 @@
             }
           },
           {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "description": "所属端: admin | app | mp | common",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "includeDeleted",
             "required": false,
             "in": "query",
@@ -849,6 +1339,16 @@
       "put": {
         "operationId": "RoleController_update",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleWithIdDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -898,6 +1398,16 @@
       "post": {
         "operationId": "RoleController_assignMenus",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleMenusDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -982,6 +1492,15 @@
             }
           },
           {
+            "name": "platform",
+            "required": false,
+            "in": "query",
+            "description": "所属端: admin | app | mp | common",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "pid",
             "required": false,
             "in": "query",
@@ -1048,7 +1567,16 @@
     "/system/menu/tree": {
       "get": {
         "operationId": "MenuController_findTree",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "platform",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
@@ -1715,427 +2243,6 @@
         ]
       }
     },
-    "/system/config/resolve/{key}": {
-      "get": {
-        "operationId": "SysConfigController_resolve",
-        "parameters": [
-          {
-            "name": "key",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "类型化读取配置(带缓存)",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/resolve": {
-      "get": {
-        "operationId": "SysConfigController_resolveMany",
-        "parameters": [
-          {
-            "name": "keys",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "批量类型化读取配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/list": {
-      "get": {
-        "operationId": "SysConfigController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "页码",
-            "schema": {
-              "minimum": 1,
-              "example": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "每页数量",
-            "schema": {
-              "minimum": 1,
-              "example": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "name",
-            "required": false,
-            "in": "query",
-            "description": "配置名称",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "key",
-            "required": false,
-            "in": "query",
-            "description": "配置键",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "type",
-            "required": false,
-            "in": "query",
-            "description": "配置类型",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "STRING",
-                "NUMBER",
-                "BOOLEAN",
-                "JSON",
-                "ARRAY",
-                "FILE",
-                "EMAIL",
-                "URL",
-                "PASSWORD"
-              ]
-            }
-          },
-          {
-            "name": "category",
-            "required": false,
-            "in": "query",
-            "description": "配置分类",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "isPublic",
-            "required": false,
-            "in": "query",
-            "description": "是否公开配置",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "isSystem",
-            "required": false,
-            "in": "query",
-            "description": "是否系统配置",
-            "schema": {
-              "type": "boolean"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "获取系统配置列表",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/detail/{id}": {
-      "get": {
-        "operationId": "SysConfigController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "获取系统配置详情",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/key/{key}": {
-      "get": {
-        "operationId": "SysConfigController_findByKey",
-        "parameters": [
-          {
-            "name": "key",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "根据键获取系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/category/{category}": {
-      "get": {
-        "operationId": "SysConfigController_findByCategory",
-        "parameters": [
-          {
-            "name": "category",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "根据分类获取系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/public": {
-      "get": {
-        "operationId": "SysConfigController_findPublic",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "获取公开配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/create": {
-      "post": {
-        "operationId": "SysConfigController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateSysConfigDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "创建系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/update": {
-      "put": {
-        "operationId": "SysConfigController_update",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "更新系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/delete/{id}": {
-      "delete": {
-        "operationId": "SysConfigController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "删除系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/batchDelete": {
-      "put": {
-        "operationId": "SysConfigController_batchRemove",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "批量删除系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/status/{id}": {
-      "put": {
-        "operationId": "SysConfigController_updateStatus",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "启用/禁用系统配置",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
-    "/system/config/validate-password": {
-      "post": {
-        "operationId": "SysConfigController_validatePassword",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "校验密码",
-        "tags": [
-          "系统配置"
-        ]
-      }
-    },
     "/system/operation-log/list": {
       "get": {
         "operationId": "OperationLogController_findAll",
@@ -2261,6 +2368,16 @@
       "post": {
         "operationId": "OperationLogController_batchRemove",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchIdsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -2281,6 +2398,16 @@
       "post": {
         "operationId": "OperationLogController_clearExpired",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClearExpiredDaysDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -2724,6 +2851,55 @@
         "summary": "启用/禁用字典项",
         "tags": [
           "数据字典"
+        ]
+      }
+    },
+    "/system/permission/list": {
+      "get": {
+        "operationId": "PermissionController_findGrouped",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取功能权限列表（按模块分组）",
+        "tags": [
+          "功能权限"
+        ]
+      }
+    },
+    "/system/permission/role/{roleId}": {
+      "get": {
+        "operationId": "PermissionController_findPermissionIdsByRole",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "获取角色已分配的功能权限ID列表",
+        "tags": [
+          "功能权限"
         ]
       }
     },
@@ -3300,9 +3476,9 @@
         ]
       }
     },
-    "/dashboard/system-info": {
+    "/dashboard/mine": {
       "get": {
-        "operationId": "DashboardController_getSystemInfo",
+        "operationId": "DashboardController_getMine",
         "parameters": [],
         "responses": {
           "200": {
@@ -3314,7 +3490,7 @@
             "bearer": []
           }
         ],
-        "summary": "获取系统信息",
+        "summary": "获取当前用户个人工作台数据",
         "tags": [
           "仪表盘"
         ]
@@ -3355,13 +3531,16 @@
         "operationId": "TodoController_findAll",
         "parameters": [
           {
-            "name": "onlyUndone",
+            "name": "isDone",
             "required": false,
             "in": "query",
-            "description": "是否只查未完成",
+            "description": "完成状态筛选: 0-未完成 1-已完成, 不传查全部",
             "schema": {
-              "default": false,
-              "type": "number"
+              "type": "number",
+              "enum": [
+                0,
+                1
+              ]
             }
           },
           {
@@ -3527,126 +3706,6 @@
           "待办事项"
         ]
       }
-    },
-    "/metrics/events": {
-      "post": {
-        "operationId": "MetricsController_report",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReportClientEventsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "批量上报前端事件",
-        "tags": [
-          "前端监控"
-        ]
-      },
-      "get": {
-        "operationId": "MetricsController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "description": "页码",
-            "schema": {
-              "default": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "pageSize",
-            "required": false,
-            "in": "query",
-            "description": "每页数量",
-            "schema": {
-              "default": 20,
-              "type": "number"
-            }
-          },
-          {
-            "name": "type",
-            "required": false,
-            "in": "query",
-            "description": "事件类型",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "error",
-                "pageview"
-              ]
-            }
-          },
-          {
-            "name": "category",
-            "required": false,
-            "in": "query",
-            "description": "分类",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "查询前端事件(分页)",
-        "tags": [
-          "前端监控"
-        ]
-      }
-    },
-    "/metrics/stats": {
-      "get": {
-        "operationId": "MetricsController_getStats",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "事件统计",
-        "tags": [
-          "前端监控"
-        ]
-      }
     }
   },
   "info": {
@@ -3690,6 +3749,11 @@
           "captchaId": {
             "type": "string",
             "description": "验证码ID"
+          },
+          "platform": {
+            "type": "string",
+            "description": "登录端: admin | app | mp（缺省 admin）",
+            "example": "app"
           }
         },
         "required": [
@@ -3827,6 +3891,123 @@
           "newPassword"
         ]
       },
+      "CreateSysConfigDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "配置名称"
+          },
+          "key": {
+            "type": "string",
+            "description": "配置键"
+          },
+          "value": {
+            "type": "string",
+            "description": "配置值"
+          },
+          "type": {
+            "type": "string",
+            "description": "配置类型",
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BOOLEAN",
+              "JSON",
+              "ARRAY",
+              "FILE",
+              "EMAIL",
+              "URL",
+              "PASSWORD"
+            ],
+            "default": "STRING"
+          },
+          "description": {
+            "type": "string",
+            "description": "配置描述"
+          },
+          "category": {
+            "type": "string",
+            "description": "配置分类",
+            "default": "SYSTEM"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "是否公开配置",
+            "default": false
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "是否系统配置",
+            "default": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序",
+            "default": 0
+          }
+        },
+        "required": [
+          "name",
+          "key",
+          "value"
+        ]
+      },
+      "UpdateSysConfigWithIdDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "配置名称"
+          },
+          "key": {
+            "type": "string",
+            "description": "配置键"
+          },
+          "value": {
+            "type": "string",
+            "description": "配置值"
+          },
+          "type": {
+            "type": "string",
+            "description": "配置类型",
+            "enum": [
+              "STRING",
+              "NUMBER",
+              "BOOLEAN",
+              "JSON",
+              "ARRAY",
+              "FILE",
+              "EMAIL",
+              "URL",
+              "PASSWORD"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "配置描述"
+          },
+          "category": {
+            "type": "string",
+            "description": "配置分类"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "description": "是否公开配置"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "排序"
+          },
+          "id": {
+            "type": "number",
+            "description": "配置ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
       "CreateUserDto": {
         "type": "object",
         "properties": {
@@ -3917,6 +4098,154 @@
           "password"
         ]
       },
+      "UpdateUserWithIdDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "用户名"
+          },
+          "password": {
+            "type": "string",
+            "description": "密码"
+          },
+          "name": {
+            "type": "string",
+            "description": "真实姓名"
+          },
+          "phone": {
+            "type": "string",
+            "description": "手机号"
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱"
+          },
+          "sex": {
+            "type": "string",
+            "description": "性别",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER"
+            ]
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像URL"
+          },
+          "birthday": {
+            "format": "date-time",
+            "type": "string",
+            "description": "生日"
+          },
+          "city": {
+            "type": "string",
+            "description": "城市"
+          },
+          "address": {
+            "type": "string",
+            "description": "地址"
+          },
+          "addressDetail": {
+            "type": "string",
+            "description": "详细地址"
+          },
+          "departmentId": {
+            "type": "number",
+            "description": "部门ID"
+          },
+          "joinedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "入职时间"
+          },
+          "position": {
+            "type": "string",
+            "description": "职位"
+          },
+          "roleType": {
+            "type": "string",
+            "description": "角色类型"
+          },
+          "status": {
+            "type": "number",
+            "description": "用户状态 0-禁用 1-启用"
+          },
+          "roleIds": {
+            "description": "角色ID列表",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number",
+            "description": "用户ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "BatchIdsDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "ID 列表",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "UpdateUserStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "用户状态",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "AssignUserRolesDto": {
+        "type": "object",
+        "properties": {
+          "roleIds": {
+            "description": "角色ID列表",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "roleIds"
+        ]
+      },
+      "ResetUserPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "description": "新密码"
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
       "CreateRoleDto": {
         "type": "object",
         "properties": {
@@ -3930,6 +4259,12 @@
             "description": "角色名称",
             "example": "管理员"
           },
+          "platform": {
+            "type": "string",
+            "description": "所属端: admin | app | mp | common（缺省 admin）",
+            "example": "app",
+            "default": "admin"
+          },
           "description": {
             "type": "string",
             "description": "角色描述"
@@ -3938,6 +4273,61 @@
         "required": [
           "code",
           "name"
+        ]
+      },
+      "UpdateRoleWithIdDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "角色编码"
+          },
+          "name": {
+            "type": "string",
+            "description": "角色名称"
+          },
+          "description": {
+            "type": "string",
+            "description": "角色描述"
+          },
+          "platform": {
+            "type": "string",
+            "description": "所属端: admin | app | mp | common"
+          },
+          "id": {
+            "type": "number",
+            "description": "角色ID"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "AssignRoleMenusDto": {
+        "type": "object",
+        "properties": {
+          "roleId": {
+            "type": "number",
+            "description": "角色ID"
+          },
+          "menuIds": {
+            "description": "菜单ID列表",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "permissionIds": {
+            "description": "功能权限ID列表",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "roleId",
+          "menuIds"
         ]
       },
       "CreateMenuDto": {
@@ -3954,7 +4344,7 @@
           },
           "permission": {
             "type": "string",
-            "description": "权限标识",
+            "description": "权限标识（仅 BUTTON 类型使用；目录/菜单类型会被忽略并落库为 null）",
             "example": "system:user:list"
           },
           "type": {
@@ -3966,9 +4356,15 @@
               "BUTTON"
             ]
           },
+          "platform": {
+            "type": "string",
+            "description": "所属端: admin | app | mp | common（缺省 admin）",
+            "example": "app",
+            "default": "admin"
+          },
           "pid": {
             "type": "number",
-            "description": "父菜单ID"
+            "description": "父菜单ID。目录/菜单的父级只能是目录或空（根节点）；按钮必须挂在菜单下"
           },
           "path": {
             "type": "string",
@@ -4083,7 +4479,7 @@
           },
           "permission": {
             "type": "string",
-            "description": "权限标识"
+            "description": "权限标识（仅 BUTTON 类型使用；目录/菜单类型会被忽略并落库为 null）"
           },
           "type": {
             "type": "string",
@@ -4094,9 +4490,14 @@
               "BUTTON"
             ]
           },
+          "platform": {
+            "type": "string",
+            "description": "所属端: admin | app | mp | common",
+            "example": "app"
+          },
           "pid": {
             "type": "number",
-            "description": "父菜单ID"
+            "description": "父菜单ID。目录/菜单的父级只能是目录或空（根节点）；按钮必须挂在菜单下"
           },
           "path": {
             "type": "string",
@@ -4255,67 +4656,15 @@
           }
         }
       },
-      "CreateSysConfigDto": {
+      "ClearExpiredDaysDto": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "配置名称"
-          },
-          "key": {
-            "type": "string",
-            "description": "配置键"
-          },
-          "value": {
-            "type": "string",
-            "description": "配置值"
-          },
-          "type": {
-            "type": "string",
-            "description": "配置类型",
-            "enum": [
-              "STRING",
-              "NUMBER",
-              "BOOLEAN",
-              "JSON",
-              "ARRAY",
-              "FILE",
-              "EMAIL",
-              "URL",
-              "PASSWORD"
-            ],
-            "default": "STRING"
-          },
-          "description": {
-            "type": "string",
-            "description": "配置描述"
-          },
-          "category": {
-            "type": "string",
-            "description": "配置分类",
-            "default": "SYSTEM"
-          },
-          "isPublic": {
-            "type": "boolean",
-            "description": "是否公开配置",
-            "default": false
-          },
-          "isSystem": {
-            "type": "boolean",
-            "description": "是否系统配置",
-            "default": false
-          },
-          "sortOrder": {
+          "days": {
             "type": "number",
-            "description": "排序",
-            "default": 0
+            "description": "保留天数",
+            "default": 90
           }
-        },
-        "required": [
-          "name",
-          "key",
-          "value"
-        ]
+        }
       },
       "CreateDictTypeDto": {
         "type": "object",
@@ -4639,62 +4988,6 @@
         },
         "required": [
           "id"
-        ]
-      },
-      "ClientEventDto": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "description": "事件类型",
-            "enum": [
-              "error",
-              "pageview"
-            ]
-          },
-          "category": {
-            "type": "string",
-            "description": "分类",
-            "example": "JS_ERROR"
-          },
-          "message": {
-            "type": "string",
-            "description": "错误消息"
-          },
-          "stack": {
-            "type": "string",
-            "description": "错误堆栈(截断后)"
-          },
-          "url": {
-            "type": "string",
-            "description": "页面 URL"
-          },
-          "route": {
-            "type": "string",
-            "description": "路由路径"
-          },
-          "extra": {
-            "type": "object",
-            "description": "附加信息"
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "ReportClientEventsDto": {
-        "type": "object",
-        "properties": {
-          "events": {
-            "description": "事件列表",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClientEventDto"
-            }
-          }
-        },
-        "required": [
-          "events"
         ]
       }
     }
