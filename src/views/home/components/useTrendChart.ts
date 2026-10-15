@@ -1,15 +1,14 @@
 import { DashboardApi } from '@/api/dashboard'
 
-export type TrendSeriesKey = 'visits' | 'newUsers' | 'operations'
+export type TrendSeriesKey = 'newUsers' | 'operations'
 
 export function useTrendChart(visible: Ref<boolean>) {
   const trends = ref<Dashboard.Trends | null>(null)
   const loading = ref(true)
-  const activeSeries = ref<TrendSeriesKey>('visits')
+  const activeSeries = ref<TrendSeriesKey>('operations')
 
-  // 口径:visits = 前端上报的 pageview 事件数(非操作量);operations = 操作日志条数
+  // 口径:operations = 操作日志条数;newUsers = 当日注册用户数
   const seriesConfig: Record<TrendSeriesKey, { label: string, color: string }> = {
-    visits: { label: '页面访问量', color: '#2080f0' },
     newUsers: { label: '新增用户', color: '#18a058' },
     operations: { label: '操作次数', color: '#f0a020' },
   }

@@ -12,20 +12,8 @@ declare namespace Dashboard {
 
   interface Trends {
     dates: string[]
-    visits: number[]
     newUsers: number[]
     operations: number[]
-  }
-
-  interface SystemInfo {
-    cpu: number
-    memory: number
-    disk: number
-    uptime: string
-    version: string
-    nodeVersion: string
-    platform: string
-    dbRecords: number
   }
 
   interface Activity {
