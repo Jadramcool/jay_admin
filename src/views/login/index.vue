@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { usePublicConfig } from '@/composables/usePublicConfig'
+import { usePublicSetting } from '@/composables/usePublicSettings'
 import LoginForm from './components/LoginForm.vue'
 import RegisterForm from './components/RegisterForm.vue'
 
@@ -8,12 +8,12 @@ const isFlipped = ref(false)
 const router = useRouter()
 const route = useRoute()
 
-// 品牌信息(公开配置,匿名可读;未配置时回退默认文案)
+// 品牌信息(公开设置白名单,匿名可读;未配置时回退默认文案)
 const siteName = ref('欢迎回来')
 const siteDescription = ref('登录您的账号以继续')
 onMounted(async () => {
-  siteName.value = await usePublicConfig('site_name', siteName.value)
-  siteDescription.value = await usePublicConfig('site_description', siteDescription.value)
+  siteName.value = await usePublicSetting('site.name', siteName.value)
+  siteDescription.value = await usePublicSetting('site.description', siteDescription.value)
 })
 
 // === Canvas particle system ===

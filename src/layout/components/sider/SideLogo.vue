@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { usePublicConfig } from '@/composables/usePublicConfig'
+import { usePublicSetting } from '@/composables/usePublicSettings'
 import { useAppStore } from '@/store/modules'
 
 const appStore = useAppStore()
-// 站点名称(公开配置;未配置时回退默认)
-const title = ref('JDM Admin')
+// 站点名称(公开设置;未配置时回退默认)
+const title = ref('Jay Admin')
 onMounted(async () => {
-  title.value = await usePublicConfig('site_name', title.value)
+  title.value = await usePublicSetting('site.name', title.value)
 })
 </script>
 

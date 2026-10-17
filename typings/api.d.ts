@@ -53,7 +53,14 @@ declare global {
     type RefreshTokenParams = components['schemas']['RefreshTokenDto']
     type CheckPasswordParams = components['schemas']['CheckPasswordDto']
     type UpdatePasswordParams = components['schemas']['UpdatePasswordDto']
-    type UserProfileUpdate = components['schemas']['UpdateUserDto']
+    type UserProfileUpdate = components['schemas']['UpdateProfileDto']
+    type SettingUpdateParams = components['schemas']['UpdateSettingDto']
+    type SettingResetParams = components['schemas']['ResetSettingDto']
+    type SettingRollbackParams = components['schemas']['RollbackSettingDto']
+    type DictTypeCreateParams = components['schemas']['CreateDictTypeDto']
+    type DictTypeUpdateParams = components['schemas']['UpdateDictTypeDto']
+    type DictItemCreateParams = components['schemas']['CreateDictItemDto']
+    type DictItemUpdateParams = components['schemas']['UpdateDictItemDto']
 
     interface LoginResult {
       accessToken: string

@@ -1,6 +1,9 @@
 import type { Page } from '@playwright/test'
 import { Buffer } from 'node:buffer'
-import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSysConfigs, mockTodos, mockUsers, ts } from './data'
+import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSettingHistory, mockSettingSchema, mockSettingViews, mockTodos, mockUsers, ts } from './data'
+
+/** 设置列表的可变副本:mock 的 PUT/reset 会改它,便于断言"保存后回显" */
+const settingViews = mockSettingViews.map(view => ({ ...view }))
 
 /** 统一成功/失败响应(与后端契约一致)。注意:fulfill body 必须为字符串 */
 const ok = (data: unknown, message = '操作成功') => ({ code: 200, message, data })
@@ -288,45 +291,64 @@ export async function installApiMocks(page: Page) {
     if (pathname.startsWith('/api/system/session/kick/') && method === 'POST')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ kicked: 1 }, '已强制下线')) })
 
-    // ── 系统配置 ──
-    if (pathname === '/api/system/config/list' && method === 'GET') {
-      const page = Number(url.searchParams.get('page') || 1)
-      const pageSize = Number(url.searchParams.get('pageSize') || 20)
-      const keyword = url.searchParams.get('key')?.trim() || ''
-      const isPublicParam = url.searchParams.get('isPublic')
-      let items = mockSysConfigs
-      if (keyword)
-        items = items.filter(c => c.key.includes(keyword))
-      if (isPublicParam === 'true' || isPublicParam === 'false')
-        items = items.filter(c => String(c.isPublic) === isPublicParam)
+    // ── 系统设置(注册表驱动) ──
+    if (pathname === '/api/system/settings/public' && method === 'GET') {
+      const publicValues: Record<string, string> = {}
+      for (const view of settingViews.filter(v => v.expose === 'public'))
+        publicValues[view.key] = String(view.value)
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(publicValues)) })
+    }
+
+    if (pathname === '/api/system/settings/schema' && method === 'GET')
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockSettingSchema)) })
+
+    if (pathname === '/api/system/settings' && method === 'GET') {
+      const group = url.searchParams.get('group')
+      const items = group ? settingViews.filter(v => v.group === group) : settingViews
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(items)) })
+    }
+
+    if (pathname.startsWith('/api/system/settings/') && pathname.endsWith('/history') && method === 'GET') {
+      const key = pathname.split('/')[4]
+      const items = mockSettingHistory.filter(h => h.key === key)
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(ok({ items: items.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize), total: items.length, page, pageSize })),
+        body: JSON.stringify(ok({ items, total: items.length, page: 1, pageSize: 10 })),
       })
     }
 
-    if (pathname === '/api/system/config/public' && method === 'GET') {
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(ok(mockSysConfigs.filter(c => c.isPublic))),
-      })
+    if (pathname.startsWith('/api/system/settings/') && pathname.endsWith('/reset') && method === 'POST') {
+      const key = pathname.split('/')[4]
+      const view = settingViews.find(v => v.key === key)
+      if (view) {
+        view.value = view.defaultValue
+        view.source = 'default'
+        view.overridden = false
+        view.version = 0
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(view ?? null, '重置成功')) })
     }
 
-    if (pathname === '/api/system/config/create' && method === 'POST')
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(null, '创建成功')) })
+    if (pathname.startsWith('/api/system/settings/') && pathname.endsWith('/rollback') && method === 'POST') {
+      const key = pathname.split('/')[4]
+      const view = settingViews.find(v => v.key === key)
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(view ?? null, '回滚成功')) })
+    }
 
-    if (pathname === '/api/system/config/update' && method === 'PUT')
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(null, '更新成功')) })
-
-    if (pathname.startsWith('/api/system/config/resolve/') && method === 'GET') {
-      const key = pathname.split('/').pop()
-      const config = mockSysConfigs.find(c => c.key === key)
-      let value: unknown = config ? config.value : null
-      if (config?.type === 'NUMBER')
-        value = Number(value)
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(value)) })
+    if (pathname.startsWith('/api/system/settings/') && method === 'PUT') {
+      const key = pathname.split('/')[4]
+      const payload = JSON.parse(route.request().postData() || '{}')
+      const view = settingViews.find(v => v.key === key)
+      if (view) {
+        view.value = payload.value
+        view.source = 'db'
+        view.overridden = true
+        view.version = view.version + 1
+        view.updatedName = 'admin'
+        view.updatedTime = ts(0)
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(view ?? null, '更新成功')) })
     }
 
     // ── 数据字典 ──
@@ -431,6 +453,11 @@ export async function installApiMocks(page: Page) {
     if (pathname === '/api/system/department/tree' && method === 'GET')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDepartments)) })
 
+    // ── 认证:解除登录失败锁定 ──
+    if (pathname === '/api/auth/unlock' && method === 'PUT') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ username: 'zhangsan', cleared: 2 }, '解锁成功')) })
+    }
+
     // ── 公告 ──
     if (pathname === '/api/notice/user/unread' && method === 'GET')
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok([])) })
@@ -438,16 +465,29 @@ export async function installApiMocks(page: Page) {
     if (pathname === '/api/notice/list' && method === 'GET') {
       const page = Number(url.searchParams.get('page') || 1)
       const pageSize = Number(url.searchParams.get('pageSize') || 20)
+      // 默认只看未清理;管理端切到「已清理」时带 isDeleted=true
+      const isDeleted = url.searchParams.get('isDeleted') === 'true'
+      const filtered = mockNotices.filter(n => Boolean(n.isDeleted) === isDeleted)
       return route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(ok({
-          items: mockNotices.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize),
-          total: mockNotices.length,
+          items: filtered.slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize),
+          total: filtered.length,
           page,
           pageSize,
         })),
       })
+    }
+
+    if (pathname.startsWith('/api/notice/restore/') && method === 'PUT') {
+      const id = Number(pathname.split('/').pop())
+      const notice = mockNotices.find(n => n.id === id)
+      if (!notice)
+        return route.fulfill(fail(40401, '公告不存在', 404))
+      notice.isDeleted = false
+      notice.deletedTime = null
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ id, title: notice.title, isDeleted: false }, '恢复成功')) })
     }
 
     if (pathname.startsWith('/api/notice/') && method === 'GET') {

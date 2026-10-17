@@ -29,10 +29,10 @@ test.describe('认证与动态路由', () => {
     await expect(page.getByRole('menuitem', { name: '个人中心' })).toBeVisible()
   })
 
-  test('主题色跟随公开配置 primary_color', async ({ page }) => {
+  test('主题色跟随公开设置 site.primaryColor', async ({ page }) => {
     await login(page)
 
-    // 启动时应用公开配置主题色(mock 配置为 #2080f0)
+    // 启动时应用公开设置主题色(mock 里 site.primaryColor = #2080f0,与默认主题色 #1890ff 不同,便于验证确实生效)
     await expect
       .poll(() =>
         page.evaluate(() =>

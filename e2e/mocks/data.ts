@@ -29,13 +29,19 @@ export const mockMenus = [
   { id: 11, code: 'system:user:create', name: '创建用户', type: 'BUTTON', pid: 3, permission: 'system:user:create', show: false, enable: true, order: 1, createdTime: ts(90), updatedTime: ts(30) },
   { id: 12, code: 'system:user:edit', name: '编辑用户', type: 'BUTTON', pid: 3, permission: 'system:user:edit', show: false, enable: true, order: 2, createdTime: ts(90), updatedTime: ts(30) },
   { id: 13, code: 'system:user:delete', name: '删除用户', type: 'BUTTON', pid: 3, permission: 'system:user:delete', show: false, enable: true, order: 3, createdTime: ts(90), updatedTime: ts(30) },
-  { id: 34, code: 'sys_config', name: '系统配置', type: 'MENU', pid: 2, path: '/system/config', icon: 'icon-park-outline:setting-config', component: '/src/views/system/config/index.vue', show: true, enable: true, order: 8, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 34, code: 'system_setting', name: '系统设置', type: 'MENU', pid: 2, path: '/system/settings', icon: 'icon-park-outline:setting-config', component: '/src/views/system/settings/index.vue', show: true, enable: true, order: 8, createdTime: ts(60), updatedTime: ts(15) },
   { id: 31, code: 'metrics', name: '前端监控', type: 'MENU', pid: 2, path: '/monitor', icon: 'icon-park-outline:monitor', component: '/src/views/monitor/index.vue', show: true, enable: true, order: 6, createdTime: ts(60), updatedTime: ts(15) },
   { id: 32, code: 'session', name: '在线用户', type: 'MENU', pid: 2, path: '/system/session', icon: 'icon-park-outline:people', component: '/src/views/system/session/index.vue', show: true, enable: true, order: 7, createdTime: ts(60), updatedTime: ts(15) },
   { id: 33, code: 'system:session:kick', name: '强制下线', type: 'BUTTON', pid: 32, permission: 'system:session:kick', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
-  { id: 35, code: 'system:config:create', name: '新增', type: 'BUTTON', pid: 34, permission: 'system:config:create', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
-  { id: 36, code: 'system:config:update', name: '编辑', type: 'BUTTON', pid: 34, permission: 'system:config:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
-  { id: 37, code: 'system:config:delete', name: '删除', type: 'BUTTON', pid: 34, permission: 'system:config:delete', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 35, code: 'system:setting:list', name: '查看设置', type: 'BUTTON', pid: 34, permission: 'system:setting:list', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 36, code: 'system:setting:update', name: '修改设置', type: 'BUTTON', pid: 34, permission: 'system:setting:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 37, code: 'system:setting:rollback', name: '回滚设置', type: 'BUTTON', pid: 34, permission: 'system:setting:rollback', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 60, code: 'notice:list', name: '查询通知', type: 'BUTTON', pid: 8, permission: 'notice:list', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 61, code: 'notice:create', name: '新增通知', type: 'BUTTON', pid: 8, permission: 'notice:create', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 62, code: 'notice:update', name: '编辑通知', type: 'BUTTON', pid: 8, permission: 'notice:update', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 63, code: 'notice:publish', name: '发布通知', type: 'BUTTON', pid: 8, permission: 'notice:publish', show: false, enable: true, order: 3, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 64, code: 'notice:delete', name: '删除通知', type: 'BUTTON', pid: 8, permission: 'notice:delete', show: false, enable: true, order: 4, createdTime: ts(60), updatedTime: ts(15) },
+  { id: 65, code: 'system:user:update', name: '编辑用户', type: 'BUTTON', pid: 3, permission: 'system:user:update', show: false, enable: true, order: 4, createdTime: ts(90), updatedTime: ts(30) },
   { id: 20, code: 'system:dict:create', name: '新增', type: 'BUTTON', pid: 10, permission: 'system:dict:create', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
   { id: 21, code: 'system:dict:update', name: '编辑', type: 'BUTTON', pid: 10, permission: 'system:dict:update', show: false, enable: true, order: 1, createdTime: ts(60), updatedTime: ts(15) },
   { id: 22, code: 'system:dict:delete', name: '删除', type: 'BUTTON', pid: 10, permission: 'system:dict:delete', show: false, enable: true, order: 2, createdTime: ts(60), updatedTime: ts(15) },
@@ -44,7 +50,9 @@ export const mockMenus = [
 
 export const mockNotices = [
   { id: 1, title: '系统升级维护通知', content: '<p>系统将于本周六 22:00-24:00 进行升级维护</p>', type: 'NOTICE', authorId: 1, authorName: '系统管理员', status: 1, isPinned: true, isMandatory: false, scopeType: 'ALL', scopeTargets: [], publishedAt: ts(2), createdTime: ts(3), updatedTime: ts(2), readCount: 3, unreadCount: 2, totalReceivers: 5 },
-  { id: 2, title: '季度团建活动报名', content: '<p>本季度团建活动开始报名</p>', type: 'ACTIVITY', authorId: 1, authorName: '系统管理员', status: 1, isPinned: false, isMandatory: false, scopeType: 'ALL', scopeTargets: [], publishedAt: ts(5), createdTime: ts(6), updatedTime: ts(5), readCount: 1, unreadCount: 4, totalReceivers: 5 },
+  { id: 2, title: '季度团建活动报名', content: '<p>本季度团建活动开始报名</p>', type: 'ACTIVITY', authorId: 1, authorName: '系统管理员', status: 1, isPinned: false, isMandatory: false, scopeType: 'ALL', scopeTargets: [], publishedAt: ts(5), createdTime: ts(6), updatedTime: ts(5), readCount: 1, unreadCount: 4, totalReceivers: 5, isDeleted: false, deletedTime: null },
+  // 已被保留期清理的公告:用于「已清理」筛选与恢复用例
+  { id: 3, title: '历史安全须知', content: '<p>历史公告</p>', type: 'INFO', authorId: 1, authorName: '系统管理员', status: 1, isPinned: false, isMandatory: false, scopeType: 'ALL', scopeTargets: [], publishedAt: ts(400), createdTime: ts(401), updatedTime: ts(400), readCount: 0, unreadCount: 0, totalReceivers: 0, isDeleted: true, deletedTime: ts(30) },
 ]
 
 export const mockRoles = [
@@ -133,12 +141,34 @@ export const mockSessions = [
   { id: 2, userId: 2, refreshToken: 'rt-2', accessJti: null, ipAddress: '192.168.1.11', userAgent: 'Firefox 128.0 on macOS', expiresAt: new Date(Date.now() + 5 * 86400000).toISOString(), lastActiveAt: ts(1), createdTime: ts(1) },
 ]
 
-export const mockSysConfigs = [
-  { id: 1, key: 'site_name', name: '站点名称', value: 'JDM 管理系统', type: 'STRING', category: 'site', isPublic: true, isSystem: false, sortOrder: 1, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 2, key: 'site_description', name: '网站描述', value: '基于 NestJS 和 Vue 3 的现代化管理系统', type: 'STRING', category: 'site', isPublic: true, isSystem: false, sortOrder: 2, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 3, key: 'copyright', name: '版权信息', value: 'JDM System', type: 'STRING', category: 'system', isPublic: true, isSystem: true, sortOrder: 3, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 4, key: 'notice.retentionDays', name: '公告保留天数', value: '180', type: 'NUMBER', category: 'notice', isPublic: false, isSystem: false, sortOrder: 4, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 5, key: 'security.login.maxRetry', name: '登录失败最大次数', value: '5', type: 'NUMBER', category: 'security', isPublic: false, isSystem: true, sortOrder: 5, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 6, key: 'security.login.lockMinutes', name: '登录失败锁定时长', value: '15', type: 'NUMBER', category: 'security', isPublic: false, isSystem: true, sortOrder: 6, createdTime: ts(30), updatedTime: ts(10) },
-  { id: 7, key: 'primary_color', name: '主题色', value: '#2080f0', type: 'STRING', category: 'theme', isPublic: true, isSystem: false, sortOrder: 7, createdTime: ts(30), updatedTime: ts(10) },
+export const mockSettingSchema = {
+  groups: [
+    {
+      group: '站点',
+      items: [
+        { key: 'site.name', label: '站点名称', type: 'string', description: '登录页与侧边栏展示的系统名称', expose: 'public', source: 'db', readonly: false, default: 'Jay Admin', order: 1 },
+        { key: 'site.primaryColor', label: '主题色', type: 'color', description: '管理端主题主色', expose: 'public', source: 'db', readonly: false, default: '#1890ff', order: 2 },
+      ],
+    },
+    {
+      group: '安全',
+      items: [
+        { key: 'security.login.maxRetry', label: '登录失败最大次数', type: 'number', description: '超过该次数锁定账号', expose: 'admin', source: 'db', readonly: false, default: 5, min: 1, max: 20, order: 1 },
+      ],
+    },
+  ],
+  revision: 3,
+}
+
+/** 设置列表(GET /system/settings 的返回,值/来源/版本) */
+export const mockSettingViews = [
+  { key: 'site.name', label: '站点名称', group: '站点', type: 'string', description: '登录页与侧边栏展示的系统名称', expose: 'public', source: 'db', readonly: false, overridden: true, value: 'Jay Admin 2', configured: true, defaultValue: 'Jay Admin', version: 2, updatedBy: 1, updatedName: 'admin', updatedTime: ts(2), invalid: false },
+  { key: 'site.primaryColor', label: '主题色', group: '站点', type: 'color', description: '管理端主题主色', expose: 'public', source: 'db', readonly: false, overridden: true, value: '#2080f0', configured: true, defaultValue: '#1890ff', version: 1, updatedBy: 1, updatedName: 'admin', updatedTime: ts(2), invalid: false },
+  { key: 'security.login.maxRetry', label: '登录失败最大次数', group: '安全', type: 'number', description: '超过该次数锁定账号', expose: 'admin', source: 'default', readonly: false, overridden: false, value: 5, configured: true, defaultValue: 5, version: 0, updatedBy: null, updatedName: null, updatedTime: null, invalid: false },
+]
+
+/** 设置变更历史(GET /system/settings/:key/history 的返回) */
+export const mockSettingHistory = [
+  { id: 2, key: 'site.name', oldValue: 'Jay Admin', newValue: 'Jay Admin 2', version: 2, source: 'api', reason: '调整品牌名', changedBy: 1, changedName: 'admin', changedTime: ts(2) },
+  { id: 1, key: 'site.name', oldValue: null, newValue: 'Jay Admin', version: 1, source: 'migration', reason: '由 sys_config 迁移', changedBy: null, changedName: 'migration', changedTime: ts(20) },
 ]

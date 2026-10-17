@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { usePublicConfig } from '@/composables/usePublicConfig'
+import { usePublicSetting } from '@/composables/usePublicSettings'
 
 const year = new Date().getFullYear()
-// 版权信息(公开配置;未配置时回退默认)
-const copyright = ref('JDM Admin')
+// 版权信息(公开设置;未配置时回退默认)
+const copyright = ref('Jay Admin')
 onMounted(async () => {
-  copyright.value = await usePublicConfig('copyright', copyright.value)
+  copyright.value = await usePublicSetting('site.copyright', copyright.value)
 })
 </script>
 

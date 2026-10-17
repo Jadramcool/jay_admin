@@ -2,7 +2,7 @@ import type { GlobalThemeOverrides } from 'naive-ui'
 import { useMediaQuery } from '@vueuse/core'
 import chroma from 'chroma-js'
 import { defineStore } from 'pinia'
-import { usePublicConfig } from '@/composables/usePublicConfig'
+import { usePublicSetting } from '@/composables/usePublicSettings'
 import {
   darkThemeOverrides,
   defaultFont,
@@ -261,11 +261,11 @@ export const useAppStore = defineStore('app', {
         }
       }
     },
-    /** 应用公开配置的主题色(用户手动自定义过则跳过) */
+    /** 应用公开设置的主题色(用户手动自定义过则跳过) */
     async applyConfigPrimaryColor() {
       if (this.primaryColorSource === 'manual')
         return
-      const color = await usePublicConfig('primary_color', '')
+      const color = await usePublicSetting('site.primaryColor', '')
       if (color && color !== this.primaryColor)
         this.setPrimaryColor(color)
     },

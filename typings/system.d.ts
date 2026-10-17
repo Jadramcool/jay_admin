@@ -121,19 +121,63 @@ declare global {
       updatedTime: string
     }
 
-    interface SysConfig {
-      id: number
-      name: string
+    // ── 系统设置(注册表驱动) ──
+    /** 设置项的生效值与来源(来源:默认/数据库覆盖/环境变量) */
+    interface SettingView {
       key: string
-      value: string
-      type?: string
+      label: string
+      group: string
+      type: string
       description?: string
-      category?: string
-      isPublic: boolean
-      isSystem: boolean
-      sortOrder?: number
-      createdTime: string
-      updatedTime: string
+      expose: 'public' | 'admin' | 'secret'
+      source: 'default' | 'db' | 'env'
+      readonly: boolean
+      overridden: boolean
+      value: unknown
+      /** expose=secret 时只回传是否已配置 */
+      configured: boolean
+      defaultValue: unknown
+      version: number
+      updatedBy: number | null
+      updatedName: string | null
+      updatedTime: string | null
+      /** 覆盖值不合法已回退默认值 */
+      invalid: boolean
+    }
+
+    /** 注册表元数据:设置页据此自动渲染 */
+    interface SettingSchema {
+      groups: {
+        group: string
+        items: {
+          key: string
+          label: string
+          type: string
+          description?: string
+          expose: 'public' | 'admin' | 'secret'
+          source: 'db' | 'env'
+          readonly: boolean
+          default: unknown
+          min?: number
+          max?: number
+          dictCode?: string
+          order: number
+        }[]
+      }[]
+      revision: number
+    }
+
+    interface SettingHistoryItem {
+      id: number
+      key: string
+      oldValue: string | null
+      newValue: string | null
+      version: number
+      source: string
+      reason: string | null
+      changedBy: number | null
+      changedName: string | null
+      changedTime: string
     }
 
     interface OperationLog {
@@ -171,6 +215,9 @@ declare global {
       readCount?: number
       unreadCount?: number
       totalReceivers?: number
+      /** 是否已被清理（保留期清理或删除）：管理端「已清理」列表与恢复按钮依赖它 */
+      isDeleted?: boolean
+      deletedTime?: string | null
       createdTime: string
       updatedTime: string
     }
@@ -251,6 +298,7 @@ declare global {
 
     // ── 请求 payload:与后端 DTO 严格绑定 ──
     type UserCreatePayload = components['schemas']['CreateUserDto']
-    type UserUpdatePayload = components['schemas']['UpdateUserDto'] & { id: number }
+    /** 管理端用户更新:后端收 UpdateUserWithIdDto(id 在类内声明,否则 ValidationPipe 会被绕过) */
+    type UserUpdatePayload = components['schemas']['UpdateUserWithIdDto']
   }
 }
