@@ -30,7 +30,6 @@ export const mockMenus = [
   { id: 12, code: 'system:user:edit', name: '编辑用户', type: 'BUTTON', pid: 3, permission: 'system:user:edit', show: false, enable: true, order: 2, createdTime: ts(90), updatedTime: ts(30) },
   { id: 13, code: 'system:user:delete', name: '删除用户', type: 'BUTTON', pid: 3, permission: 'system:user:delete', show: false, enable: true, order: 3, createdTime: ts(90), updatedTime: ts(30) },
   { id: 34, code: 'system_setting', name: '系统设置', type: 'MENU', pid: 2, path: '/system/settings', icon: 'icon-park-outline:setting-config', component: '/src/views/system/settings/index.vue', show: true, enable: true, order: 8, createdTime: ts(60), updatedTime: ts(15) },
-  { id: 31, code: 'metrics', name: '前端监控', type: 'MENU', pid: 2, path: '/monitor', icon: 'icon-park-outline:monitor', component: '/src/views/monitor/index.vue', show: true, enable: true, order: 6, createdTime: ts(60), updatedTime: ts(15) },
   { id: 32, code: 'session', name: '在线用户', type: 'MENU', pid: 2, path: '/system/session', icon: 'icon-park-outline:people', component: '/src/views/system/session/index.vue', show: true, enable: true, order: 7, createdTime: ts(60), updatedTime: ts(15) },
   { id: 33, code: 'system:session:kick', name: '强制下线', type: 'BUTTON', pid: 32, permission: 'system:session:kick', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
   { id: 35, code: 'system:setting:list', name: '查看设置', type: 'BUTTON', pid: 34, permission: 'system:setting:list', show: false, enable: true, order: 0, createdTime: ts(60), updatedTime: ts(15) },
@@ -80,19 +79,8 @@ export const mockDashboard = {
   },
   trends: {
     dates: [ts(6), ts(5), ts(4), ts(3), ts(2), ts(1), ts(0)],
-    visits: [120, 135, 110, 150, 160, 140, 180],
     newUsers: [2, 3, 1, 4, 2, 3, 2],
     operations: [15, 22, 18, 25, 20, 28, 24],
-  },
-  systemInfo: {
-    cpu: 23,
-    memory: 45,
-    disk: 32,
-    uptime: '3天2小时',
-    version: '1.0.0',
-    nodeVersion: 'v24.18.0',
-    platform: 'win32',
-    dbRecords: 128,
   },
   activities: [
     { id: 1, username: 'admin', action: '登录系统', module: '认证模块', operationType: 'LOGIN', time: ts(0), status: 'SUCCESS' },
@@ -128,12 +116,6 @@ export const mockTodos = [
   { id: 1, pid: null, title: '完成周报', content: null, sortOrder: 1, isDone: false, doneTime: null, createdTime: ts(2), updatedTime: ts(1) },
   { id: 2, pid: 1, title: '整理数据', content: null, sortOrder: 1, isDone: false, doneTime: null, createdTime: ts(1), updatedTime: ts(1) },
   { id: 3, pid: null, title: '评审新功能', content: null, sortOrder: 2, isDone: true, doneTime: ts(0), createdTime: ts(5), updatedTime: ts(0) },
-]
-
-export const mockClientEvents = [
-  { id: 1, type: 'error', category: 'JS_ERROR', message: 'Cannot read properties of undefined', stack: 'at fn (app.js:1:1)', url: 'http://localhost:4000/#/home', route: '/home', userId: 1, browser: 'Chrome 126.0.0.0', extra: null, createdTime: ts(0) },
-  { id: 2, type: 'pageview', category: 'ROUTE_CHANGE', message: null, stack: null, url: 'http://localhost:4000/#/system/user', route: '/system/user', userId: 1, browser: 'Chrome 126.0.0.0', extra: null, createdTime: ts(1) },
-  { id: 3, type: 'error', category: 'VUE_ERROR', message: 'TypeError: xxx is not a function', stack: 'at setup (index.vue:2:2)', url: 'http://localhost:4000/#/notice', route: '/notice', userId: 1, browser: 'Chrome 126.0.0.0', extra: null, createdTime: ts(2) },
 ]
 
 export const mockSessions = [

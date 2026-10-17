@@ -276,6 +276,227 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/system/config/resolve/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 类型化读取配置(带缓存) */
+        get: operations["SysConfigController_resolve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 批量类型化读取配置 */
+        get: operations["SysConfigController_resolveMany"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取系统配置列表 */
+        get: operations["SysConfigController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/detail/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取系统配置详情 */
+        get: operations["SysConfigController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/key/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 根据键获取系统配置 */
+        get: operations["SysConfigController_findByKey"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/category/{category}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 根据分类获取系统配置 */
+        get: operations["SysConfigController_findByCategory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/public": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取公开配置 */
+        get: operations["SysConfigController_findPublic"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/create": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 创建系统配置 */
+        post: operations["SysConfigController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 更新系统配置 */
+        put: operations["SysConfigController_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/delete/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** 删除系统配置 */
+        delete: operations["SysConfigController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/batchDelete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 批量删除系统配置 */
+        put: operations["SysConfigController_batchRemove"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/status/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 启用/禁用系统配置 */
+        put: operations["SysConfigController_updateStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/config/validate-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** 校验密码 */
+        post: operations["SysConfigController_validatePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/system/user/list": {
         parameters: {
             query?: never;
@@ -1007,227 +1228,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/system/config/resolve/{key}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 类型化读取配置(带缓存) */
-        get: operations["SysConfigController_resolve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/resolve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 批量类型化读取配置 */
-        get: operations["SysConfigController_resolveMany"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/list": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 获取系统配置列表 */
-        get: operations["SysConfigController_findAll"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/detail/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 获取系统配置详情 */
-        get: operations["SysConfigController_findOne"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/key/{key}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 根据键获取系统配置 */
-        get: operations["SysConfigController_findByKey"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/category/{category}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 根据分类获取系统配置 */
-        get: operations["SysConfigController_findByCategory"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/public": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 获取公开配置 */
-        get: operations["SysConfigController_findPublic"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/create": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** 创建系统配置 */
-        post: operations["SysConfigController_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/update": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** 更新系统配置 */
-        put: operations["SysConfigController_update"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/delete/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** 删除系统配置 */
-        delete: operations["SysConfigController_remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/batchDelete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** 批量删除系统配置 */
-        put: operations["SysConfigController_batchRemove"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/status/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** 启用/禁用系统配置 */
-        put: operations["SysConfigController_updateStatus"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/system/config/validate-password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** 校验密码 */
-        post: operations["SysConfigController_validatePassword"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/system/operation-log/list": {
         parameters: {
             query?: never;
@@ -1527,6 +1527,40 @@ export interface paths {
         get?: never;
         /** 启用/禁用字典项 */
         put: operations["DictController_updateItemStatus"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/permission/list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取功能权限列表（按模块分组） */
+        get: operations["PermissionController_findGrouped"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/system/permission/role/{roleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 获取角色已分配的功能权限ID列表 */
+        get: operations["PermissionController_findPermissionIdsByRole"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1840,15 +1874,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/dashboard/system-info": {
+    "/dashboard/mine": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** 获取系统信息 */
-        get: operations["DashboardController_getSystemInfo"];
+        /** 获取当前用户个人工作台数据 */
+        get: operations["DashboardController_getMine"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1976,41 +2010,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/metrics/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 查询前端事件(分页) */
-        get: operations["MetricsController_findAll"];
-        put?: never;
-        /** 批量上报前端事件 */
-        post: operations["MetricsController_report"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/metrics/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** 事件统计 */
-        get: operations["MetricsController_getStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2033,6 +2032,11 @@ export interface components {
             captcha?: string;
             /** @description 验证码ID */
             captchaId?: string;
+            /**
+             * @description 登录端: admin | app | mp（缺省 admin）
+             * @example app
+             */
+            platform?: string;
         };
         RegisterDto: {
             /**
@@ -2112,6 +2116,65 @@ export interface components {
              */
             newPassword: string;
         };
+        CreateSysConfigDto: {
+            /** @description 配置名称 */
+            name: string;
+            /** @description 配置键 */
+            key: string;
+            /** @description 配置值 */
+            value: string;
+            /**
+             * @description 配置类型
+             * @default STRING
+             * @enum {string}
+             */
+            type: "STRING" | "NUMBER" | "BOOLEAN" | "JSON" | "ARRAY" | "FILE" | "EMAIL" | "URL" | "PASSWORD";
+            /** @description 配置描述 */
+            description?: string;
+            /**
+             * @description 配置分类
+             * @default SYSTEM
+             */
+            category: string;
+            /**
+             * @description 是否公开配置
+             * @default false
+             */
+            isPublic: boolean;
+            /**
+             * @description 是否系统配置
+             * @default false
+             */
+            isSystem: boolean;
+            /**
+             * @description 排序
+             * @default 0
+             */
+            sortOrder: number;
+        };
+        UpdateSysConfigWithIdDto: {
+            /** @description 配置名称 */
+            name?: string;
+            /** @description 配置键 */
+            key?: string;
+            /** @description 配置值 */
+            value?: string;
+            /**
+             * @description 配置类型
+             * @enum {string}
+             */
+            type?: "STRING" | "NUMBER" | "BOOLEAN" | "JSON" | "ARRAY" | "FILE" | "EMAIL" | "URL" | "PASSWORD";
+            /** @description 配置描述 */
+            description?: string;
+            /** @description 配置分类 */
+            category?: string;
+            /** @description 是否公开配置 */
+            isPublic?: boolean;
+            /** @description 排序 */
+            sortOrder?: number;
+            /** @description 配置ID */
+            id: number;
+        };
         CreateUserDto: {
             /**
              * @description 用户名
@@ -2170,6 +2233,72 @@ export interface components {
              */
             roleIds?: string[];
         };
+        UpdateUserWithIdDto: {
+            /** @description 用户名 */
+            username?: string;
+            /** @description 密码 */
+            password?: string;
+            /** @description 真实姓名 */
+            name?: string;
+            /** @description 手机号 */
+            phone?: string;
+            /** @description 邮箱 */
+            email?: string;
+            /**
+             * @description 性别
+             * @enum {string}
+             */
+            sex?: "MALE" | "FEMALE" | "OTHER";
+            /** @description 头像URL */
+            avatar?: string;
+            /**
+             * Format: date-time
+             * @description 生日
+             */
+            birthday?: string;
+            /** @description 城市 */
+            city?: string;
+            /** @description 地址 */
+            address?: string;
+            /** @description 详细地址 */
+            addressDetail?: string;
+            /** @description 部门ID */
+            departmentId?: number;
+            /**
+             * Format: date-time
+             * @description 入职时间
+             */
+            joinedAt?: string;
+            /** @description 职位 */
+            position?: string;
+            /** @description 角色类型 */
+            roleType?: string;
+            /** @description 用户状态 0-禁用 1-启用 */
+            status?: number;
+            /** @description 角色ID列表 */
+            roleIds?: string[];
+            /** @description 用户ID */
+            id: number;
+        };
+        BatchIdsDto: {
+            /** @description ID 列表 */
+            ids: number[];
+        };
+        UpdateUserStatusDto: {
+            /**
+             * @description 用户状态
+             * @enum {number}
+             */
+            status: 0 | 1;
+        };
+        AssignUserRolesDto: {
+            /** @description 角色ID列表 */
+            roleIds: number[];
+        };
+        ResetUserPasswordDto: {
+            /** @description 新密码 */
+            newPassword: string;
+        };
         CreateRoleDto: {
             /**
              * @description 角色编码
@@ -2181,8 +2310,34 @@ export interface components {
              * @example 管理员
              */
             name: string;
+            /**
+             * @description 所属端: admin | app | mp | common（缺省 admin）
+             * @default admin
+             * @example app
+             */
+            platform: string;
             /** @description 角色描述 */
             description?: string;
+        };
+        UpdateRoleWithIdDto: {
+            /** @description 角色编码 */
+            code?: string;
+            /** @description 角色名称 */
+            name?: string;
+            /** @description 角色描述 */
+            description?: string;
+            /** @description 所属端: admin | app | mp | common */
+            platform?: string;
+            /** @description 角色ID */
+            id: number;
+        };
+        AssignRoleMenusDto: {
+            /** @description 角色ID */
+            roleId: number;
+            /** @description 菜单ID列表 */
+            menuIds: number[];
+            /** @description 功能权限ID列表 */
+            permissionIds?: number[];
         };
         CreateMenuDto: {
             /** @description 菜单名称 */
@@ -2193,7 +2348,7 @@ export interface components {
              */
             code: string;
             /**
-             * @description 权限标识
+             * @description 权限标识（仅 BUTTON 类型使用；目录/菜单类型会被忽略并落库为 null）
              * @example system:user:list
              */
             permission?: string;
@@ -2202,7 +2357,13 @@ export interface components {
              * @enum {string}
              */
             type: "DIRECTORY" | "MENU" | "BUTTON";
-            /** @description 父菜单ID */
+            /**
+             * @description 所属端: admin | app | mp | common（缺省 admin）
+             * @default admin
+             * @example app
+             */
+            platform: string;
+            /** @description 父菜单ID。目录/菜单的父级只能是目录或空（根节点）；按钮必须挂在菜单下 */
             pid?: number;
             /** @description 路由路径 */
             path?: string;
@@ -2279,14 +2440,19 @@ export interface components {
             name?: string;
             /** @description 路由标识 */
             code?: string;
-            /** @description 权限标识 */
+            /** @description 权限标识（仅 BUTTON 类型使用；目录/菜单类型会被忽略并落库为 null） */
             permission?: string;
             /**
              * @description 菜单类型
              * @enum {string}
              */
             type?: "DIRECTORY" | "MENU" | "BUTTON";
-            /** @description 父菜单ID */
+            /**
+             * @description 所属端: admin | app | mp | common
+             * @example app
+             */
+            platform?: string;
+            /** @description 父菜单ID。目录/菜单的父级只能是目录或空（根节点）；按钮必须挂在菜单下 */
             pid?: number;
             /** @description 路由路径 */
             path?: string;
@@ -2367,41 +2533,12 @@ export interface components {
             /** @description 父部门ID */
             parentId?: number;
         };
-        CreateSysConfigDto: {
-            /** @description 配置名称 */
-            name: string;
-            /** @description 配置键 */
-            key: string;
-            /** @description 配置值 */
-            value: string;
+        ClearExpiredDaysDto: {
             /**
-             * @description 配置类型
-             * @default STRING
-             * @enum {string}
+             * @description 保留天数
+             * @default 90
              */
-            type: "STRING" | "NUMBER" | "BOOLEAN" | "JSON" | "ARRAY" | "FILE" | "EMAIL" | "URL" | "PASSWORD";
-            /** @description 配置描述 */
-            description?: string;
-            /**
-             * @description 配置分类
-             * @default SYSTEM
-             */
-            category: string;
-            /**
-             * @description 是否公开配置
-             * @default false
-             */
-            isPublic: boolean;
-            /**
-             * @description 是否系统配置
-             * @default false
-             */
-            isSystem: boolean;
-            /**
-             * @description 排序
-             * @default 0
-             */
-            sortOrder: number;
+            days: number;
         };
         CreateDictTypeDto: {
             /**
@@ -2579,32 +2716,6 @@ export interface components {
             pid?: number;
             /** @description 排序 */
             sortOrder?: number;
-        };
-        ClientEventDto: {
-            /**
-             * @description 事件类型
-             * @enum {string}
-             */
-            type: "error" | "pageview";
-            /**
-             * @description 分类
-             * @example JS_ERROR
-             */
-            category?: string;
-            /** @description 错误消息 */
-            message?: string;
-            /** @description 错误堆栈(截断后) */
-            stack?: string;
-            /** @description 页面 URL */
-            url?: string;
-            /** @description 路由路径 */
-            route?: string;
-            /** @description 附加信息 */
-            extra?: Record<string, never>;
-        };
-        ReportClientEventsDto: {
-            /** @description 事件列表 */
-            events: components["schemas"]["ClientEventDto"][];
         };
     };
     responses: never;
@@ -2948,6 +3059,266 @@ export interface operations {
             };
         };
     };
+    SysConfigController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_resolveMany: {
+        parameters: {
+            query: {
+                keys: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_findAll: {
+        parameters: {
+            query?: {
+                /** @description 页码 */
+                page?: number;
+                /** @description 每页数量 */
+                pageSize?: number;
+                /** @description 配置名称 */
+                name?: string;
+                /** @description 配置键 */
+                key?: string;
+                /** @description 配置类型 */
+                type?: "STRING" | "NUMBER" | "BOOLEAN" | "JSON" | "ARRAY" | "FILE" | "EMAIL" | "URL" | "PASSWORD";
+                /** @description 配置分类 */
+                category?: string;
+                /** @description 是否公开配置 */
+                isPublic?: boolean;
+                /** @description 是否系统配置 */
+                isSystem?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_findByKey: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_findByCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                category: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_findPublic: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSysConfigDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSysConfigWithIdDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_batchRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_updateStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SysConfigController_validatePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     UserController_findAll: {
         parameters: {
             query?: never;
@@ -3012,7 +3383,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserWithIdDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3048,7 +3423,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchIdsDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3067,7 +3446,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserStatusDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3086,7 +3469,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignUserRolesDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3105,7 +3492,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetUserPasswordDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3177,6 +3568,8 @@ export interface operations {
                 code?: string;
                 /** @description 角色名称 */
                 name?: string;
+                /** @description 所属端: admin | app | mp | common */
+                platform?: string;
                 /** @description 是否包含已删除角色 */
                 includeDeleted?: boolean;
             };
@@ -3258,7 +3651,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoleWithIdDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3294,7 +3691,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRoleMenusDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -3319,6 +3720,8 @@ export interface operations {
                 permission?: string;
                 /** @description 菜单类型 */
                 type?: "DIRECTORY" | "MENU" | "BUTTON";
+                /** @description 所属端: admin | app | mp | common */
+                platform?: string;
                 /** @description 父菜单ID */
                 pid?: number;
                 /** @description 是否显示 */
@@ -3359,7 +3762,9 @@ export interface operations {
     };
     MenuController_findTree: {
         parameters: {
-            query?: never;
+            query: {
+                platform: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3789,262 +4194,6 @@ export interface operations {
             };
         };
     };
-    SysConfigController_resolve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_resolveMany: {
-        parameters: {
-            query: {
-                keys: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_findAll: {
-        parameters: {
-            query?: {
-                /** @description 页码 */
-                page?: number;
-                /** @description 每页数量 */
-                pageSize?: number;
-                /** @description 配置名称 */
-                name?: string;
-                /** @description 配置键 */
-                key?: string;
-                /** @description 配置类型 */
-                type?: "STRING" | "NUMBER" | "BOOLEAN" | "JSON" | "ARRAY" | "FILE" | "EMAIL" | "URL" | "PASSWORD";
-                /** @description 配置分类 */
-                category?: string;
-                /** @description 是否公开配置 */
-                isPublic?: boolean;
-                /** @description 是否系统配置 */
-                isSystem?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_findByKey: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_findByCategory: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                category: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_findPublic: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateSysConfigDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_batchRemove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_updateStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    SysConfigController_validatePassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     OperationLogController_findAll: {
         parameters: {
             query?: {
@@ -4129,7 +4278,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchIdsDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -4146,7 +4299,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClearExpiredDaysDto"];
+            };
+        };
         responses: {
             200: {
                 headers: {
@@ -4397,6 +4554,42 @@ export interface operations {
             header?: never;
             path: {
                 id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PermissionController_findGrouped: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PermissionController_findPermissionIdsByRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roleId: number;
             };
             cookie?: never;
         };
@@ -4770,7 +4963,7 @@ export interface operations {
             };
         };
     };
-    DashboardController_getSystemInfo: {
+    DashboardController_getMine: {
         parameters: {
             query?: never;
             header?: never;
@@ -4809,8 +5002,8 @@ export interface operations {
     TodoController_findAll: {
         parameters: {
             query?: {
-                /** @description 是否只查未完成 */
-                onlyUndone?: number;
+                /** @description 完成状态筛选: 0-未完成 1-已完成, 不传查全部 */
+                isDone?: 0 | 1;
                 /** @description 标题关键字 */
                 keyword?: string;
             };
@@ -4913,72 +5106,6 @@ export interface operations {
             path: {
                 id: number;
             };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MetricsController_findAll: {
-        parameters: {
-            query?: {
-                /** @description 页码 */
-                page?: number;
-                /** @description 每页数量 */
-                pageSize?: number;
-                /** @description 事件类型 */
-                type?: "error" | "pageview";
-                /** @description 分类 */
-                category?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MetricsController_report: {
-        parameters: {
-            query?: never;
-            header: {
-                "user-agent": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReportClientEventsDto"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    MetricsController_getStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
             cookie?: never;
         };
         requestBody?: never;

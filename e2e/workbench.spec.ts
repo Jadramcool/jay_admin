@@ -3,7 +3,7 @@ import { expect, login, test } from './fixtures'
 /**
  * 首页双视图(按 system:operation-log:list 权限切换):
  * - 管理员(持有审计查询权)→ 运营看板
- * - 普通用户 → 个人工作台(今日概览 + 待办 + 公告),且不发 system-info 请求
+ * - 普通用户 → 个人工作台(今日概览 + 待办 + 公告),且不请求看板专属接口
  */
 test.describe('首页工作台/看板视图', () => {
   test('管理员登录展示运营看板', async ({ page }) => {
@@ -17,11 +17,11 @@ test.describe('首页工作台/看板视图', () => {
   })
 
   test('普通用户登录展示个人工作台', async ({ page }) => {
-    // system-info 已收口:首页不应发起该请求(监控页才调用)
-    const sysInfoRequests: string[] = []
+    // 工作台视图不请求看板专属接口(stats/trends)
+    const boardRequests: string[] = []
     page.on('request', (req) => {
-      if (req.url().includes('/api/dashboard/system-info'))
-        sysInfoRequests.push(req.url())
+      if (/\/api\/dashboard\/(?:stats|trends)/.test(req.url()))
+        boardRequests.push(req.url())
     })
 
     await login(page, 'zhangsan', '123456')
@@ -44,6 +44,6 @@ test.describe('首页工作台/看板视图', () => {
     await expect(page.getByText('数据概览')).toHaveCount(0)
     await expect(page.getByText('趋势分析')).toHaveCount(0)
 
-    await expect(sysInfoRequests).toHaveLength(0)
+    await expect(boardRequests).toHaveLength(0)
   })
 })

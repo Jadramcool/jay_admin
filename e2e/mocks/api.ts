@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { Buffer } from 'node:buffer'
-import { mockClientEvents, mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSettingHistory, mockSettingSchema, mockSettingViews, mockTodos, mockUsers, ts } from './data'
+import { mockDashboard, mockDepartments, mockDictItems, mockDictTypes, mockMenus, mockNotices, mockRoles, mockSessions, mockSettingHistory, mockSettingSchema, mockSettingViews, mockTodos, mockUsers, ts } from './data'
 
 /** 设置列表的可变副本:mock 的 PUT/reset 会改它,便于断言"保存后回显" */
 const settingViews = mockSettingViews.map(view => ({ ...view }))
@@ -217,58 +217,6 @@ export async function installApiMocks(page: Page) {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ id }, '删除成功')) })
     }
 
-    // ── 前端监控 ──
-    if (pathname === '/api/metrics/events' && method === 'POST') {
-      const body = JSON.parse(request.postData() || '{}')
-      const events = body.events || []
-      events.forEach((event: any, index: number) => {
-        mockClientEvents.push({
-          id: 100 + mockClientEvents.length + index,
-          type: event.type,
-          category: event.category ?? null,
-          message: event.message ?? null,
-          stack: event.stack ?? null,
-          url: event.url ?? null,
-          route: event.route ?? null,
-          userId: 1,
-          browser: 'Chrome 126.0.0.0',
-          extra: null,
-          createdTime: new Date().toISOString(),
-        })
-      })
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok({ received: events.length })) })
-    }
-
-    if (pathname === '/api/metrics/events' && method === 'GET') {
-      const page = Number(url.searchParams.get('page') || 1)
-      const pageSize = Number(url.searchParams.get('pageSize') || 20)
-      const type = url.searchParams.get('type')
-      const items = type ? mockClientEvents.filter(e => e.type === type) : mockClientEvents
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(ok({
-          items: [...items].reverse().slice((page - 1) * pageSize, (page - 1) * pageSize + pageSize),
-          total: items.length,
-          page,
-          pageSize,
-        })),
-      })
-    }
-
-    if (pathname === '/api/metrics/stats' && method === 'GET') {
-      return route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(ok({
-          total: mockClientEvents.length,
-          errors: mockClientEvents.filter(e => e.type === 'error').length,
-          pageviews: mockClientEvents.filter(e => e.type === 'pageview').length,
-          todayErrors: mockClientEvents.filter(e => e.type === 'error').length,
-        })),
-      })
-    }
-
     // ── 在线用户 ──
     if (pathname === '/api/system/session/list' && method === 'GET') {
       const page = Number(url.searchParams.get('page') || 1)
@@ -438,8 +386,6 @@ export async function installApiMocks(page: Page) {
         })),
       })
     }
-    if (pathname === '/api/dashboard/system-info' && method === 'GET')
-      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ok(mockDashboard.systemInfo)) })
     if (pathname === '/api/dashboard/activities' && method === 'GET') {
       // 与后端 C2 分级一致:非审计用户仅返回本人操作记录
       const user = currentUser()
