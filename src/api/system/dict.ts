@@ -22,10 +22,10 @@ export const DictApi = {
 
   getAllTypes: () => request.get<System.DictType[]>({ url: API.typeAll }),
 
-  createType: (data: Partial<System.DictType>) =>
+  createType: (data: Api.DictTypeCreateParams) =>
     request.post<System.DictType>({ url: API.typeCreate, data }),
 
-  updateType: (data: Partial<System.DictType> & { id: number }) =>
+  updateType: (data: Api.DictTypeUpdateParams) =>
     request.put<System.DictType>({ url: API.typeUpdate, data }),
 
   deleteType: (id: number) =>
@@ -42,10 +42,10 @@ export const DictApi = {
   getItemsByCode: (code: string) =>
     request.get<System.DictItem[]>({ url: `${API.itemsByCode}/${code}` }),
 
-  createItem: (data: Partial<System.DictItem>) =>
+  createItem: (data: Api.DictItemCreateParams) =>
     request.post<System.DictItem>({ url: API.itemCreate, data }),
 
-  updateItem: (data: Partial<System.DictItem> & { id: number }) =>
+  updateItem: (data: Api.DictItemUpdateParams) =>
     request.put<System.DictItem>({ url: API.itemUpdate, data }),
 
   deleteItem: (id: number) =>

@@ -1,5 +1,8 @@
 {
   "eslint.useFlatConfig": true,
+  "eslint.format.enable": true,
+  // 禁掉 Prettier 扩展，避免它和 ESLint 抢「格式化」这个入口
+  "prettier.enable": false,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
   },

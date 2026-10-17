@@ -3,6 +3,7 @@ import { NButton, NTag } from 'naive-ui'
 import { h, ref } from 'vue'
 import { DictApi } from '@/api/system'
 import { useForm, useModal } from '@/components/index.ts'
+import { useDictStore } from '@/store/modules'
 import { hasPermission } from '@/utils/common/hasPermission'
 import DictItemModal from './components/DictItemModal.vue'
 import DictTypeModal from './components/DictTypeModal.vue'
@@ -10,6 +11,10 @@ import DictTypeModal from './components/DictTypeModal.vue'
 const tableRef = ref<any>(null)
 const [registerTypeModal, { openModal: openTypeModal }] = useModal()
 const [registerItemModal, { openModal: openItemModal }] = useModal()
+
+const dictStore = useDictStore()
+/** 当前打开的字典项弹窗所属类型编码,用于精确失效缓存 */
+const openedTypeCode = ref<string | undefined>(undefined)
 
 const [register, { getFieldsValue }] = useForm({
   gridProps: { cols: '1 s:1 m:2 l:3 xl:4' },
@@ -30,6 +35,17 @@ function reload() {
   tableRef.value?.reload()
 }
 
+/**
+ * 字典变更后必须先失效缓存再刷新。
+ *
+ * DictSelect 的选项来自 useDictStore 的按 code 缓存,不失效的话已挂载的
+ * 下拉(如「系统配置 → 分类」)会一直显示旧选项,只能靠刷新页面才更新。
+ */
+function reloadWithCacheClear(code?: string) {
+  dictStore.clear(code)
+  reload()
+}
+
 function handleAdd() {
   openTypeModal()
 }
@@ -39,6 +55,7 @@ function handleEdit(row: System.DictType) {
 }
 
 function handleItems(row: System.DictType) {
+  openedTypeCode.value = row.code
   openItemModal({ typeId: row.id, typeName: row.name })
 }
 
@@ -52,7 +69,7 @@ async function handleDelete(row: System.DictType) {
       try {
         await DictApi.deleteType(row.id)
         window.$message?.success?.('删除成功')
-        reload()
+        reloadWithCacheClear(row.code)
       }
       catch {
         /* handled by interceptor */
@@ -65,7 +82,7 @@ async function handleToggleStatus(row: System.DictType) {
   const newStatus = row.status === 1 ? 0 : 1
   try {
     await DictApi.updateTypeStatus(row.id, newStatus as 0 | 1)
-    reload()
+    reloadWithCacheClear(row.code)
   }
   catch {
     /* handled by interceptor */
@@ -106,12 +123,8 @@ const columns = [
   <div class="system-page">
     <FormQuery @register="register" @submit="reload" />
     <BasicTable
-      ref="tableRef"
-      title="数据字典"
-      :columns="columns"
-      :request="loadData"
-      :show-add-btn="hasPermission('system:dict:create')"
-      @add="handleAdd"
+      ref="tableRef" title="数据字典" :columns="columns" :request="loadData"
+      :show-add-btn="hasPermission('system:dict:create')" @add="handleAdd"
     >
       <template #toolbar>
         <NButton v-if="hasPermission('system:dict:list')" size="small" @click="reload">
@@ -120,7 +133,7 @@ const columns = [
       </template>
     </BasicTable>
 
-    <DictTypeModal @register="registerTypeModal" @success="reload" />
-    <DictItemModal @register="registerItemModal" />
+    <DictTypeModal @register="registerTypeModal" @success="reloadWithCacheClear()" />
+    <DictItemModal @register="registerItemModal" @success="reloadWithCacheClear(openedTypeCode)" />
   </div>
 </template>

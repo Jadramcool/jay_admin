@@ -41,10 +41,16 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (isEdit.value) {
-      await DictApi.updateType({ ...formData })
+      await DictApi.updateType({ id: formData.id, name: formData.name, remark: formData.remark })
     }
     else {
-      await DictApi.createType({ ...formData })
+      // 白名单提交:CreateDictTypeDto 没有 id,整体展开会被 forbidNonWhitelisted 拒收
+      await DictApi.createType({
+        code: formData.code,
+        name: formData.name,
+        status: 1,
+        remark: formData.remark,
+      })
     }
     window.$message?.success?.(isEdit.value ? '更新成功' : '创建成功')
     closeModal()

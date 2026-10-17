@@ -1,7 +1,8 @@
 import type { FormActionType, FormSchema } from '../types/form'
-import { merge, uniqBy } from 'lodash-es'
+import { uniqBy } from 'lodash-es'
 import { nextTick } from 'vue'
 import { isArray, isFunction } from '@/utils'
+import { mergeReplacingArrays } from '../helper'
 
 declare type EmitType = (event: any, ...args: any[]) => void
 
@@ -233,7 +234,7 @@ export function useFormEvents({
     unref(getSchema).forEach((val) => {
       const updatedItem = updateData.find(item => val.field === item.field)
       if (updatedItem) {
-        const newSchema = merge({}, val, updatedItem) as FormSchema
+        const newSchema = mergeReplacingArrays(val, updatedItem) as FormSchema
         updatedSchema.push(newSchema)
         schema.push(newSchema)
       }

@@ -2,7 +2,8 @@ import { normalizeApiError } from './api-error'
 
 /**
  * 归一化错误并统一提示：取消类错误静默忽略，DEV 环境打印元数据，
- * 5xx 且带 traceId 时在提示语后追加追踪 ID。silentFail 的放行判断由 error-policy 完成。
+ * 字段级校验错误用弹窗逐条展示，5xx 且带 traceId 时在提示语后追加追踪 ID。
+ * silentFail 的放行判断由 error-policy 完成。
  */
 export function errorHandler(error: unknown): void {
   const apiError = normalizeApiError(error)
@@ -18,6 +19,15 @@ export function errorHandler(error: unknown): void {
       message: apiError.message,
       kind: apiError.kind,
     })
+  }
+
+  // 参数校验失败：message 只有一句「参数验证失败」，必须把字段级信息展示出来
+  if (apiError.fieldErrors?.length) {
+    window.$dialog?.error?.({
+      title: '提交内容校验未通过',
+      content: apiError.fieldErrors.map(item => item.message).join('；'),
+    })
+    return
   }
 
   const traceSuffix

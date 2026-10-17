@@ -38,6 +38,8 @@ const submitting = ref(false)
 const [registerModal] = useModalInner((data: { typeId: number, typeName: string }) => {
   typeId.value = data.typeId
   typeName.value = data.typeName
+  // 先归位表单:否则 formData.typeId 仍是 0,直接点「添加」会创建到不存在的类型
+  resetForm()
   loadItems()
 })
 
@@ -90,10 +92,24 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (isEdit.value) {
-      await DictApi.updateItem({ ...formData })
+      // 更新 DTO 不接受 typeId(类型不允许改),只提交可改字段
+      await DictApi.updateItem({
+        id: formData.id,
+        code: formData.code,
+        label: formData.label,
+        sortOrder: formData.sortOrder,
+        status: formData.status,
+      })
     }
     else {
-      await DictApi.createItem({ ...formData })
+      // 创建 DTO 不接受 id,整体展开会被 forbidNonWhitelisted 拒收
+      await DictApi.createItem({
+        typeId: typeId.value,
+        code: formData.code,
+        label: formData.label,
+        sortOrder: formData.sortOrder,
+        status: formData.status,
+      })
     }
     window.$message?.success?.(isEdit.value ? '更新成功' : '创建成功')
     resetForm()

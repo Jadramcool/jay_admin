@@ -1,4 +1,5 @@
 import { NCascader, NCheckbox, NCheckboxGroup, NDatePicker, NInput, NInputNumber, NRadioGroup, NSelect, NSwitch, NTimePicker, NTransfer, NTreeSelect } from 'naive-ui'
+import { DictSelect } from '@/components/DictSelect'
 import ApiSelect from './components/ApiSelect.vue'
 import ApiTree from './components/ApiTree.vue'
 import ApiTreeSelect from './components/ApiTreeSelect.vue'
@@ -10,6 +11,7 @@ const componentMap = new Map<string, any>()
 componentMap.set('NInput', NInput)
 componentMap.set('NInputNumber', NInputNumber)
 componentMap.set('NSelect', NSelect)
+componentMap.set('DictSelect', DictSelect)
 componentMap.set('NCheckbox', NCheckbox)
 componentMap.set('NCheckboxGroup', NCheckboxGroup)
 componentMap.set('NRadioGroup', NRadioGroup)

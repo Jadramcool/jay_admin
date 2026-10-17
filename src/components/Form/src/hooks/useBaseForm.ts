@@ -1,23 +1,7 @@
 import type { FormActionType, FormSchema } from '../types'
-import { cloneDeep, merge, uniqBy } from 'lodash-es'
+import { merge, uniqBy } from 'lodash-es'
 import { isArray, isBoolean, isFunction } from '@/utils'
-import { createPlaceholderMessage } from '../helper'
-
-/**
- * 深合并但数组整体替换：lodash merge 对数组按索引合并，
- * 缩短数组（如 schemas / componentProps.options）时会残留旧元素
- */
-function mergeReplacingArrays(target: any, patch: any): any {
-  if (Array.isArray(patch))
-    return cloneDeep(patch)
-  if (patch !== null && typeof patch === 'object') {
-    const out: Recordable = { ...(target ?? {}) }
-    for (const [key, value] of Object.entries(patch))
-      out[key] = mergeReplacingArrays(out[key], value)
-    return out
-  }
-  return patch
-}
+import { createPlaceholderMessage, mergeReplacingArrays } from '../helper'
 
 /**
  * useBaseForm — 表单核心逻辑基座

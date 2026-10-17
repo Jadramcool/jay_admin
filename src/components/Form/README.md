@@ -148,7 +148,7 @@ await formMethods.resetFields()
 | `clearValidate`        | `(name?) => Promise<void>`                       | 清除校验状态；当前实现会清除整个表单                     |
 | `validate`             | `() => Promise<unknown>`                         | 校验整个表单                                             |
 | `validateFields`       | `(name: string \| string[]) => Promise<unknown>` | 校验指定字段                                             |
-| `updateSchema`         | `(schema \| schema[]) => Promise<void>`          | 按 `field` 合并更新 schema                               |
+| `updateSchema`         | `(schema \| schema[]) => Promise<void>`          | 按 `field` 合并更新 schema；数组整体替换（含 `rules`）   |
 | `submit`               | `() => Promise<unknown>`                         | 主动触发提交流程                                         |
 | `getComponentInstance` | `(field) => unknown`                             | 获取字段组件实例；仅组件暴露对象提供，`useForm` 暂未代理 |
 
@@ -167,6 +167,14 @@ await formMethods.resetFields()
 - 点击默认重置按钮或调用 `resetFields()` 时恢复该初始化快照，不会清空编辑接口回填的数据。
 - 未形成初始化快照时，恢复 schema 的 `defaultValue`。
 - `showResetButton=false` 的复用 Modal 不保存编辑快照，仍可在每次打开时调用 `resetFields()` 清理旧数据。
+
+### updateSchema 合并语义
+
+- 对象按 `field` 深合并：后一次传入的 `component` / `componentProps` 覆盖前一次的同名键。
+- **数组整体替换**，不按索引合并：传 `rules: []` 会真正清空校验规则，传 `options: [a]` 会真正缩成一项。
+  （lodash 原生 `merge` 会保留旧数组元素，公共组件已改用 `mergeReplacingArrays` 规避该行为。）
+- 对象类型的 `componentProps` 不会自动删除旧键：切换到另一套 props 时，需要显式传 `key: undefined` 清掉残留。
+- 合并结果写入组件内部 schema 副本，不会修改父组件传入的 `schemas`；`resetFields()` 也不会还原 schema 补丁。
 
 ## 完整业务示例
 
