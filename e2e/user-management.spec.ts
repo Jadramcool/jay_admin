@@ -42,6 +42,18 @@ test.describe('用户管理', () => {
     await expect(page.locator('body')).toContainText('创建成功')
   })
 
+  test('解锁某账号的登录失败锁定', async ({ page }) => {
+    await login(page)
+    await page.goto('/#/system/user')
+
+    const unlockRequest = page.waitForRequest(req => req.method() === 'PUT' && req.url().includes('/api/auth/unlock'))
+    await page.getByRole('row', { name: /zhangsan/ }).getByRole('button', { name: '解锁登录' }).click()
+    await page.locator('.n-popover').getByRole('button', { name: '确认' }).click()
+    await unlockRequest
+
+    await expect(page.locator('body')).toContainText('已解除「zhangsan」的登录失败锁定')
+  })
+
   test('导出与导入入口及导入流程', async ({ page }) => {
     await login(page)
     await page.goto('/#/system/user')

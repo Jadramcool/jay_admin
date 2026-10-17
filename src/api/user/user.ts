@@ -12,6 +12,7 @@ enum API {
   updateUser = '/auth/user/update',
   checkPassword = '/auth/user/checkPassword',
   updatePassword = '/auth/user/updatePassword',
+  unlock = '/auth/unlock',
 }
 
 export const UserApi = {
@@ -59,4 +60,11 @@ export const UserApi = {
 
   updatePassword: (data: Api.UpdatePasswordParams) =>
     request.post<null>({ url: API.updatePassword, data }),
+
+  /** 解除某账号的登录失败锁定(需要 system:user:update 权限) */
+  unlockLogin: (username: string) =>
+    request.put<{ username: string, cleared: number }>({
+      url: API.unlock,
+      data: { username },
+    }),
 }

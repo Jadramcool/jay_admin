@@ -312,7 +312,7 @@ export function useUserSchema(methods: any = {}) {
         label: '操作',
         table: {
           fixed: 'right',
-          width: 220,
+          width: 280,
           render: (row: any) => renderTableActions([
             {
               label: '分配角色',
@@ -330,6 +330,12 @@ export function useUserSchema(methods: any = {}) {
               type: 'info',
               show: hasPermission('system:user:update'),
               onClick: () => methods.handleEdit(row),
+            },
+            {
+              label: '解锁登录',
+              show: hasPermission('system:user:update'),
+              confirm: `解除用户 ${row.username} 的登录失败锁定？`,
+              onClick: () => methods.handleUnlock(row),
             },
             {
               label: '删除',

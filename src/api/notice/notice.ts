@@ -38,6 +38,7 @@ enum API {
   create = '/notice/create',
   update = '/notice/update',
   delete = '/notice/delete',
+  restore = '/notice/restore',
   batchDelete = '/notice/batchDelete',
   toggleStatus = '/notice/status',
   togglePin = '/notice/pin',
@@ -59,6 +60,12 @@ export const NoticeApi = {
 
   delete: (id: number) =>
     request.put<null>({ url: `${API.delete}/${id}` }),
+
+  /** 恢复被清理（保留期清理或误删）的公告 */
+  restore: (id: number) =>
+    request.put<{ id: number, title: string, isDeleted: boolean }>({
+      url: `${API.restore}/${id}`,
+    }),
 
   batchDelete: (ids: number[]) =>
     request.put<null>({ url: API.batchDelete, data: { ids } }),

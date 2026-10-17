@@ -38,6 +38,16 @@ const schemaMethods = {
       },
     })
   },
+  async handleRestore(row: any) {
+    try {
+      await NoticeApi.restore(row.id)
+      window.$message?.success?.(`已恢复公告「${row.title}」`)
+      reload()
+    }
+    catch {
+      /* handled by interceptor */
+    }
+  },
   async handleToggleStatus(row: any) {
     try {
       const action = row.status === 1 ? '下刊' : '发布'

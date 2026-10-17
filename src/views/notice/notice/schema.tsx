@@ -267,6 +267,33 @@ export function useNoticeSchema(methods: any = {}) {
         },
       },
       {
+        key: 'isDeleted',
+        label: '清理状态',
+        defaultValue: undefined,
+        form: {
+          component: 'NSelect',
+          componentProps: {
+            options: [
+              { label: '未清理', value: false },
+              { label: '已清理', value: true },
+            ],
+            placeholder: '清理状态',
+          },
+        },
+        table: {
+          width: 100,
+          render: (row: any) => (
+            <NTag
+              bordered={false}
+              type={row.isDeleted ? 'error' : 'success'}
+              size="small"
+            >
+              {row.isDeleted ? '已清理' : '正常'}
+            </NTag>
+          ),
+        },
+      },
+      {
         key: 'isPinned',
         label: '置顶',
         defaultValue: false,
@@ -406,32 +433,39 @@ export function useNoticeSchema(methods: any = {}) {
               {
                 label: isPublished ? '下刊' : '发布',
                 type: isPublished ? 'warning' : 'success',
-                show: hasPermission('notice:publish'),
+                show: !row.isDeleted && hasPermission('notice:publish'),
                 onClick: () => methods.handleToggleStatus(row),
               },
               {
                 label: row.isPinned ? '取消置顶' : '置顶',
                 type: row.isPinned ? 'error' : 'primary',
-                show: hasPermission('notice:update'),
+                show: !row.isDeleted && hasPermission('notice:update'),
                 onClick: () => methods.handleTogglePin(row),
               },
               {
                 label: '重推',
-                show: row.status === 1 && hasPermission('notice:update'),
+                show: !row.isDeleted && row.status === 1 && hasPermission('notice:update'),
                 onClick: () => methods.handleResend(row),
               },
               {
                 label: '编辑',
                 type: 'info',
-                show: hasPermission('notice:update'),
+                show: !row.isDeleted && hasPermission('notice:update'),
                 onClick: () => methods.handleEdit(row),
               },
               {
                 label: '删除',
                 type: 'error',
-                show: hasPermission('notice:delete'),
+                show: !row.isDeleted && hasPermission('notice:delete'),
                 confirm: `确定删除公告「${row.title}」吗？`,
                 onClick: () => methods.handleDelete(row),
+              },
+              {
+                label: '恢复',
+                type: 'primary',
+                show: row.isDeleted && hasPermission('notice:delete'),
+                confirm: `确定恢复公告「${row.title}」吗？`,
+                onClick: () => methods.handleRestore(row),
               },
             ])
           },
@@ -445,6 +479,7 @@ export function useNoticeSchema(methods: any = {}) {
     'title',
     'type',
     'status',
+    'isDeleted',
     'isPinned',
     'readCount',
     'authorName',
@@ -452,7 +487,7 @@ export function useNoticeSchema(methods: any = {}) {
     'createdTime',
     'operate',
   ]
-  const formFields = ['title', 'type', 'status']
+  const formFields = ['title', 'type', 'status', 'isDeleted']
   const editFormFields = [
     'title',
     'type',

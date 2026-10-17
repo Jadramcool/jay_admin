@@ -2,6 +2,7 @@
 import dayjs from 'dayjs'
 import { useRouter } from 'vue-router'
 import { UserManagerApi } from '@/api/system'
+import { UserApi } from '@/api/user'
 import { useForm, useModal } from '@/components/index.ts'
 import { hasPermission } from '@/utils/common/hasPermission'
 import { downloadBlob } from '@/utils/download'
@@ -52,6 +53,19 @@ const schemaMethods = {
   },
   handleResetPwd(row: any) {
     openPwdModal({ record: row })
+  },
+  async handleUnlock(row: any) {
+    try {
+      const result = await UserApi.unlockLogin(row.username)
+      window.$message?.success?.(
+        result?.cleared
+          ? `已解除「${row.username}」的登录失败锁定`
+          : `「${row.username}」当前未被锁定`,
+      )
+    }
+    catch {
+      /* handled by interceptor */
+    }
   },
 }
 
