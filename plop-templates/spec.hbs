@@ -1,9 +1,10 @@
 import { expect, login, test } from './fixtures'
 
 test.describe('{{titleCase name}}', () => {
+  // 依赖菜单已 seed(见 plopfile 手动步骤 3)：路由是目录 path，不是 /list
   test('列表加载', async ({ page }) => {
     await login(page)
-    await page.goto('/#/{{kebabCase name}}')
+    await page.goto('/#/{{domain}}/{{kebabCase name}}')
     await expect(page.getByText('{{titleCase name}}')).toBeVisible()
   })
 })

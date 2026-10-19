@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { {{pascalCase name}}Api } from '@/api/{{kebabCase name}}'
-import { useModalInner } from '@/components/Modal/src/hooks/useModal'
+import { {{pascalCase name}}Api } from '@/api/{{domain}}'
+import { FormEdit, useForm, useModalInner } from '@/components'
+import { use{{pascalCase name}}Schema } from '../schema'
 
 const emit = defineEmits<{
   success: []
@@ -9,40 +9,42 @@ const emit = defineEmits<{
 }>()
 
 const isEdit = ref(false)
-const submitting = ref(false)
-const formRef = ref<any>(null)
+const recordId = ref<number>()
 
-const formData = reactive({
-  id: 0,
-  name: '',
+// 需要按新增/编辑切换字段时，在 schema 的 editForm.ifShow 里用 methods.isCreate()
+const { editFormSchemas } = use{{pascalCase name}}Schema({
+  isCreate: () => !isEdit.value,
 })
 
-const [registerModal, { closeModal }] = useModalInner((data?: System.{{pascalCase name}}) => {
-  formData.id = data?.id ?? 0
-  formData.name = data?.name ?? ''
-  isEdit.value = Boolean(data?.id)
+const [registerForm, { setFieldsValue, resetFields, validate, getFieldsValue }] = useForm({
+  schemas: editFormSchemas,
+  showActionButtonGroup: false, // 提交交给 BasicModal 底部按钮
 })
 
-const rules = {
-  name: [{ required: true, message: '请输入名称', trigger: ['blur', 'input'] }],
-}
+const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data: any) => {
+  const record = data?.record
+  isEdit.value = Boolean(record?.id)
+  recordId.value = record?.id
+  await resetFields() // 复用弹窗必须先清上一次的数据
+  if (isEdit.value)
+    await setFieldsValue(await {{pascalCase name}}Api.detail(recordId.value!))
+})
 
-async function handleSubmit() {
+async function handleOk() {
   try {
-    await formRef.value?.validate()
+    await validate()
   }
   catch {
-    return
+    return // 校验失败：保留弹窗
   }
-  submitting.value = true
+  setModalProps({ confirmLoading: true })
   try {
-    if (isEdit.value) {
-      await {{pascalCase name}}Api.update({ ...formData })
-    }
-    else {
-      await {{pascalCase name}}Api.create({ ...formData })
-    }
-    window.$message?.success?.(isEdit.value ? '更新成功' : '创建成功')
+    const values = getFieldsValue<Record<string, unknown>>()
+    if (isEdit.value)
+      await {{pascalCase name}}Api.update({ ...values, id: recordId.value! } as System.{{pascalCase name}}UpdatePayload)
+    else
+      await {{pascalCase name}}Api.create(values as System.{{pascalCase name}}CreatePayload)
+    window.$message?.success?.('保存成功')
     closeModal()
     emit('success')
   }
@@ -50,23 +52,19 @@ async function handleSubmit() {
     /* handled by interceptor */
   }
   finally {
-    submitting.value = false
+    setModalProps({ confirmLoading: false })
   }
 }
 </script>
 
 <template>
   <BasicModal
-    :title="isEdit ? '编辑{{titleCase name}}' : '新增{{titleCase name}}'"
-    :ok-text="submitting ? '提交中...' : '确定'"
+    :title="isEdit ? '编辑' : '新增'"
     :mask-closable="false"
+    draggable
     @register="registerModal"
-    @ok="handleSubmit"
+    @ok="handleOk"
   >
-    <n-form ref="formRef" :model="formData" :rules="rules" label-placement="left" :label-width="90">
-      <n-form-item label="名称" path="name">
-        <n-input v-model:value="formData.name" placeholder="请输入名称" maxlength="50" show-count />
-      </n-form-item>
-    </n-form>
+    <FormEdit @register="registerForm" />
   </BasicModal>
 </template>

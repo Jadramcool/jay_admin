@@ -60,6 +60,16 @@ function handleSubmit(values: Record<string, unknown>) {
 
 `ApiTreeSelect` 使用 `api(params)` 加载树数据，默认读取 `name`、`id`、`children` 和 `disabled` 字段。可分别通过 `labelField`、`keyField`、`childrenField`、`disabledField` 修改字段映射；业务侧需要禁止选择某个节点时，应在接口结果中为该节点设置对应禁用字段，而不是操作组件内部选项。
 
+`FormSchema` 类型由本目录 barrel 导出，可直接用于给 schema 数组加类型标注：
+
+```ts
+import type { FormSchema } from '@/components/Form'
+
+const schemas: FormSchema[] = [
+  { field: 'keyword', label: '关键词', component: 'NInput' },
+]
+```
+
 ## Props
 
 三个表单均会把未消费的表单属性透传给 Naive UI `NForm`。下表列出公共封装属性。
