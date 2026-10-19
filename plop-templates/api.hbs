@@ -1,22 +1,31 @@
 import request from '@/utils/http/axios'
 
 enum API {
-  list = '/{{kebabCase name}}/list',
-  create = '/{{kebabCase name}}/create',
-  update = '/{{kebabCase name}}/update',
-  remove = '/{{kebabCase name}}/delete',
+  list = '/{{domain}}/{{kebabCase name}}/list',
+  detail = '/{{domain}}/{{kebabCase name}}/detail',
+  create = '/{{domain}}/{{kebabCase name}}/create',
+  update = '/{{domain}}/{{kebabCase name}}/update',
+  delete = '/{{domain}}/{{kebabCase name}}/delete',
+  batchDelete = '/{{domain}}/{{kebabCase name}}/batchDelete',
 }
 
 export const {{pascalCase name}}Api = {
   list: (params?: Api.PageParams) =>
     request.get<Api.PaginatedData<System.{{pascalCase name}}>>({ url: API.list, params }),
 
-  create: (data: Partial<System.{{pascalCase name}}>) =>
+  detail: (id: number) =>
+    request.get<System.{{pascalCase name}}>({ url: `${API.detail}/${id}` }),
+
+  create: (data: System.{{pascalCase name}}CreatePayload) =>
     request.post<null>({ url: API.create, data }),
 
-  update: (data: Partial<System.{{pascalCase name}}> & { id: number }) =>
+  update: (data: System.{{pascalCase name}}UpdatePayload) =>
     request.put<null>({ url: API.update, data }),
 
+  /** 本仓后端约定：删除用 PUT，不是 HTTP DELETE */
   delete: (id: number) =>
-    request.delete<null>({ url: `${API.remove}/${id}` }),
+    request.put<null>({ url: `${API.delete}/${id}` }),
+
+  batchDelete: (ids: number[]) =>
+    request.put<null>({ url: API.batchDelete, data: { ids } }),
 }

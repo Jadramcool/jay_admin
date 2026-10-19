@@ -1,0 +1,119 @@
+import dayjs from 'dayjs'
+import { NTag } from 'naive-ui'
+import { computed } from 'vue'
+import { columnsUtil, editFormSchemaUtil, formSchemaUtil, renderTableActions } from '@/utils'
+import { hasPermission } from '@/utils/common/hasPermission'
+
+const statusOptions = [
+  { label: '启用', value: 1 },
+  { label: '禁用', value: 0 },
+]
+
+/**
+ * 字段唯一源：properties 声明一次，投影成表格列 / 查询表单 / 编辑表单。
+ * 字段必须登记进下方三个数组才会生效(数组是白名单，key 拼错会静默消失)。
+ * methods 传取值函数，详见 admin-module-scaffold/references/schema.md。
+ */
+export function use{{pascalCase name}}Schema(methods: any = {}) {
+  const schema = computed(() => ({
+    properties: [
+      {
+        key: 'id',
+        label: 'ID',
+        table: { width: 80 },
+        editForm: { ifShow: false },
+      },
+      {
+        key: 'name',
+        label: '名称',
+        form: {
+          component: 'NInput',
+          componentProps: { placeholder: '请输入名称' },
+        },
+        editForm: {
+          component: 'NInput',
+          rules: [
+            { required: true, message: '请输入名称', trigger: ['blur', 'input'] },
+          ],
+          componentProps: { maxlength: 50, showCount: true },
+        },
+        table: {
+          width: 180,
+          ellipsis: { tooltip: true },
+          render: (row: any) => row.name || '-',
+        },
+      },
+      {
+        key: 'status',
+        label: '状态',
+        form: {
+          component: 'NSelect',
+          componentProps: { options: statusOptions, placeholder: '请选择状态' },
+        },
+        editForm: {
+          component: 'NRadioGroup',
+          componentProps: { options: statusOptions },
+        },
+        table: {
+          width: 80,
+          render: (row: any) => (
+            <NTag
+              bordered={false}
+              type={(row.status === 1 ? 'success' : 'warning') as any}
+              size="small"
+            >
+              {statusOptions.find(o => o.value === row.status)?.label || '-'}
+            </NTag>
+          ),
+        },
+      },
+      {
+        key: 'createdTime',
+        label: '创建时间',
+        table: {
+          width: 170,
+          render: (row: any) =>
+            row.createdTime
+              ? dayjs(row.createdTime).format('YYYY-MM-DD HH:mm:ss')
+              : '-',
+        },
+      },
+      {
+        key: 'operate',
+        label: '操作',
+        table: {
+          fixed: 'right',
+          width: 160,
+          render: (row: any) => renderTableActions([
+            {
+              label: '编辑',
+              type: 'info',
+              show: hasPermission('{{domain}}:{{kebabCase name}}:update'),
+              onClick: () => methods.handleEdit(row),
+            },
+            {
+              label: '删除',
+              type: 'error',
+              show: hasPermission('{{domain}}:{{kebabCase name}}:delete'),
+              // 已在此处二次确认，回调内不要再弹 window.$dialog
+              confirm: `是否确认删除 ${row.name}？`,
+              onClick: () => methods.handleDelete(row),
+            },
+          ]),
+        },
+      },
+    ],
+  }))
+
+  const tableFields = ['id', 'name', 'status', 'createdTime', 'operate']
+  const formFields = ['name', 'status']
+  const editFormFields = ['id', 'name', 'status']
+
+  return {
+    columns: computed(() => columnsUtil(schema.value, tableFields)),
+    formSchemas: computed(() => formSchemaUtil(schema.value, formFields)),
+    editFormSchemas: computed(() =>
+      editFormSchemaUtil(schema.value, editFormFields),
+    ),
+  }
+}
